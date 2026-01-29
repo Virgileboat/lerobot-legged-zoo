@@ -1,0 +1,14 @@
+{
+    "url": "https://cad.onshape.com/documents/fb645318a27646d1d8840be6/w/d1cae8805fb652b4d1614997/e/621ef473e7cde4418aaec2ed",
+    "documentId": "fb645318a27646d1d8840be6",
+    "outputFormat": "urdf",
+    "assemblyName": "bipedal_platefrom",
+    "ignore": {
+        // Ignore all for all
+        "RS00*": "all",
+        "RS02": "all",
+        "03_ASM": "all",
+        "*screw*": "all",
+
+    },
+}

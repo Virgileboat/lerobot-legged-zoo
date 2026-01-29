@@ -1,0 +1,28 @@
+<mujoco model="scene">
+  <compiler inertiafromgeom="true"/>
+  <option timestep="0.002" gravity="0 0 -9.81"/>
+<default>
+  <geom contype="1" conaffinity="1"/>
+</default>
+
+  <include file="robot.xml"/>
+  <actuator>
+    <position name="m_hipz_right" joint="hipz_right" kp="50" kv="2" gear="1" ctrlrange="-1 1" />
+    <position name="m_hipx_right" joint="hipx_right" kp="50" kv="2" gear="1" ctrlrange="-1 1" />
+    <position name="m_hipy_right" joint="hipy_right" kp="100" kv="2" gear="1" ctrlrange="-1 1" />
+    <position name="m_knee_right" joint="knee_right" kp="100" kv="2" gear="1" ctrlrange="-1 1" />
+    <position name="m_ankley_right" joint="ankley_right" kp="40" kv="2" gear="1" ctrlrange="-1 1" />
+    <position name="m_anklex_right" joint="anklex_right" kp="10" kv="2" gear="1" ctrlrange="-1 1" />
+    <position name="m_hipz_left" joint="hipz_left" kp="50" kv="2" gear="1" ctrlrange="-1 1" />
+    <position name="m_hipx_left" joint="hipx_left" kp="50" kv="2" gear="1" ctrlrange="-1 1" />
+    <position name="m_hipy_left" joint="hipy_left" kp="100" kv="2" gear="1" ctrlrange="-1 1" />
+    <position name="m_knee_left" joint="knee_left" kp="100" kv="2" gear="1" ctrlrange="-1 1" />
+    <position name="m_ankley_left" joint="ankley_left" kp="40" kv="2" gear="1" ctrlrange="-1 1" />
+    <position name="m_anklex_left" joint="anklex_left" kp="10" kv="2" gear="1" ctrlrange="-1 1" />
+  </actuator>
+  <worldbody>
+    <light pos="0 0 5"/>
+    <geom name="floor" type="plane" size="10 10 0.1" contype="1" conaffinity="1" rgba="0.2 0.2 0.2 1"/>
+  </worldbody>
+</mujoco>
+

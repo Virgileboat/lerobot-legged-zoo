@@ -1,0 +1,36 @@
+closed_loop:
+  [
+  ]
+type: []
+name_mot:
+  [
+    "hipz_left",
+    "hipy_left",
+    "hipx_left",
+    "knee_left",
+    "anklex_left",
+    "ankley_left",
+    "hipz_right",
+    "hipy_right",
+    "hipx_right",
+    "knee_right",
+    "anklex_right",
+    "ankley_right",
+    "shoulder1_right",
+    "shoulder2_right",
+    "shoulder3_right",
+    "elbow_right",
+    "shoulder1_left",
+    "shoulder2_left",
+    "shoulder3_left",
+    "elbow_left",    
+    
+  ]
+
+joint_name:
+  [
+  ]
+joint_type:
+  [
+  ]
+

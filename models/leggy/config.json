@@ -1,0 +1,64 @@
+{
+  // Onshape URL of the assembly
+  "url": "https://cad.onshape.com/documents/6006520d7e567b7f616afa69/w/10b25d97dd9b3cea810edf0f/e/0e8fe2c78e38de67c452e429",
+  // Output format
+  "output_format": "mujoco",
+
+  // Don't create actuators for passive joints
+  "joint_properties": {
+    "*hip*": {
+      "damping": 0.008824,
+      "armature": 0.00006499,
+      "forcerange": 0.236,
+      "limits": [-1.57, 1.57],
+      "frictionloss": 0.01,
+      "kp": 10
+    },
+    "*knee": {
+      "damping": 0.008824,
+      "armature": 0.00006499,
+      "forcerange": 0.236,
+      "limits": [0, 3.14],
+      "frictionloss": 0.01,
+      "kp": 10
+    },
+    "*passive*": {
+      "actuated": false,
+      "frictionloss": 0.0001,
+      "damping": 0.0001,
+      "stiffness": 0,
+      "armature": 0.00001,
+      "limits": [-4, 4] // no limits
+    }
+  },
+  "geom_properties": {
+    "foot": {
+      "collision": {
+        "name": "left_foot_collision"
+      }
+    },
+    "foot_2": {
+      "collision": {
+        "name": "right_foot_collision"
+      }
+    }
+  },
+
+  "ignore": {
+    // Ignore visual
+    "cm4lite": "visual",
+    "Intel*": "visual",
+
+    // Ignore everything expect "Foot" for collision
+    "*": "collision",
+    "!Foot": "collision"
+  },
+  // Override equality attributes
+  "equalities": {
+    "closing_*": {
+      "solref": "0.002 1",
+      "solimp": "0.99 0.999 0.0005 0.5 2"
+    }
+  },
+  "additional_xml": ["sensors.xml"]
+}

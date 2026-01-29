@@ -1,0 +1,3704 @@
+<?xml version="1.0" ?>
+<!-- Generated using onshape-to-robot -->
+<!-- Onshape https://cad.onshape.com/documents/fb645318a27646d1d8840be6/w/d1cae8805fb652b4d1614997/e/621ef473e7cde4418aaec2ed -->
+<robot name="urdf">
+  <!-- Link torso_subassembly -->
+  <link name="torso_subassembly">
+    <inertial>
+      <origin xyz="-0.000697254 4.08729e-07 0.0361785" rpy="0 0 0"/>
+      <mass value="1.37455"/>
+      <inertia ixx="0.0195228" ixy="-3.0234e-10" ixz="1.40229e-06" iyy="0.00129235" iyz="1.22091e-10" izz="0.0197822"/>
+    </inertial>
+    <!-- Part rs00 -->
+    <!-- Part torso22 -->
+    <visual>
+      <origin xyz="-0.000263039 0.233572 -0.0901625" rpy="-2.85923 1.2395e-17 -3.14159"/>
+      <geometry>
+        <mesh filename="package://assets/torso22.stl"/>
+      </geometry>
+      <material name="torso22_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.000263039 0.233572 -0.0901625" rpy="-2.85923 1.2395e-17 -3.14159"/>
+      <geometry>
+        <mesh filename="package://assets/torso22.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_20__832e47d784177ea3f1dabbaab534416e -->
+    <!-- Part rs00_2 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_20__832e47d784177ea3f1dabbaab534416e_2 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_2 -->
+    <!-- Part bearing_35_72_17 -->
+    <visual>
+      <origin xyz="-0.000887454 -0.130401 0.0222352" rpy="1.42962 -0.00345593 -3.1411"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_35_72_17.stl"/>
+      </geometry>
+      <material name="bearing_35_72_17_material">
+        <color rgba="0.768627 0.886275 0.952941 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.000887454 -0.130401 0.0222352" rpy="1.42962 -0.00345593 -3.1411"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_35_72_17.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_20__832e47d784177ea3f1dabbaab534416e_3 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_20__832e47d784177ea3f1dabbaab534416e_4 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_20__832e47d784177ea3f1dabbaab534416e_5 -->
+    <!-- Part robstrideo0 -->
+    <visual>
+      <origin xyz="0.672086 -0.147255 0.0629195" rpy="1.42962 -0.00345593 -3.1411"/>
+      <geometry>
+        <mesh filename="package://assets/robstrideo0.stl"/>
+      </geometry>
+      <material name="robstrideo0_material">
+        <color rgba="0.301961 0.301961 0.301961 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.672086 -0.147255 0.0629195" rpy="1.42962 -0.00345593 -3.1411"/>
+      <geometry>
+        <mesh filename="package://assets/robstrideo0.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_3 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_20__832e47d784177ea3f1dabbaab534416e_6 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_4 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_20__832e47d784177ea3f1dabbaab534416e_7 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_20__832e47d784177ea3f1dabbaab534416e_8 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_5 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_20__832e47d784177ea3f1dabbaab534416e_9 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_6 -->
+    <!-- Part robstrideo0_2 -->
+    <visual>
+      <origin xyz="0.672086 0.12555 0.0660044" rpy="1.71198 -0.00345593 3.1411"/>
+      <geometry>
+        <mesh filename="package://assets/robstrideo0.stl"/>
+      </geometry>
+      <material name="robstrideo0_2_material">
+        <color rgba="0.301961 0.301961 0.301961 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.672086 0.12555 0.0660044" rpy="1.71198 -0.00345593 3.1411"/>
+      <geometry>
+        <mesh filename="package://assets/robstrideo0.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_7 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_8 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_20__832e47d784177ea3f1dabbaab534416e_10 -->
+    <!-- Part torso12 -->
+    <visual>
+      <origin xyz="-0.000263039 4.05842e-07 -0.056966" rpy="-3.14159 1.39466e-17 3.14159"/>
+      <geometry>
+        <mesh filename="package://assets/torso12.stl"/>
+      </geometry>
+      <material name="torso12_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.000263039 4.05842e-07 -0.056966" rpy="-3.14159 1.39466e-17 3.14159"/>
+      <geometry>
+        <mesh filename="package://assets/torso12.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_20__832e47d784177ea3f1dabbaab534416e_11 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_20__832e47d784177ea3f1dabbaab534416e_12 -->
+    <!-- Part torso22_2 -->
+    <visual>
+      <origin xyz="-0.000263039 4.05842e-07 -0.056966" rpy="-3.14159 1.39466e-17 3.14159"/>
+      <geometry>
+        <mesh filename="package://assets/torso22.stl"/>
+      </geometry>
+      <material name="torso22_2_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.000263039 4.05842e-07 -0.056966" rpy="-3.14159 1.39466e-17 3.14159"/>
+      <geometry>
+        <mesh filename="package://assets/torso22.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_20__832e47d784177ea3f1dabbaab534416e_13 -->
+    <!-- Part bearing_35_72_17_2 -->
+    <visual>
+      <origin xyz="-0.000887454 0.130402 0.0222352" rpy="1.71198 -0.00345593 3.1411"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_35_72_17.stl"/>
+      </geometry>
+      <material name="bearing_35_72_17_2_material">
+        <color rgba="0.768627 0.886275 0.952941 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.000887454 0.130402 0.0222352" rpy="1.71198 -0.00345593 3.1411"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_35_72_17.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_9 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_10 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_11 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_20__832e47d784177ea3f1dabbaab534416e_14 -->
+    <!-- Part xt_30_2x2_f -->
+    <visual>
+      <origin xyz="-3.97731e-05 -0.105809 0.0903709" rpy="3.11704 -1.42957 -1.54599"/>
+      <geometry>
+        <mesh filename="package://assets/xt_30_2x2_f.stl"/>
+      </geometry>
+      <material name="xt_30_2x2_f_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-3.97731e-05 -0.105809 0.0903709" rpy="3.11704 -1.42957 -1.54599"/>
+      <geometry>
+        <mesh filename="package://assets/xt_30_2x2_f.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_20__832e47d784177ea3f1dabbaab534416e_15 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_20__832e47d784177ea3f1dabbaab534416e_16 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_12 -->
+  </link>
+  <!-- Frame torso (dummy link + fixed joint) -->
+  <link name="torso">
+    <origin xyz="0 0 0" rpy="0 -0 0"/>
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="1e-9"/>
+      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+    </inertial>
+  </link>
+  <joint name="torso_frame" type="fixed">
+    <origin xyz="2.52201e-19 -1.6263e-19 -2.60209e-18" rpy="0 -0 -1.28128e-29"/>
+    <parent link="torso_subassembly"/>
+    <child link="torso"/>
+    <axis xyz="0 0 0"/>
+  </joint>
+  <!-- Link hipx_subassembly -->
+  <link name="hipx_subassembly">
+    <inertial>
+      <origin xyz="-0.0179437 -0.0274254 -0.0837243" rpy="0 0 0"/>
+      <mass value="0.794013"/>
+      <inertia ixx="0.00093782" ixy="-4.40032e-05" ixz="-0.00011053" iyy="0.000903422" iyz="-0.000168643" izz="0.00100397"/>
+    </inertial>
+    <!-- Part rs02 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_40__14321d45d56569246e7feb4574a6bae6 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_13 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_14 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_40__14321d45d56569246e7feb4574a6bae6_2 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_15 -->
+    <!-- Part xt_30_2x2_f_2 -->
+    <visual>
+      <origin xyz="-0.0280156 -0.000591536 -0.0506633" rpy="-2.51827 -1.25093 -2.15149"/>
+      <geometry>
+        <mesh filename="package://assets/xt_30_2x2_f.stl"/>
+      </geometry>
+      <material name="xt_30_2x2_f_2_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.0280156 -0.000591536 -0.0506633" rpy="-2.51827 -1.25093 -2.15149"/>
+      <geometry>
+        <mesh filename="package://assets/xt_30_2x2_f.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_16 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_40__14321d45d56569246e7feb4574a6bae6_3 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_40__14321d45d56569246e7feb4574a6bae6_4 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_17 -->
+    <!-- Part hipz12 -->
+    <visual>
+      <origin xyz="1.38778e-17 -6.93889e-18 -0.1" rpy="-3.14159 2.9384e-18 -2.93972e-17"/>
+      <geometry>
+        <mesh filename="package://assets/hipz12.stl"/>
+      </geometry>
+      <material name="hipz12_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="1.38778e-17 -6.93889e-18 -0.1" rpy="-3.14159 2.9384e-18 -2.93972e-17"/>
+      <geometry>
+        <mesh filename="package://assets/hipz12.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_40__14321d45d56569246e7feb4574a6bae6_5 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_18 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_19 -->
+    <!-- Part robstride02 -->
+    <visual>
+      <origin xyz="-0.575896 0.0494047 -0.172196" rpy="-1.29671 -0.167023 -0.0467087"/>
+      <geometry>
+        <mesh filename="package://assets/robstride02.stl"/>
+      </geometry>
+      <material name="robstride02_material">
+        <color rgba="0.301961 0.301961 0.301961 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.575896 0.0494047 -0.172196" rpy="-1.29671 -0.167023 -0.0467087"/>
+      <geometry>
+        <mesh filename="package://assets/robstride02.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_40__14321d45d56569246e7feb4574a6bae6_6 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_20 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_40__14321d45d56569246e7feb4574a6bae6_7 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_40__14321d45d56569246e7feb4574a6bae6_8 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_21 -->
+    <!-- Part bearing_35_72_17_3 -->
+    <visual>
+      <origin xyz="-0.01759 -0.0267968 -0.104484" rpy="1.84488 -0.167023 -0.0467087"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_35_72_17.stl"/>
+      </geometry>
+      <material name="bearing_35_72_17_3_material">
+        <color rgba="0.768627 0.886275 0.952941 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.01759 -0.0267968 -0.104484" rpy="1.84488 -0.167023 -0.0467087"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_35_72_17.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_22 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_23 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_40__14321d45d56569246e7feb4574a6bae6_9 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_24 -->
+    <!-- Part hipz22 -->
+    <visual>
+      <origin xyz="1.38778e-17 -6.93889e-18 -0.1" rpy="-3.14159 5.78969e-17 2.84576e-16"/>
+      <geometry>
+        <mesh filename="package://assets/hipz22.stl"/>
+      </geometry>
+      <material name="hipz22_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="1.38778e-17 -6.93889e-18 -0.1" rpy="-3.14159 5.78969e-17 2.84576e-16"/>
+      <geometry>
+        <mesh filename="package://assets/hipz22.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_25 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_26 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_27 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_40__14321d45d56569246e7feb4574a6bae6_10 -->
+  </link>
+  <!-- Link hipy_subassembly -->
+  <link name="hipy_subassembly">
+    <inertial>
+      <origin xyz="0.00476547 -0.00266343 -0.0607297" rpy="0 0 0"/>
+      <mass value="0.241618"/>
+      <inertia ixx="0.000504044" ixy="2.43362e-05" ixz="7.84949e-06" iyy="0.000455767" iyz="-3.61499e-05" izz="0.000428966"/>
+    </inertial>
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_20__832e47d784177ea3f1dabbaab534416e_17 -->
+    <!-- Part hipxy -->
+    <visual>
+      <origin xyz="0 1.38778e-17 6.93889e-18" rpy="-2.03065e-17 3.0198e-17 -9.05937e-17"/>
+      <geometry>
+        <mesh filename="package://assets/hipxy.stl"/>
+      </geometry>
+      <material name="hipxy_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 1.38778e-17 6.93889e-18" rpy="-2.03065e-17 3.0198e-17 -9.05937e-17"/>
+      <geometry>
+        <mesh filename="package://assets/hipxy.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_20__832e47d784177ea3f1dabbaab534416e_18 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_20__832e47d784177ea3f1dabbaab534416e_19 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_12__c825518ee8edf1afced0eee1b019b750 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_20__832e47d784177ea3f1dabbaab534416e_20 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_12__c825518ee8edf1afced0eee1b019b750_2 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_12__c825518ee8edf1afced0eee1b019b750_3 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_20__832e47d784177ea3f1dabbaab534416e_21 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_20__832e47d784177ea3f1dabbaab534416e_22 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_12__c825518ee8edf1afced0eee1b019b750_4 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_12__c825518ee8edf1afced0eee1b019b750_5 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_12__c825518ee8edf1afced0eee1b019b750_6 -->
+  </link>
+  <!-- Link tigh_subassembly -->
+  <link name="tigh_subassembly">
+    <inertial>
+      <origin xyz="0.0501976 0.0785779 -0.0353813" rpy="0 0 0"/>
+      <mass value="2.5804"/>
+      <inertia ixx="0.0174359" ixy="-0.0081889" ixz="0.000938636" iyy="0.00865749" iyz="0.00155247" izz="0.0236145"/>
+    </inertial>
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150 -->
+    <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_8__a416dc2a8d778a4ef6150c0739aa89d1 -->
+    <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232_2 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_8__a416dc2a8d778a4ef6150c0739aa89d1_2 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_2 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_16__8d628c0d7a90368385b1c4c7479647eb -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_8__a416dc2a8d778a4ef6150c0739aa89d1_3 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_16__8d628c0d7a90368385b1c4c7479647eb_2 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_8__a416dc2a8d778a4ef6150c0739aa89d1_4 -->
+    <!-- Part knee_rod22 -->
+    <visual>
+      <origin xyz="0.210506 0.184547 -0.0305" rpy="1.5708 -2.30439e-13 -1.0472"/>
+      <geometry>
+        <mesh filename="package://assets/knee_rod22.stl"/>
+      </geometry>
+      <material name="knee_rod22_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.210506 0.184547 -0.0305" rpy="1.5708 -2.30439e-13 -1.0472"/>
+      <geometry>
+        <mesh filename="package://assets/knee_rod22.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_8__a416dc2a8d778a4ef6150c0739aa89d1_5 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_16__8d628c0d7a90368385b1c4c7479647eb_3 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_16__8d628c0d7a90368385b1c4c7479647eb_4 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_8__a416dc2a8d778a4ef6150c0739aa89d1_6 -->
+    <!-- Part bearing_15_21_4 -->
+    <visual>
+      <origin xyz="0.117923 0.320381 -0.0185" rpy="-1.5708 -2.30501e-13 -1.0472"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_15_21_4.stl"/>
+      </geometry>
+      <material name="bearing_15_21_4_material">
+        <color rgba="0.647059 0.647059 0.647059 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.117923 0.320381 -0.0185" rpy="-1.5708 -2.30501e-13 -1.0472"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_15_21_4.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part bearing_15_21_4_2 -->
+    <visual>
+      <origin xyz="0.0130854 0.122429 -0.0245" rpy="-1.5708 -5.27636e-14 -2.31602e-13"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_15_21_4.stl"/>
+      </geometry>
+      <material name="bearing_15_21_4_2_material">
+        <color rgba="0.647059 0.647059 0.647059 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.0130854 0.122429 -0.0245" rpy="-1.5708 -5.27636e-14 -2.31602e-13"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_15_21_4.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232_3 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_8__a416dc2a8d778a4ef6150c0739aa89d1_7 -->
+    <!-- Part robstrideo3 -->
+    <visual>
+      <origin xyz="-0.437806 0.570998 -0.07" rpy="-1.5708 -1.50116e-13 -0.523599"/>
+      <geometry>
+        <mesh filename="package://assets/robstrideo3.stl"/>
+      </geometry>
+      <material name="robstrideo3_material">
+        <color rgba="0.301961 0.301961 0.301961 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.437806 0.570998 -0.07" rpy="-1.5708 -1.50116e-13 -0.523599"/>
+      <geometry>
+        <mesh filename="package://assets/robstrideo3.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_16__8d628c0d7a90368385b1c4c7479647eb_5 -->
+    <!-- Part bearing_15_21_4_3 -->
+    <visual>
+      <origin xyz="1.8735e-15 -9.90874e-15 -0.0635" rpy="1.5708 -1.50143e-13 -0.523599"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_15_21_4.stl"/>
+      </geometry>
+      <material name="bearing_15_21_4_3_material">
+        <color rgba="0.647059 0.647059 0.647059 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="1.8735e-15 -9.90874e-15 -0.0635" rpy="1.5708 -1.50143e-13 -0.523599"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_15_21_4.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part bearing_15_21_4_4 -->
+    <visual>
+      <origin xyz="0.0130854 0.122429 -0.0365" rpy="1.5708 -5.27866e-14 -2.3157e-13"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_15_21_4.stl"/>
+      </geometry>
+      <material name="bearing_15_21_4_4_material">
+        <color rgba="0.647059 0.647059 0.647059 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.0130854 0.122429 -0.0365" rpy="1.5708 -5.27866e-14 -2.3157e-13"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_15_21_4.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_40__14321d45d56569246e7feb4574a6bae6_11 -->
+    <!-- Part bearing_15_21_4_5 -->
+    <visual>
+      <origin xyz="0.117923 0.320381 -0.0425" rpy="1.5708 -2.30466e-13 -1.0472"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_15_21_4.stl"/>
+      </geometry>
+      <material name="bearing_15_21_4_5_material">
+        <color rgba="0.647059 0.647059 0.647059 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.117923 0.320381 -0.0425" rpy="1.5708 -2.30466e-13 -1.0472"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_15_21_4.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_40__14321d45d56569246e7feb4574a6bae6_12 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_8__a416dc2a8d778a4ef6150c0739aa89d1_8 -->
+    <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232_4 -->
+    <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232_5 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_8__a416dc2a8d778a4ef6150c0739aa89d1_9 -->
+    <!-- Part knee_rod12 -->
+    <visual>
+      <origin xyz="0.210506 0.184547 -0.0305" rpy="1.5708 -2.30723e-13 -1.0472"/>
+      <geometry>
+        <mesh filename="package://assets/knee_rod12.stl"/>
+      </geometry>
+      <material name="knee_rod12_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.210506 0.184547 -0.0305" rpy="1.5708 -2.30723e-13 -1.0472"/>
+      <geometry>
+        <mesh filename="package://assets/knee_rod12.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_8__a416dc2a8d778a4ef6150c0739aa89d1_10 -->
+    <!-- Part bearing_5_16_5 -->
+    <visual>
+      <origin xyz="0.17 0.294449 -0.05" rpy="-1.5708 -1.49914e-13 -0.523599"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_5_16_5.stl"/>
+      </geometry>
+      <material name="bearing_5_16_5_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.17 0.294449 -0.05" rpy="-1.5708 -1.49914e-13 -0.523599"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_5_16_5.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_8__a416dc2a8d778a4ef6150c0739aa89d1_11 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_8__a416dc2a8d778a4ef6150c0739aa89d1_12 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_8__a416dc2a8d778a4ef6150c0739aa89d1_13 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_40__14321d45d56569246e7feb4574a6bae6_13 -->
+    <!-- Part knee_actuation -->
+    <visual>
+      <origin xyz="0.058 0.324459 -0.0305" rpy="1.5708 -5.27508e-14 -2.31602e-13"/>
+      <geometry>
+        <mesh filename="package://assets/knee_actuation.stl"/>
+      </geometry>
+      <material name="knee_actuation_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.058 0.324459 -0.0305" rpy="1.5708 -5.27508e-14 -2.31602e-13"/>
+      <geometry>
+        <mesh filename="package://assets/knee_actuation.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_16__8d628c0d7a90368385b1c4c7479647eb_6 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_3 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_8__a416dc2a8d778a4ef6150c0739aa89d1_14 -->
+    <!-- Part bearing_5_16_5_2 -->
+    <visual>
+      <origin xyz="0.17 0.294449 -0.01425" rpy="-1.5708 -1.49914e-13 -0.523599"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_5_16_5.stl"/>
+      </geometry>
+      <material name="bearing_5_16_5_2_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.17 0.294449 -0.01425" rpy="-1.5708 -1.49914e-13 -0.523599"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_5_16_5.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part femur_22 -->
+    <visual>
+      <origin xyz="0.17 0.294449 -0.0305" rpy="1.5708 -1.5006e-13 -0.523599"/>
+      <geometry>
+        <mesh filename="package://assets/femur_22.stl"/>
+      </geometry>
+      <material name="femur_22_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.17 0.294449 -0.0305" rpy="1.5708 -1.5006e-13 -0.523599"/>
+      <geometry>
+        <mesh filename="package://assets/femur_22.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_40__14321d45d56569246e7feb4574a6bae6_14 -->
+    <!-- Part femur_12 -->
+    <visual>
+      <origin xyz="0.17 0.294449 -0.0305" rpy="1.5708 -1.50136e-13 -0.523599"/>
+      <geometry>
+        <mesh filename="package://assets/femur_12.stl"/>
+      </geometry>
+      <material name="femur_12_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.17 0.294449 -0.0305" rpy="1.5708 -1.50136e-13 -0.523599"/>
+      <geometry>
+        <mesh filename="package://assets/femur_12.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hat_femur -->
+    <visual>
+      <origin xyz="0.17 0.294449 -0.0305" rpy="1.5708 -1.50116e-13 -0.523599"/>
+      <geometry>
+        <mesh filename="package://assets/hat_femur.stl"/>
+      </geometry>
+      <material name="hat_femur_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.17 0.294449 -0.0305" rpy="1.5708 -1.50116e-13 -0.523599"/>
+      <geometry>
+        <mesh filename="package://assets/hat_femur.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part part_3 -->
+    <visual>
+      <origin xyz="2.31065e-15 -1.7486e-14 -0.0938" rpy="-2.61799 1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/part_3.stl"/>
+      </geometry>
+      <material name="part_3_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="2.31065e-15 -1.7486e-14 -0.0938" rpy="-2.61799 1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/part_3.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part robstrideo3_2 -->
+    <visual>
+      <origin xyz="-0.495806 0.470539 -0.0275" rpy="-1.5708 -1.50116e-13 -0.523599"/>
+      <geometry>
+        <mesh filename="package://assets/robstrideo3.stl"/>
+      </geometry>
+      <material name="robstrideo3_2_material">
+        <color rgba="0.301961 0.301961 0.301961 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.495806 0.470539 -0.0275" rpy="-1.5708 -1.50116e-13 -0.523599"/>
+      <geometry>
+        <mesh filename="package://assets/robstrideo3.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232_6 -->
+    <!-- Part 1_1_31_qt_942_1 -->
+    <visual>
+      <origin xyz="3.72966e-15 -4.38538e-15 -0.04" rpy="1.05498e-13 -1.32004e-13 -2.0944"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_31_qt_942_1.stl"/>
+      </geometry>
+      <material name="1_1_31_qt_942_1_material">
+        <color rgba="0.768627 0.886275 0.952941 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="3.72966e-15 -4.38538e-15 -0.04" rpy="1.05498e-13 -1.32004e-13 -2.0944"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_31_qt_942_1.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 1_1_06_eb903_538_1 -->
+    <visual>
+      <origin xyz="4.33334e-15 -5.96745e-15 -0.0566" rpy="1.05498e-13 -1.32004e-13 -2.0944"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_06_eb903_538_1.stl"/>
+      </geometry>
+      <material name="1_1_06_eb903_538_1_material">
+        <color rgba="0.498039 0.498039 0.498039 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="4.33334e-15 -5.96745e-15 -0.0566" rpy="1.05498e-13 -1.32004e-13 -2.0944"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_06_eb903_538_1.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 1_1_31_qt_942_1_2 -->
+    <visual>
+      <origin xyz="0.058 0.100459 -0.0825" rpy="3.05109e-13 1.63945e-13 2.61799"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_31_qt_942_1.stl"/>
+      </geometry>
+      <material name="1_1_31_qt_942_1_2_material">
+        <color rgba="0.768627 0.886275 0.952941 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.058 0.100459 -0.0825" rpy="3.05109e-13 1.63945e-13 2.61799"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_31_qt_942_1.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 1_1_06_eb903_538_1_2 -->
+    <visual>
+      <origin xyz="0.058 0.100459 -0.0991" rpy="3.05109e-13 1.63945e-13 2.61799"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_06_eb903_538_1.stl"/>
+      </geometry>
+      <material name="1_1_06_eb903_538_1_2_material">
+        <color rgba="0.498039 0.498039 0.498039 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.058 0.100459 -0.0991" rpy="3.05109e-13 1.63945e-13 2.61799"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_06_eb903_538_1.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 1_1_06_eb903_537_af0_1 -->
+    <visual>
+      <origin xyz="2.52576e-15 -4.10783e-15 -0.0375" rpy="-2.09276e-13 -1.50053e-13 -0.523599"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_06_eb903_537_af0_1.stl"/>
+      </geometry>
+      <material name="1_1_06_eb903_537_af0_1_material">
+        <color rgba="0.768627 0.886275 0.952941 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="2.52576e-15 -4.10783e-15 -0.0375" rpy="-2.09276e-13 -1.50053e-13 -0.523599"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_06_eb903_537_af0_1.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 1_1_02_eb901_558_1 -->
+    <visual>
+      <origin xyz="3.46945e-18 0 0" rpy="3.14159 6.95065e-30 1.46162e-17"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_02_eb901_558_1.stl"/>
+      </geometry>
+      <material name="1_1_02_eb901_558_1_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="3.46945e-18 0 0" rpy="3.14159 6.95065e-30 1.46162e-17"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_02_eb901_558_1.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 1_1_06_eb903_537_af0_1_2 -->
+    <visual>
+      <origin xyz="0.058 0.100459 -0.08" rpy="1.50011e-13 -1.97375e-13 -2.0944"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_06_eb903_537_af0_1.stl"/>
+      </geometry>
+      <material name="1_1_06_eb903_537_af0_1_2_material">
+        <color rgba="0.768627 0.886275 0.952941 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.058 0.100459 -0.08" rpy="1.50011e-13 -1.97375e-13 -2.0944"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_06_eb903_537_af0_1.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 1_1_02_eb901_558_1_2 -->
+    <visual>
+      <origin xyz="0.058 0.100459 -0.0425" rpy="-3.14159 -2.37057e-13 -1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_02_eb901_558_1.stl"/>
+      </geometry>
+      <material name="1_1_02_eb901_558_1_2_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.058 0.100459 -0.0425" rpy="-3.14159 -2.37057e-13 -1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_02_eb901_558_1.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <!-- Link shin_subassembly -->
+  <link name="shin_subassembly">
+    <inertial>
+      <origin xyz="-0.0765467 -0.0486737 6.35117e-05" rpy="0 0 0"/>
+      <mass value="0.593267"/>
+      <inertia ixx="0.00060022" ixy="-0.000633438" ixz="-8.08235e-05" iyy="0.00138683" iyz="-4.81462e-05" izz="0.00176401"/>
+    </inertial>
+    <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_8__dec2226ceabd7d7ca0bb403ec234d89b -->
+    <!-- Part rmdx43 -->
+    <visual>
+      <origin xyz="-0.2967 0.369726 0.019" rpy="1.5708 -4.60092e-16 -1.02188"/>
+      <geometry>
+        <mesh filename="package://assets/rmdx43.stl"/>
+      </geometry>
+      <material name="rmdx43_material">
+        <color rgba="0.301961 0.301961 0.301961 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.2967 0.369726 0.019" rpy="1.5708 -4.60092e-16 -1.02188"/>
+      <geometry>
+        <mesh filename="package://assets/rmdx43.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part xt_30_2x2_f_3 -->
+    <visual>
+      <origin xyz="-0.0609783 -0.00254913 -0.0142" rpy="2.11972 -1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/xt_30_2x2_f.stl"/>
+      </geometry>
+      <material name="xt_30_2x2_f_3_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.0609783 -0.00254913 -0.0142" rpy="2.11972 -1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/xt_30_2x2_f.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_20__7252065e4445f5ec71347b53fcae11e4 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_4 -->
+    <!-- Part tibias22 -->
+    <visual>
+      <origin xyz="-0.221803 -0.135659 0.019" rpy="-1.5708 -4.53153e-16 -1.02188"/>
+      <geometry>
+        <mesh filename="package://assets/tibias22.stl"/>
+      </geometry>
+      <material name="tibias22_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.221803 -0.135659 0.019" rpy="-1.5708 -4.53153e-16 -1.02188"/>
+      <geometry>
+        <mesh filename="package://assets/tibias22.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 27628_01_050_catpart -->
+    <visual>
+      <origin xyz="0.00455194 -0.0324886 0.02" rpy="-1.5708 -2.20588e-15 -0.831949"/>
+      <geometry>
+        <mesh filename="package://assets/27628_01_050_catpart.stl"/>
+      </geometry>
+      <material name="27628_01_050_catpart_material">
+        <color rgba="0.690196 0.690196 0.690196 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.00455194 -0.0324886 0.02" rpy="-1.5708 -2.20588e-15 -0.831949"/>
+      <geometry>
+        <mesh filename="package://assets/27628_01_050_catpart.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_5 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_6 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_7 -->
+    <!-- Part hex_thin_nut_grade_a___b_m4x0_7__a8228d9ce5dcc05f24da0a2f74d882f3 -->
+    <visual>
+      <origin xyz="1.38778e-17 5.55112e-17 0.0247602" rpy="1.73472e-16 1.14492e-16 -6.79818e-17"/>
+      <geometry>
+        <mesh filename="package://assets/hex_thin_nut_grade_a___b_m4x0_7__a8228d9ce5dcc05f24da0a2f74d882f3.stl"/>
+      </geometry>
+      <material name="hex_thin_nut_grade_a___b_m4x0_7__a8228d9ce5dcc05f24da0a2f74d882f3_material">
+        <color rgba="0.603922 0.647059 0.686275 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="1.38778e-17 5.55112e-17 0.0247602" rpy="1.73472e-16 1.14492e-16 -6.79818e-17"/>
+      <geometry>
+        <mesh filename="package://assets/hex_thin_nut_grade_a___b_m4x0_7__a8228d9ce5dcc05f24da0a2f74d882f3.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 07534_05x40_catpart -->
+    <visual>
+      <origin xyz="1.38778e-17 5.55112e-17 -0.025" rpy="-1.5708 -1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/07534_05x40_catpart.stl"/>
+      </geometry>
+      <material name="07534_05x40_catpart_material">
+        <color rgba="0.690196 0.690196 0.690196 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="1.38778e-17 5.55112e-17 -0.025" rpy="-1.5708 -1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/07534_05x40_catpart.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_thin_nut_grade_a___b_m4x0_7__a8228d9ce5dcc05f24da0a2f74d882f3_2 -->
+    <visual>
+      <origin xyz="-0.0406618 -0.0601422 -0.0112398" rpy="-3.14159 6.06258e-16 -0.0968529"/>
+      <geometry>
+        <mesh filename="package://assets/hex_thin_nut_grade_a___b_m4x0_7__a8228d9ce5dcc05f24da0a2f74d882f3.stl"/>
+      </geometry>
+      <material name="hex_thin_nut_grade_a___b_m4x0_7__a8228d9ce5dcc05f24da0a2f74d882f3_2_material">
+        <color rgba="0.603922 0.647059 0.686275 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.0406618 -0.0601422 -0.0112398" rpy="-3.14159 6.06258e-16 -0.0968529"/>
+      <geometry>
+        <mesh filename="package://assets/hex_thin_nut_grade_a___b_m4x0_7__a8228d9ce5dcc05f24da0a2f74d882f3.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_20__7252065e4445f5ec71347b53fcae11e4_2 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_8 -->
+    <!-- Part 07534_05x20_catpart -->
+    <visual>
+      <origin xyz="-0.0406618 -0.0601422 -0.041" rpy="3.04474 -1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/07534_05x20_catpart.stl"/>
+      </geometry>
+      <material name="07534_05x20_catpart_material">
+        <color rgba="0.690196 0.690196 0.690196 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.0406618 -0.0601422 -0.041" rpy="3.04474 -1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/07534_05x20_catpart.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part actuation_ankle -->
+    <visual>
+      <origin xyz="-0.0303217 0.125625 -0.019" rpy="1.5708 1.93525e-13 -0.0968529"/>
+      <geometry>
+        <mesh filename="package://assets/actuation_ankle.stl"/>
+      </geometry>
+      <material name="actuation_ankle_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.0303217 0.125625 -0.019" rpy="1.5708 1.93525e-13 -0.0968529"/>
+      <geometry>
+        <mesh filename="package://assets/actuation_ankle.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_30__cb22dc4460edbee8e1cbddf29677c00f -->
+    <!-- Part rmdx43_2 -->
+    <visual>
+      <origin xyz="-0.341913 0.342073 0.006" rpy="1.5708 -4.53153e-16 -1.02188"/>
+      <geometry>
+        <mesh filename="package://assets/rmdx43.stl"/>
+      </geometry>
+      <material name="rmdx43_2_material">
+        <color rgba="0.301961 0.301961 0.301961 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.341913 0.342073 0.006" rpy="1.5708 -4.53153e-16 -1.02188"/>
+      <geometry>
+        <mesh filename="package://assets/rmdx43.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_9 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_20__7252065e4445f5ec71347b53fcae11e4_3 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_10 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_11 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_12 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_12__c825518ee8edf1afced0eee1b019b750_7 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_20__7252065e4445f5ec71347b53fcae11e4_4 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_20__7252065e4445f5ec71347b53fcae11e4_5 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_13 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_14 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_15 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_16 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_20__7252065e4445f5ec71347b53fcae11e4_6 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_17 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_18 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_19 -->
+    <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_8__dec2226ceabd7d7ca0bb403ec234d89b_2 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_12__c825518ee8edf1afced0eee1b019b750_8 -->
+    <!-- Part hat_big -->
+    <visual>
+      <origin xyz="-0.221803 -0.135659 0.019" rpy="-1.5708 -4.60092e-16 -1.02188"/>
+      <geometry>
+        <mesh filename="package://assets/hat_big.stl"/>
+      </geometry>
+      <material name="hat_big_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.221803 -0.135659 0.019" rpy="-1.5708 -4.60092e-16 -1.02188"/>
+      <geometry>
+        <mesh filename="package://assets/hat_big.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 07534_05x20_catpart_2 -->
+    <visual>
+      <origin xyz="0.00455195 -0.0324886 0.041" rpy="-3.04474 1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/07534_05x20_catpart.stl"/>
+      </geometry>
+      <material name="07534_05x20_catpart_2_material">
+        <color rgba="0.690196 0.690196 0.690196 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.00455195 -0.0324886 0.041" rpy="-3.04474 1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/07534_05x20_catpart.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_12__c825518ee8edf1afced0eee1b019b750_9 -->
+    <!-- Part hex_thin_nut_grade_a___b_m4x0_7__a8228d9ce5dcc05f24da0a2f74d882f3_3 -->
+    <visual>
+      <origin xyz="0.00455195 -0.0324886 0.0134397" rpy="-2.15347e-13 1.93622e-13 -0.0968529"/>
+      <geometry>
+        <mesh filename="package://assets/hex_thin_nut_grade_a___b_m4x0_7__a8228d9ce5dcc05f24da0a2f74d882f3.stl"/>
+      </geometry>
+      <material name="hex_thin_nut_grade_a___b_m4x0_7__a8228d9ce5dcc05f24da0a2f74d882f3_3_material">
+        <color rgba="0.603922 0.647059 0.686275 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.00455195 -0.0324886 0.0134397" rpy="-2.15347e-13 1.93622e-13 -0.0968529"/>
+      <geometry>
+        <mesh filename="package://assets/hex_thin_nut_grade_a___b_m4x0_7__a8228d9ce5dcc05f24da0a2f74d882f3.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_8__dec2226ceabd7d7ca0bb403ec234d89b_3 -->
+    <!-- Part tibias12 -->
+    <visual>
+      <origin xyz="-0.221803 -0.135659 0.019" rpy="-1.5708 -4.60092e-16 -1.02188"/>
+      <geometry>
+        <mesh filename="package://assets/tibias12.stl"/>
+      </geometry>
+      <material name="tibias12_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.221803 -0.135659 0.019" rpy="-1.5708 -4.60092e-16 -1.02188"/>
+      <geometry>
+        <mesh filename="package://assets/tibias12.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_20 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_20__7252065e4445f5ec71347b53fcae11e4_7 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_21 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_22 -->
+    <!-- Part xt_30_2x2_f_4 -->
+    <visual>
+      <origin xyz="-0.105595 -0.0298375 0.0145" rpy="1.02188 1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/xt_30_2x2_f.stl"/>
+      </geometry>
+      <material name="xt_30_2x2_f_4_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.105595 -0.0298375 0.0145" rpy="1.02188 1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/xt_30_2x2_f.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_23 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_20__7252065e4445f5ec71347b53fcae11e4_8 -->
+    <!-- Part actuation_ankle_2 -->
+    <visual>
+      <origin xyz="-0.105319 -0.208585 0.019" rpy="-1.5708 7.7973e-16 -0.0968529"/>
+      <geometry>
+        <mesh filename="package://assets/actuation_ankle.stl"/>
+      </geometry>
+      <material name="actuation_ankle_2_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.105319 -0.208585 0.019" rpy="-1.5708 7.7973e-16 -0.0968529"/>
+      <geometry>
+        <mesh filename="package://assets/actuation_ankle.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_24 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_12__c825518ee8edf1afced0eee1b019b750_10 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_20__7252065e4445f5ec71347b53fcae11e4_9 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_20__7252065e4445f5ec71347b53fcae11e4_10 -->
+    <!-- Part 27628_01_050_catpart_2 -->
+    <visual>
+      <origin xyz="-0.0406619 -0.060142 -0.023" rpy="-1.5708 5.96181e-16 0.772269"/>
+      <geometry>
+        <mesh filename="package://assets/27628_01_050_catpart.stl"/>
+      </geometry>
+      <material name="27628_01_050_catpart_2_material">
+        <color rgba="0.690196 0.690196 0.690196 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.0406619 -0.060142 -0.023" rpy="-1.5708 5.96181e-16 0.772269"/>
+      <geometry>
+        <mesh filename="package://assets/27628_01_050_catpart.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_25 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_20__7252065e4445f5ec71347b53fcae11e4_11 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_20__7252065e4445f5ec71347b53fcae11e4_12 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_26 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_27 -->
+    <!-- Part 1_1_31_eb463_510_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de -->
+    <visual>
+      <origin xyz="-0.0904274 -0.0553071 -0.0195" rpy="-3.14159 9.1342e-16 -1.41458"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_31_eb463_510_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+      <material name="1_1_31_eb463_510_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_material">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.0904274 -0.0553071 -0.0195" rpy="-3.14159 9.1342e-16 -1.41458"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_31_eb463_510_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 1_1_02_eb461_502_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de -->
+    <visual>
+      <origin xyz="-0.0904274 -0.0553071 -0.0095" rpy="-3.14159 9.1342e-16 -1.41458"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_02_eb461_502_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+      <material name="1_1_02_eb461_502_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_material">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.0904274 -0.0553071 -0.0095" rpy="-3.14159 9.1342e-16 -1.41458"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_02_eb461_502_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 1_1_06_eb463_509_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de -->
+    <visual>
+      <origin xyz="-0.0904274 -0.0553071 0.022" rpy="3.14159 -8.26613e-14 -0.236479"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_06_eb463_509_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+      <material name="1_1_06_eb463_509_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_material">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.0904274 -0.0553071 0.022" rpy="3.14159 -8.26613e-14 -0.236479"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_06_eb463_509_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 1_1_06_eb463_507_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de -->
+    <visual>
+      <origin xyz="-0.0904274 -0.0553071 0.0085" rpy="3.14159 -1.2997e-15 -1.02188"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_06_eb463_507_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+      <material name="1_1_06_eb463_507_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_material">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.0904274 -0.0553071 0.0085" rpy="3.14159 -1.2997e-15 -1.02188"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_06_eb463_507_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 1_1_31_eb463_510_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_2 -->
+    <visual>
+      <origin xyz="-0.0452137 -0.0276536 0.0195" rpy="-4.06102e-15 3.67729e-14 -0.629178"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_31_eb463_510_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+      <material name="1_1_31_eb463_510_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_2_material">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.0452137 -0.0276536 0.0195" rpy="-4.06102e-15 3.67729e-14 -0.629178"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_31_eb463_510_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 1_1_02_eb461_502_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_2 -->
+    <visual>
+      <origin xyz="-0.0452137 -0.0276536 0.0095" rpy="-4.06102e-15 3.67729e-14 -0.629178"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_02_eb461_502_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+      <material name="1_1_02_eb461_502_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_2_material">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.0452137 -0.0276536 0.0095" rpy="-4.06102e-15 3.67729e-14 -0.629178"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_02_eb461_502_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 1_1_06_eb463_509_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_2 -->
+    <visual>
+      <origin xyz="-0.0452137 -0.0276536 -0.022" rpy="5.99655e-15 -7.4959e-14 -1.80728"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_06_eb463_509_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+      <material name="1_1_06_eb463_509_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_2_material">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.0452137 -0.0276536 -0.022" rpy="5.99655e-15 -7.4959e-14 -1.80728"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_06_eb463_509_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 1_1_06_eb463_507_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_2 -->
+    <visual>
+      <origin xyz="-0.0452137 -0.0276536 -0.0085" rpy="-1.54054e-14 1.70892e-14 -1.02188"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_06_eb463_507_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+      <material name="1_1_06_eb463_507_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_2_material">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.0452137 -0.0276536 -0.0085" rpy="-1.54054e-14 1.70892e-14 -1.02188"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_06_eb463_507_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 0001755652_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de -->
+    <visual>
+      <origin xyz="-0.0823231 -0.0503503 -0.024" rpy="2.45981e-15 1.6397e-15 2.11972"/>
+      <geometry>
+        <mesh filename="package://assets/0001755652_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+      <material name="0001755652_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_material">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.0823231 -0.0503503 -0.024" rpy="2.45981e-15 1.6397e-15 2.11972"/>
+      <geometry>
+        <mesh filename="package://assets/0001755652_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 0001755652_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_2 -->
+    <visual>
+      <origin xyz="-0.0987723 -0.0507669 -0.024" rpy="2.45981e-15 1.6397e-15 2.11972"/>
+      <geometry>
+        <mesh filename="package://assets/0001755652_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+      <material name="0001755652_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_2_material">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.0987723 -0.0507669 -0.024" rpy="2.45981e-15 1.6397e-15 2.11972"/>
+      <geometry>
+        <mesh filename="package://assets/0001755652_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 0001755652_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_3 -->
+    <visual>
+      <origin xyz="-0.0533181 -0.0326103 0.024" rpy="-3.14159 3.96987e-14 2.11972"/>
+      <geometry>
+        <mesh filename="package://assets/0001755652_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+      <material name="0001755652_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_3_material">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.0533181 -0.0326103 0.024" rpy="-3.14159 3.96987e-14 2.11972"/>
+      <geometry>
+        <mesh filename="package://assets/0001755652_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 0001755652_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_4 -->
+    <visual>
+      <origin xyz="-0.0454542 -0.0181566 0.024" rpy="-3.14159 3.96987e-14 2.11972"/>
+      <geometry>
+        <mesh filename="package://assets/0001755652_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+      <material name="0001755652_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_4_material">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.0454542 -0.0181566 0.024" rpy="-3.14159 3.96987e-14 2.11972"/>
+      <geometry>
+        <mesh filename="package://assets/0001755652_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 0001755652_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de -->
+    <visual>
+      <origin xyz="-0.0901869 -0.0648041 -0.024" rpy="2.45981e-15 1.6397e-15 2.11972"/>
+      <geometry>
+        <mesh filename="package://assets/0001755652_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+      <material name="0001755652_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_material">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.0901869 -0.0648041 -0.024" rpy="2.45981e-15 1.6397e-15 2.11972"/>
+      <geometry>
+        <mesh filename="package://assets/0001755652_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 6706__300001_1_1_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de -->
+    <visual>
+      <origin xyz="-0.0904274 -0.0553071 -0.0205" rpy="2.45981e-15 1.6397e-15 2.11972"/>
+      <geometry>
+        <mesh filename="package://assets/6706__300001_1_1_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+      <material name="6706__300001_1_1_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_material">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.0904274 -0.0553071 -0.0205" rpy="2.45981e-15 1.6397e-15 2.11972"/>
+      <geometry>
+        <mesh filename="package://assets/6706__300001_1_1_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 0001755650_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de -->
+    <visual>
+      <origin xyz="-0.0904274 -0.0553071 -0.0209" rpy="2.45981e-15 1.6397e-15 2.11972"/>
+      <geometry>
+        <mesh filename="package://assets/0001755650_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+      <material name="0001755650_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_material">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.0904274 -0.0553071 -0.0209" rpy="2.45981e-15 1.6397e-15 2.11972"/>
+      <geometry>
+        <mesh filename="package://assets/0001755650_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 0001755652_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_2 -->
+    <visual>
+      <origin xyz="-0.0368689 -0.0321937 0.024" rpy="-3.14159 3.96987e-14 2.11972"/>
+      <geometry>
+        <mesh filename="package://assets/0001755652_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+      <material name="0001755652_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_2_material">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.0368689 -0.0321937 0.024" rpy="-3.14159 3.96987e-14 2.11972"/>
+      <geometry>
+        <mesh filename="package://assets/0001755652_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 6706__300001_1_1_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_2 -->
+    <visual>
+      <origin xyz="-0.0452137 -0.0276536 0.0205" rpy="-3.14159 3.96987e-14 2.11972"/>
+      <geometry>
+        <mesh filename="package://assets/6706__300001_1_1_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+      <material name="6706__300001_1_1_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_2_material">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.0452137 -0.0276536 0.0205" rpy="-3.14159 3.96987e-14 2.11972"/>
+      <geometry>
+        <mesh filename="package://assets/6706__300001_1_1_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 0001755650_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_2 -->
+    <visual>
+      <origin xyz="-0.0452137 -0.0276536 0.0209" rpy="-3.14159 3.96987e-14 2.11972"/>
+      <geometry>
+        <mesh filename="package://assets/0001755650_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+      <material name="0001755650_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_2_material">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.0452137 -0.0276536 0.0209" rpy="-3.14159 3.96987e-14 2.11972"/>
+      <geometry>
+        <mesh filename="package://assets/0001755650_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <!-- Link ankle_subassembly -->
+  <link name="ankle_subassembly">
+    <inertial>
+      <origin xyz="-1.62086e-08 -0.000727483 0.02" rpy="0 0 0"/>
+      <mass value="0.0168168"/>
+      <inertia ixx="5.19458e-06" ixy="2.61119e-12" ixz="4.35145e-12" iyy="4.86353e-06" iyz="-7.24871e-13" izz="8.35665e-07"/>
+    </inertial>
+    <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232_7 -->
+    <!-- Part 07534_05x40_catpart_2 -->
+    <visual>
+      <origin xyz="1.77636e-15 0.0249999 0.02" rpy="-3.14159 3.65491e-14 -1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/07534_05x40_catpart.stl"/>
+      </geometry>
+      <material name="07534_05x40_catpart_2_material">
+        <color rgba="0.690196 0.690196 0.690196 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="1.77636e-15 0.0249999 0.02" rpy="-3.14159 3.65491e-14 -1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/07534_05x40_catpart.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part ujoint -->
+    <visual>
+      <origin xyz="-7.77156e-16 2.46331e-16 0.02" rpy="3.14159 1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/ujoint.stl"/>
+      </geometry>
+      <material name="ujoint_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-7.77156e-16 2.46331e-16 0.02" rpy="3.14159 1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/ujoint.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232_8 -->
+    <!-- Part spacer_ujoint -->
+    <visual>
+      <origin xyz="-1.22125e-15 -1.249e-16 0.02" rpy="2.9536e-14 -1.54943 -3.1118e-14"/>
+      <geometry>
+        <mesh filename="package://assets/spacer_ujoint.stl"/>
+      </geometry>
+      <material name="spacer_ujoint_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-1.22125e-15 -1.249e-16 0.02" rpy="2.9536e-14 -1.54943 -3.1118e-14"/>
+      <geometry>
+        <mesh filename="package://assets/spacer_ujoint.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_thin_nut_grade_a___b_m4x0_7__a8228d9ce5dcc05f24da0a2f74d882f3_4 -->
+    <visual>
+      <origin xyz="3.03091e-14 -0.02204 0.02" rpy="-1.5708 -1.54943 1.03955e-12"/>
+      <geometry>
+        <mesh filename="package://assets/hex_thin_nut_grade_a___b_m4x0_7__a8228d9ce5dcc05f24da0a2f74d882f3.stl"/>
+      </geometry>
+      <material name="hex_thin_nut_grade_a___b_m4x0_7__a8228d9ce5dcc05f24da0a2f74d882f3_4_material">
+        <color rgba="0.603922 0.647059 0.686275 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="3.03091e-14 -0.02204 0.02" rpy="-1.5708 -1.54943 1.03955e-12"/>
+      <geometry>
+        <mesh filename="package://assets/hex_thin_nut_grade_a___b_m4x0_7__a8228d9ce5dcc05f24da0a2f74d882f3.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part part_3_2 -->
+    <visual>
+      <origin xyz="2.10942e-15 -4.01762e-15 0.0195" rpy="3.14159 1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/part_3.stl"/>
+      </geometry>
+      <material name="part_3_2_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="2.10942e-15 -4.01762e-15 0.0195" rpy="3.14159 1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/part_3.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part bearing_5_16_5_3 -->
+    <visual>
+      <origin xyz="-5.32907e-15 -0.01594 0.02" rpy="-1.87698e-12 -1.54943 2.12906e-12"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_5_16_5.stl"/>
+      </geometry>
+      <material name="bearing_5_16_5_3_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-5.32907e-15 -0.01594 0.02" rpy="-1.87698e-12 -1.54943 2.12906e-12"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_5_16_5.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part bearing_15_21_4_6 -->
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 -8.62817e-32 1.7033e-31"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_15_21_4.stl"/>
+      </geometry>
+      <material name="bearing_15_21_4_6_material">
+        <color rgba="0.647059 0.647059 0.647059 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="1.5708 -8.62817e-32 1.7033e-31"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_15_21_4.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232_9 -->
+    <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232_10 -->
+    <!-- Part part_3_3 -->
+    <visual>
+      <origin xyz="2.55351e-15 -6.38378e-16 0.0205" rpy="-3.14159 -1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/part_3.stl"/>
+      </geometry>
+      <material name="part_3_3_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="2.55351e-15 -6.38378e-16 0.0205" rpy="-3.14159 -1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/part_3.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232_11 -->
+    <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232_12 -->
+    <!-- Part bearing_5_16_5_4 -->
+    <visual>
+      <origin xyz="-6.99441e-15 0.0209456 0.02" rpy="-3.14159 0.0146585 3.14159"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_5_16_5.stl"/>
+      </geometry>
+      <material name="bearing_5_16_5_4_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-6.99441e-15 0.0209456 0.02" rpy="-3.14159 0.0146585 3.14159"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_5_16_5.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part spacer_ujoint_2 -->
+    <visual>
+      <origin xyz="-6.66134e-15 5.64895e-06 0.02" rpy="3.14159 1.55614 -3.23576e-12"/>
+      <geometry>
+        <mesh filename="package://assets/spacer_ujoint.stl"/>
+      </geometry>
+      <material name="spacer_ujoint_2_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-6.66134e-15 5.64895e-06 0.02" rpy="3.14159 1.55614 -3.23576e-12"/>
+      <geometry>
+        <mesh filename="package://assets/spacer_ujoint.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part bearing_15_21_4_7 -->
+    <visual>
+      <origin xyz="7.77156e-16 1.88044e-15 0.04" rpy="-1.5708 1.67921e-15 3.14159"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_15_21_4.stl"/>
+      </geometry>
+      <material name="bearing_15_21_4_7_material">
+        <color rgba="0.647059 0.647059 0.647059 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="7.77156e-16 1.88044e-15 0.04" rpy="-1.5708 1.67921e-15 3.14159"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_15_21_4.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <!-- Link foot_subassembly -->
+  <link name="foot_subassembly">
+    <inertial>
+      <origin xyz="8.52312e-09 -0.0138418 -0.052232" rpy="0 0 0"/>
+      <mass value="0.122498"/>
+      <inertia ixx="0.000163413" ixy="-1.15065e-10" ixz="-2.96383e-11" iyy="0.000162266" iyz="1.11374e-05" izz="7.07692e-05"/>
+    </inertial>
+    <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232_13 -->
+    <!-- Part 27628_01_050_catpart_3 -->
+    <visual>
+      <origin xyz="0.021 3.53792e-08 -0.0660002" rpy="-3.14159 -4.49847e-16 1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/27628_01_050_catpart.stl"/>
+      </geometry>
+      <material name="27628_01_050_catpart_3_material">
+        <color rgba="0.690196 0.690196 0.690196 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.021 3.53792e-08 -0.0660002" rpy="-3.14159 -4.49847e-16 1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/27628_01_050_catpart.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232_14 -->
+    <!-- Part 07534_05x20_catpart_3 -->
+    <visual>
+      <origin xyz="0.036 1.11022e-16 -0.066" rpy="-3.14159 -1.44819e-31 3.14159"/>
+      <geometry>
+        <mesh filename="package://assets/07534_05x20_catpart.stl"/>
+      </geometry>
+      <material name="07534_05x20_catpart_3_material">
+        <color rgba="0.690196 0.690196 0.690196 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.036 1.11022e-16 -0.066" rpy="-3.14159 -1.44819e-31 3.14159"/>
+      <geometry>
+        <mesh filename="package://assets/07534_05x20_catpart.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 27628_01_050_catpart_4 -->
+    <visual>
+      <origin xyz="-0.021 -1.89504e-08 -0.066" rpy="3.14159 -4.7147e-16 1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/27628_01_050_catpart.stl"/>
+      </geometry>
+      <material name="27628_01_050_catpart_4_material">
+        <color rgba="0.690196 0.690196 0.690196 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.021 -1.89504e-08 -0.066" rpy="3.14159 -4.7147e-16 1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/27628_01_050_catpart.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 07534_05x20_catpart_4 -->
+    <visual>
+      <origin xyz="-0.036 1.11022e-16 -0.066" rpy="2.97007e-16 1.21898e-30 -5.19326e-15"/>
+      <geometry>
+        <mesh filename="package://assets/07534_05x20_catpart.stl"/>
+      </geometry>
+      <material name="07534_05x20_catpart_4_material">
+        <color rgba="0.690196 0.690196 0.690196 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.036 1.11022e-16 -0.066" rpy="2.97007e-16 1.21898e-30 -5.19326e-15"/>
+      <geometry>
+        <mesh filename="package://assets/07534_05x20_catpart.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hat_small -->
+    <visual>
+      <origin xyz="6.66134e-16 -0.035 -0.0385" rpy="-1.5708 -1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/hat_small.stl"/>
+      </geometry>
+      <material name="hat_small_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="6.66134e-16 -0.035 -0.0385" rpy="-1.5708 -1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/hat_small.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232_15 -->
+    <!-- Part foot -->
+    <visual>
+      <origin xyz="1.11022e-16 -0.035 -0.0385" rpy="-1.5708 -1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/foot.stl"/>
+      </geometry>
+      <material name="foot_material">
+        <color rgba="0.301961 0.301961 0.301961 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="1.11022e-16 -0.035 -0.0385" rpy="-1.5708 -1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/foot.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <!-- Frame foot_right (dummy link + fixed joint) -->
+  <link name="foot_right">
+    <origin xyz="0 0 0" rpy="0 -0 0"/>
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="1e-9"/>
+      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+    </inertial>
+  </link>
+  <joint name="foot_right_frame" type="fixed">
+    <origin xyz="-6.35351e-08 -0.035 -0.0480606" rpy="-1.5708 1.5708 0"/>
+    <parent link="foot_subassembly"/>
+    <child link="foot_right"/>
+    <axis xyz="0 0 0"/>
+  </joint>
+  <!-- Joint from ankle_subassembly to foot_subassembly -->
+  <joint name="anklex_right" type="revolute">
+    <origin xyz="-5.32907e-15 -0.01594 0.02" rpy="1.5708 1.5708 0"/>
+    <parent link="ankle_subassembly"/>
+    <child link="foot_subassembly"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
+  </joint>
+  <!-- Joint from shin_subassembly to ankle_subassembly -->
+  <joint name="ankley_right" type="revolute">
+    <origin xyz="-0.221803 -0.135659 0.02" rpy="-3.14159 -6.73195e-15 1.16452"/>
+    <parent link="shin_subassembly"/>
+    <child link="ankle_subassembly"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
+  </joint>
+  <!-- Joint from tigh_subassembly to shin_subassembly -->
+  <joint name="knee_right" type="revolute">
+    <origin xyz="0.17 0.294449 -0.0305" rpy="3.14159 -1.53592e-13 -0.544439"/>
+    <parent link="tigh_subassembly"/>
+    <child link="shin_subassembly"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
+  </joint>
+  <!-- Joint from hipy_subassembly to tigh_subassembly -->
+  <joint name="hipy_right" type="revolute">
+    <origin xyz="0.012638 -0.0276823 -0.112055" rpy="-1.64549 0.446566 -2.74613"/>
+    <parent link="hipy_subassembly"/>
+    <child link="tigh_subassembly"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
+  </joint>
+  <!-- Joint from hipx_subassembly to hipy_subassembly -->
+  <joint name="hipx_right" type="revolute">
+    <origin xyz="-0.01897 -0.0289 -0.09689" rpy="-0.0593605 0.3145 -2.3413"/>
+    <parent link="hipx_subassembly"/>
+    <child link="hipy_subassembly"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
+  </joint>
+  <!-- Joint from torso_subassembly to hipx_subassembly -->
+  <joint name="hipz_right" type="revolute">
+    <origin xyz="-0.000819037 -0.133159 0.04164" rpy="0.0475276 0.133035 -1.20169"/>
+    <parent link="torso_subassembly"/>
+    <child link="hipx_subassembly"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
+  </joint>
+  <!-- Link hipx_subassemby_sym -->
+  <link name="hipx_subassemby_sym">
+    <inertial>
+      <origin xyz="-0.0179432 0.0274245 -0.0837272" rpy="0 0 0"/>
+      <mass value="0.794016"/>
+      <inertia ixx="0.00093784" ixy="4.40289e-05" ixz="-0.000110464" iyy="0.000903443" iyz="0.000168604" izz="0.00100402"/>
+    </inertial>
+    <!-- Part rs02_2 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_40__14321d45d56569246e7feb4574a6bae6_15 -->
+    <!-- Part robstride02_2 -->
+    <visual>
+      <origin xyz="-0.575896 0.057308 -0.20175" rpy="-1.84488 -0.167023 0.0467087"/>
+      <geometry>
+        <mesh filename="package://assets/robstride02.stl"/>
+      </geometry>
+      <material name="robstride02_2_material">
+        <color rgba="0.301961 0.301961 0.301961 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.575896 0.057308 -0.20175" rpy="-1.84488 -0.167023 0.0467087"/>
+      <geometry>
+        <mesh filename="package://assets/robstride02.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_28 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_29 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_30 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_31 -->
+    <!-- Part hipz22_sym -->
+    <visual>
+      <origin xyz="2.77556e-17 1.38778e-17 0.1" rpy="-1.05331e-18 -4.68297e-19 -1.631e-17"/>
+      <geometry>
+        <mesh filename="package://assets/hipz22_sym.stl"/>
+      </geometry>
+      <material name="hipz22_sym_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="2.77556e-17 1.38778e-17 0.1" rpy="-1.05331e-18 -4.68297e-19 -1.631e-17"/>
+      <geometry>
+        <mesh filename="package://assets/hipz22_sym.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_40__14321d45d56569246e7feb4574a6bae6_16 -->
+    <!-- Part hipz12_sym -->
+    <visual>
+      <origin xyz="2.22045e-16 0 0.1" rpy="6.16608e-16 2.7011e-17 1.51592e-16"/>
+      <geometry>
+        <mesh filename="package://assets/hipz12_sym.stl"/>
+      </geometry>
+      <material name="hipz12_sym_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="2.22045e-16 0 0.1" rpy="6.16608e-16 2.7011e-17 1.51592e-16"/>
+      <geometry>
+        <mesh filename="package://assets/hipz12_sym.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part xt_30_2x2_f_5 -->
+    <visual>
+      <origin xyz="-0.0280156 0.0769561 -0.0718124" rpy="-0.490825 -1.25093 2.15149"/>
+      <geometry>
+        <mesh filename="package://assets/xt_30_2x2_f.stl"/>
+      </geometry>
+      <material name="xt_30_2x2_f_5_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.0280156 0.0769561 -0.0718124" rpy="-0.490825 -1.25093 2.15149"/>
+      <geometry>
+        <mesh filename="package://assets/xt_30_2x2_f.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_32 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_33 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_34 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_40__14321d45d56569246e7feb4574a6bae6_17 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_35 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_40__14321d45d56569246e7feb4574a6bae6_18 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_40__14321d45d56569246e7feb4574a6bae6_19 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_40__14321d45d56569246e7feb4574a6bae6_20 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_36 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_40__14321d45d56569246e7feb4574a6bae6_21 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_37 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_38 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_40__14321d45d56569246e7feb4574a6bae6_22 -->
+    <!-- Part bearing_35_72_17_4 -->
+    <visual>
+      <origin xyz="-0.01759 0.0267968 -0.104484" rpy="1.29671 -0.167023 0.0467087"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_35_72_17.stl"/>
+      </geometry>
+      <material name="bearing_35_72_17_4_material">
+        <color rgba="0.768627 0.886275 0.952941 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.01759 0.0267968 -0.104484" rpy="1.29671 -0.167023 0.0467087"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_35_72_17.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_39 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_40__14321d45d56569246e7feb4574a6bae6_23 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_40 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_41 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_40__14321d45d56569246e7feb4574a6bae6_24 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_42 -->
+  </link>
+  <!-- Link hipy_subassembly_sym -->
+  <link name="hipy_subassembly_sym">
+    <inertial>
+      <origin xyz="0.0047654 0.00266393 -0.0607296" rpy="0 0 0"/>
+      <mass value="0.241619"/>
+      <inertia ixx="0.000504046" ixy="-2.43365e-05" ixz="7.8493e-06" iyy="0.000455768" iyz="3.61482e-05" izz="0.000428972"/>
+    </inertial>
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_12__c825518ee8edf1afced0eee1b019b750_11 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_12__c825518ee8edf1afced0eee1b019b750_12 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_12__c825518ee8edf1afced0eee1b019b750_13 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_12__c825518ee8edf1afced0eee1b019b750_14 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_20__832e47d784177ea3f1dabbaab534416e_23 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_20__832e47d784177ea3f1dabbaab534416e_24 -->
+    <!-- Part hipxy_sym -->
+    <visual>
+      <origin xyz="-1.30104e-18 0 0" rpy="3.14159 -4.67642e-17 -6.93155e-17"/>
+      <geometry>
+        <mesh filename="package://assets/hipxy_sym.stl"/>
+      </geometry>
+      <material name="hipxy_sym_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-1.30104e-18 0 0" rpy="3.14159 -4.67642e-17 -6.93155e-17"/>
+      <geometry>
+        <mesh filename="package://assets/hipxy_sym.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_12__c825518ee8edf1afced0eee1b019b750_15 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_20__832e47d784177ea3f1dabbaab534416e_25 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_12__c825518ee8edf1afced0eee1b019b750_16 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_20__832e47d784177ea3f1dabbaab534416e_26 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_20__832e47d784177ea3f1dabbaab534416e_27 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_20__832e47d784177ea3f1dabbaab534416e_28 -->
+  </link>
+  <!-- Link tigh_subassembly_sym -->
+  <link name="tigh_subassembly_sym">
+    <inertial>
+      <origin xyz="-0.0431321 -0.0830741 -0.0353867" rpy="0 0 0"/>
+      <mass value="2.5804"/>
+      <inertia ixx="0.0180602" ixy="-0.00802639" ixz="-0.00087206" iyy="0.00826187" iyz="-0.00158484" izz="0.0238429"/>
+    </inertial>
+    <!-- Part knee_rod22_sym -->
+    <visual>
+      <origin xyz="-0.058 -0.280519 0.0295" rpy="-1.5708 7.85393e-15 -4.8024e-15"/>
+      <geometry>
+        <mesh filename="package://assets/knee_rod22_sym.stl"/>
+      </geometry>
+      <material name="knee_rod22_sym_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.058 -0.280519 0.0295" rpy="-1.5708 7.85393e-15 -4.8024e-15"/>
+      <geometry>
+        <mesh filename="package://assets/knee_rod22_sym.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_16__8d628c0d7a90368385b1c4c7479647eb_7 -->
+    <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232_16 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_8__a416dc2a8d778a4ef6150c0739aa89d1_15 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_8__a416dc2a8d778a4ef6150c0739aa89d1_16 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_8__a416dc2a8d778a4ef6150c0739aa89d1_17 -->
+    <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232_17 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_16__8d628c0d7a90368385b1c4c7479647eb_8 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_40__14321d45d56569246e7feb4574a6bae6_25 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_8__a416dc2a8d778a4ef6150c0739aa89d1_18 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_8__a416dc2a8d778a4ef6150c0739aa89d1_19 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_8__a416dc2a8d778a4ef6150c0739aa89d1_20 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_16__8d628c0d7a90368385b1c4c7479647eb_9 -->
+    <!-- Part bearing_15_21_4_8 -->
+    <visual>
+      <origin xyz="-0.221927 -0.268257 -0.0185" rpy="-1.5708 -3.39596e-14 1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_15_21_4.stl"/>
+      </geometry>
+      <material name="bearing_15_21_4_8_material">
+        <color rgba="0.647059 0.647059 0.647059 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.221927 -0.268257 -0.0185" rpy="-1.5708 -3.39596e-14 1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_15_21_4.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part part_3_4 -->
+    <visual>
+      <origin xyz="-2.59515e-15 5.00988e-15 -0.0938" rpy="0.523599 1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/part_3.stl"/>
+      </geometry>
+      <material name="part_3_4_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-2.59515e-15 5.00988e-15 -0.0938" rpy="0.523599 1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/part_3.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part bearing_15_21_4_9 -->
+    <visual>
+      <origin xyz="-0.102915 -0.0784891 -0.0245" rpy="-1.5708 7.8548e-15 -4.73334e-15"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_15_21_4.stl"/>
+      </geometry>
+      <material name="bearing_15_21_4_9_material">
+        <color rgba="0.647059 0.647059 0.647059 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.102915 -0.0784891 -0.0245" rpy="-1.5708 7.8548e-15 -4.73334e-15"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_15_21_4.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_40__14321d45d56569246e7feb4574a6bae6_26 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_8__a416dc2a8d778a4ef6150c0739aa89d1_21 -->
+    <!-- Part bearing_15_21_4_10 -->
+    <visual>
+      <origin xyz="-3.02536e-15 3.48332e-15 -0.0675" rpy="-1.5708 -1.49311e-14 2.61799"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_15_21_4.stl"/>
+      </geometry>
+      <material name="bearing_15_21_4_10_material">
+        <color rgba="0.647059 0.647059 0.647059 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-3.02536e-15 3.48332e-15 -0.0675" rpy="-1.5708 -1.49311e-14 2.61799"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_15_21_4.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part bearing_15_21_4_11 -->
+    <visual>
+      <origin xyz="-0.102915 -0.0784891 -0.0365" rpy="1.5708 7.85393e-15 -4.8024e-15"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_15_21_4.stl"/>
+      </geometry>
+      <material name="bearing_15_21_4_11_material">
+        <color rgba="0.647059 0.647059 0.647059 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.102915 -0.0784891 -0.0365" rpy="1.5708 7.85393e-15 -4.8024e-15"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_15_21_4.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part bearing_15_21_4_12 -->
+    <visual>
+      <origin xyz="-0.221927 -0.268257 -0.0465" rpy="-1.5708 -3.33591e-14 1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_15_21_4.stl"/>
+      </geometry>
+      <material name="bearing_15_21_4_12_material">
+        <color rgba="0.647059 0.647059 0.647059 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.221927 -0.268257 -0.0465" rpy="-1.5708 -3.33591e-14 1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_15_21_4.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232_18 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_16__8d628c0d7a90368385b1c4c7479647eb_10 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_8__a416dc2a8d778a4ef6150c0739aa89d1_22 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_40__14321d45d56569246e7feb4574a6bae6_27 -->
+    <!-- Part femur_12_sym -->
+    <visual>
+      <origin xyz="-0.17 -0.294449 0.0295" rpy="-1.5708 1.49582e-14 -0.523599"/>
+      <geometry>
+        <mesh filename="package://assets/femur_12_sym.stl"/>
+      </geometry>
+      <material name="femur_12_sym_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.17 -0.294449 0.0295" rpy="-1.5708 1.49582e-14 -0.523599"/>
+      <geometry>
+        <mesh filename="package://assets/femur_12_sym.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part bearing_5_16_5_5 -->
+    <visual>
+      <origin xyz="-0.17 -0.294449 -0.045" rpy="1.5708 -1.51756e-14 2.61799"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_5_16_5.stl"/>
+      </geometry>
+      <material name="bearing_5_16_5_5_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.17 -0.294449 -0.045" rpy="1.5708 -1.51756e-14 2.61799"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_5_16_5.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_28 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_40__14321d45d56569246e7feb4574a6bae6_28 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_16__8d628c0d7a90368385b1c4c7479647eb_11 -->
+    <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232_19 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_8__a416dc2a8d778a4ef6150c0739aa89d1_23 -->
+    <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232_20 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_16__8d628c0d7a90368385b1c4c7479647eb_12 -->
+    <!-- Part knee_actuation_2 -->
+    <visual>
+      <origin xyz="-0.058 0.123541 -0.0305" rpy="1.5708 7.84979e-15 -4.37485e-15"/>
+      <geometry>
+        <mesh filename="package://assets/knee_actuation.stl"/>
+      </geometry>
+      <material name="knee_actuation_2_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.058 0.123541 -0.0305" rpy="1.5708 7.84979e-15 -4.37485e-15"/>
+      <geometry>
+        <mesh filename="package://assets/knee_actuation.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part femur_22_sym -->
+    <visual>
+      <origin xyz="-0.17 -0.294449 0.0295" rpy="-1.5708 1.4959e-14 -0.523599"/>
+      <geometry>
+        <mesh filename="package://assets/femur_22_sym.stl"/>
+      </geometry>
+      <material name="femur_22_sym_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.17 -0.294449 0.0295" rpy="-1.5708 1.4959e-14 -0.523599"/>
+      <geometry>
+        <mesh filename="package://assets/femur_22_sym.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hat_femur_2 -->
+    <visual>
+      <origin xyz="-0.17 -0.294449 -0.0305" rpy="1.5708 -1.51756e-14 2.61799"/>
+      <geometry>
+        <mesh filename="package://assets/hat_femur.stl"/>
+      </geometry>
+      <material name="hat_femur_2_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.17 -0.294449 -0.0305" rpy="1.5708 -1.51756e-14 2.61799"/>
+      <geometry>
+        <mesh filename="package://assets/hat_femur.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_8__a416dc2a8d778a4ef6150c0739aa89d1_24 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_29 -->
+    <!-- Part bearing_5_16_5_6 -->
+    <visual>
+      <origin xyz="-0.17 -0.294449 -0.013" rpy="-1.5708 -1.31012e-14 2.61799"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_5_16_5.stl"/>
+      </geometry>
+      <material name="bearing_5_16_5_6_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.17 -0.294449 -0.013" rpy="-1.5708 -1.31012e-14 2.61799"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_5_16_5.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part robstrideo3_3 -->
+    <visual>
+      <origin xyz="0.655402 -0.194111 -0.0025" rpy="1.5708 -1.53968e-14 2.61799"/>
+      <geometry>
+        <mesh filename="package://assets/robstrideo3.stl"/>
+      </geometry>
+      <material name="robstrideo3_3_material">
+        <color rgba="0.301961 0.301961 0.301961 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.655402 -0.194111 -0.0025" rpy="1.5708 -1.53968e-14 2.61799"/>
+      <geometry>
+        <mesh filename="package://assets/robstrideo3.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_8__a416dc2a8d778a4ef6150c0739aa89d1_25 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_8__a416dc2a8d778a4ef6150c0739aa89d1_26 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_8__a416dc2a8d778a4ef6150c0739aa89d1_27 -->
+    <!-- Part knee_rod12_sym -->
+    <visual>
+      <origin xyz="-0.058 -0.280519 0.0295" rpy="-1.5708 7.85373e-15 -4.93885e-15"/>
+      <geometry>
+        <mesh filename="package://assets/knee_rod12_sym.stl"/>
+      </geometry>
+      <material name="knee_rod12_sym_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.058 -0.280519 0.0295" rpy="-1.5708 7.85373e-15 -4.93885e-15"/>
+      <geometry>
+        <mesh filename="package://assets/knee_rod12_sym.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_30 -->
+    <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232_21 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_8__a416dc2a8d778a4ef6150c0739aa89d1_28 -->
+    <!-- Part robstrideo3_4 -->
+    <visual>
+      <origin xyz="0.597402 -0.29457 -0.045" rpy="1.5708 -1.53968e-14 2.61799"/>
+      <geometry>
+        <mesh filename="package://assets/robstrideo3.stl"/>
+      </geometry>
+      <material name="robstrideo3_4_material">
+        <color rgba="0.301961 0.301961 0.301961 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.597402 -0.29457 -0.045" rpy="1.5708 -1.53968e-14 2.61799"/>
+      <geometry>
+        <mesh filename="package://assets/robstrideo3.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 1_1_31_qt_942_1_3 -->
+    <visual>
+      <origin xyz="-4.02456e-15 2.31759e-15 -0.04" rpy="3.74941e-14 2.49057e-14 -2.0944"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_31_qt_942_1.stl"/>
+      </geometry>
+      <material name="1_1_31_qt_942_1_3_material">
+        <color rgba="0.768627 0.886275 0.952941 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-4.02456e-15 2.31759e-15 -0.04" rpy="3.74941e-14 2.49057e-14 -2.0944"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_31_qt_942_1.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 1_1_06_eb903_538_1_3 -->
+    <visual>
+      <origin xyz="-3.60822e-15 3.4972e-15 -0.0566" rpy="3.74941e-14 2.49057e-14 -2.0944"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_06_eb903_538_1.stl"/>
+      </geometry>
+      <material name="1_1_06_eb903_538_1_3_material">
+        <color rgba="0.498039 0.498039 0.498039 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-3.60822e-15 3.4972e-15 -0.0566" rpy="3.74941e-14 2.49057e-14 -2.0944"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_06_eb903_538_1.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 1_1_31_qt_942_1_4 -->
+    <visual>
+      <origin xyz="-0.058 -0.100459 -0.0825" rpy="3.39166e-13 -2.07618e-14 -0.523599"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_31_qt_942_1.stl"/>
+      </geometry>
+      <material name="1_1_31_qt_942_1_4_material">
+        <color rgba="0.768627 0.886275 0.952941 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.058 -0.100459 -0.0825" rpy="3.39166e-13 -2.07618e-14 -0.523599"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_31_qt_942_1.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 1_1_06_eb903_538_1_4 -->
+    <visual>
+      <origin xyz="-0.058 -0.100459 -0.0991" rpy="3.39166e-13 -2.07618e-14 -0.523599"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_06_eb903_538_1.stl"/>
+      </geometry>
+      <material name="1_1_06_eb903_538_1_4_material">
+        <color rgba="0.498039 0.498039 0.498039 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.058 -0.100459 -0.0991" rpy="3.39166e-13 -2.07618e-14 -0.523599"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_06_eb903_538_1.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 1_1_06_eb903_537_af0_1_3 -->
+    <visual>
+      <origin xyz="-3.45557e-15 1.7486e-15 -0.0375" rpy="5.94232e-14 1.496e-14 -0.523599"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_06_eb903_537_af0_1.stl"/>
+      </geometry>
+      <material name="1_1_06_eb903_537_af0_1_3_material">
+        <color rgba="0.768627 0.886275 0.952941 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-3.45557e-15 1.7486e-15 -0.0375" rpy="5.94232e-14 1.496e-14 -0.523599"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_06_eb903_537_af0_1.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 1_1_02_eb901_558_1_3 -->
+    <visual>
+      <origin xyz="-1.38778e-17 1.38778e-17 1.38778e-17" rpy="3.14159 7.21184e-19 -5.81e-17"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_02_eb901_558_1.stl"/>
+      </geometry>
+      <material name="1_1_02_eb901_558_1_3_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-1.38778e-17 1.38778e-17 1.38778e-17" rpy="3.14159 7.21184e-19 -5.81e-17"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_02_eb901_558_1.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 1_1_06_eb903_537_af0_1_4 -->
+    <visual>
+      <origin xyz="-0.058 -0.100459 -0.08" rpy="1.46265e-14 -5.95798e-14 1.0472"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_06_eb903_537_af0_1.stl"/>
+      </geometry>
+      <material name="1_1_06_eb903_537_af0_1_4_material">
+        <color rgba="0.768627 0.886275 0.952941 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.058 -0.100459 -0.08" rpy="1.46265e-14 -5.95798e-14 1.0472"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_06_eb903_537_af0_1.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 1_1_02_eb901_558_1_4 -->
+    <visual>
+      <origin xyz="-0.058 -0.100459 -0.0425" rpy="-3.14159 -3.39623e-14 1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_02_eb901_558_1.stl"/>
+      </geometry>
+      <material name="1_1_02_eb901_558_1_4_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.058 -0.100459 -0.0425" rpy="-3.14159 -3.39623e-14 1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_02_eb901_558_1.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <!-- Link shin_subassembly_sym -->
+  <link name="shin_subassembly_sym">
+    <inertial>
+      <origin xyz="0.0013467 -0.0907957 -1.51262e-05" rpy="0 0 0"/>
+      <mass value="0.593266"/>
+      <inertia ixx="0.00173784" ixy="-5.59428e-05" ixz="2.83049e-06" iyy="0.000242541" iyz="9.49157e-05" izz="0.00176007"/>
+    </inertial>
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_20__7252065e4445f5ec71347b53fcae11e4_13 -->
+    <!-- Part xt_30_2x2_f_6 -->
+    <visual>
+      <origin xyz="0.0212074 -0.0322876 0.0147" rpy="2.35619 1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/xt_30_2x2_f.stl"/>
+      </geometry>
+      <material name="xt_30_2x2_f_6_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.0212074 -0.0322876 0.0147" rpy="2.35619 1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/xt_30_2x2_f.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_20__7252065e4445f5ec71347b53fcae11e4_14 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_20__7252065e4445f5ec71347b53fcae11e4_15 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_31 -->
+    <!-- Part 27628_01_050_catpart_5 -->
+    <visual>
+      <origin xyz="0.0300907 -0.0130682 -0.0195" rpy="1.5708 2.8773e-14 0.721397"/>
+      <geometry>
+        <mesh filename="package://assets/27628_01_050_catpart.stl"/>
+      </geometry>
+      <material name="27628_01_050_catpart_5_material">
+        <color rgba="0.690196 0.690196 0.690196 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.0300907 -0.0130682 -0.0195" rpy="1.5708 2.8773e-14 0.721397"/>
+      <geometry>
+        <mesh filename="package://assets/27628_01_050_catpart.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_20__7252065e4445f5ec71347b53fcae11e4_16 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_30__cb22dc4460edbee8e1cbddf29677c00f_2 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_32 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_33 -->
+    <!-- Part 07534_05x40_catpart_3 -->
+    <visual>
+      <origin xyz="0 0 -0.025" rpy="-1.5708 -1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/07534_05x40_catpart.stl"/>
+      </geometry>
+      <material name="07534_05x40_catpart_3_material">
+        <color rgba="0.690196 0.690196 0.690196 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 -0.025" rpy="-1.5708 -1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/07534_05x40_catpart.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_34 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_35 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_36 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_37 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_20__7252065e4445f5ec71347b53fcae11e4_17 -->
+    <!-- Part 07534_05x20_catpart_5 -->
+    <visual>
+      <origin xyz="0.0300908 -0.0660682 0.0405" rpy="-0.925025 1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/07534_05x20_catpart.stl"/>
+      </geometry>
+      <material name="07534_05x20_catpart_5_material">
+        <color rgba="0.690196 0.690196 0.690196 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.0300908 -0.0660682 0.0405" rpy="-0.925025 1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/07534_05x20_catpart.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part tibias12_sym -->
+    <visual>
+      <origin xyz="-2.77556e-16 -0.26 0.067" rpy="-1.5708 -3.93955e-16 4.38885e-16"/>
+      <geometry>
+        <mesh filename="package://assets/tibias12_sym.stl"/>
+      </geometry>
+      <material name="tibias12_sym_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-2.77556e-16 -0.26 0.067" rpy="-1.5708 -3.93955e-16 4.38885e-16"/>
+      <geometry>
+        <mesh filename="package://assets/tibias12_sym.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_8__dec2226ceabd7d7ca0bb403ec234d89b_4 -->
+    <!-- Part actuation_ankle_3 -->
+    <visual>
+      <origin xyz="0.12299 -0.14568 0.0195" rpy="-1.5708 5.46345e-14 0.925025"/>
+      <geometry>
+        <mesh filename="package://assets/actuation_ankle.stl"/>
+      </geometry>
+      <material name="actuation_ankle_3_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.12299 -0.14568 0.0195" rpy="-1.5708 5.46345e-14 0.925025"/>
+      <geometry>
+        <mesh filename="package://assets/actuation_ankle.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_20__7252065e4445f5ec71347b53fcae11e4_18 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_38 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_39 -->
+    <!-- Part hex_thin_nut_grade_a___b_m4x0_7__a8228d9ce5dcc05f24da0a2f74d882f3_5 -->
+    <visual>
+      <origin xyz="0.0300908 -0.0660682 0.0129398" rpy="3.14159 4.29999e-16 2.49582"/>
+      <geometry>
+        <mesh filename="package://assets/hex_thin_nut_grade_a___b_m4x0_7__a8228d9ce5dcc05f24da0a2f74d882f3.stl"/>
+      </geometry>
+      <material name="hex_thin_nut_grade_a___b_m4x0_7__a8228d9ce5dcc05f24da0a2f74d882f3_5_material">
+        <color rgba="0.603922 0.647059 0.686275 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.0300908 -0.0660682 0.0129398" rpy="3.14159 4.29999e-16 2.49582"/>
+      <geometry>
+        <mesh filename="package://assets/hex_thin_nut_grade_a___b_m4x0_7__a8228d9ce5dcc05f24da0a2f74d882f3.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_40 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_20__7252065e4445f5ec71347b53fcae11e4_19 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_20__7252065e4445f5ec71347b53fcae11e4_20 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_41 -->
+    <!-- Part rmdx43_3 -->
+    <visual>
+      <origin xyz="0.470217 -0.113201 -0.006" rpy="-1.5708 3.47015e-16 -3.14159"/>
+      <geometry>
+        <mesh filename="package://assets/rmdx43.stl"/>
+      </geometry>
+      <material name="rmdx43_3_material">
+        <color rgba="0.301961 0.301961 0.301961 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.470217 -0.113201 -0.006" rpy="-1.5708 3.47015e-16 -3.14159"/>
+      <geometry>
+        <mesh filename="package://assets/rmdx43.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_8__dec2226ceabd7d7ca0bb403ec234d89b_5 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_12__c825518ee8edf1afced0eee1b019b750_17 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_20__7252065e4445f5ec71347b53fcae11e4_21 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_12__c825518ee8edf1afced0eee1b019b750_18 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_42 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_43 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_44 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_12__c825518ee8edf1afced0eee1b019b750_19 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_20__7252065e4445f5ec71347b53fcae11e4_22 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_45 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_46 -->
+    <!-- Part 07534_05x20_catpart_6 -->
+    <visual>
+      <origin xyz="0.0300908 -0.0130682 -0.0405" rpy="0.925025 -1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/07534_05x20_catpart.stl"/>
+      </geometry>
+      <material name="07534_05x20_catpart_6_material">
+        <color rgba="0.690196 0.690196 0.690196 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.0300908 -0.0130682 -0.0405" rpy="0.925025 -1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/07534_05x20_catpart.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part rmdx43_4 -->
+    <visual>
+      <origin xyz="0.470217 -0.0457991 0.006" rpy="1.5708 -1.6537e-15 -3.14159"/>
+      <geometry>
+        <mesh filename="package://assets/rmdx43.stl"/>
+      </geometry>
+      <material name="rmdx43_4_material">
+        <color rgba="0.301961 0.301961 0.301961 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.470217 -0.0457991 0.006" rpy="1.5708 -1.6537e-15 -3.14159"/>
+      <geometry>
+        <mesh filename="package://assets/rmdx43.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part tibias22_sym -->
+    <visual>
+      <origin xyz="-6.66134e-16 -0.26 0.067" rpy="-1.5708 -3.81138e-16 6.46186e-16"/>
+      <geometry>
+        <mesh filename="package://assets/tibias22_sym.stl"/>
+      </geometry>
+      <material name="tibias22_sym_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-6.66134e-16 -0.26 0.067" rpy="-1.5708 -3.81138e-16 6.46186e-16"/>
+      <geometry>
+        <mesh filename="package://assets/tibias22_sym.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_20__7252065e4445f5ec71347b53fcae11e4_23 -->
+    <!-- Part hex_socket_head_cap_screw_m4x0_70_x_12__c825518ee8edf1afced0eee1b019b750_20 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_47 -->
+    <!-- Part xt_30_2x2_f_7 -->
+    <visual>
+      <origin xyz="0.0212074 -0.126712 -0.015" rpy="-0.785398 -1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/xt_30_2x2_f.stl"/>
+      </geometry>
+      <material name="xt_30_2x2_f_7_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.0212074 -0.126712 -0.015" rpy="-0.785398 -1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/xt_30_2x2_f.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_thin_nut_grade_a___b_m4x0_7__a8228d9ce5dcc05f24da0a2f74d882f3_6 -->
+    <visual>
+      <origin xyz="0 0 0.0247602" rpy="-3.14159 2.85987e-15 3.14159"/>
+      <geometry>
+        <mesh filename="package://assets/hex_thin_nut_grade_a___b_m4x0_7__a8228d9ce5dcc05f24da0a2f74d882f3.stl"/>
+      </geometry>
+      <material name="hex_thin_nut_grade_a___b_m4x0_7__a8228d9ce5dcc05f24da0a2f74d882f3_6_material">
+        <color rgba="0.603922 0.647059 0.686275 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.0247602" rpy="-3.14159 2.85987e-15 3.14159"/>
+      <geometry>
+        <mesh filename="package://assets/hex_thin_nut_grade_a___b_m4x0_7__a8228d9ce5dcc05f24da0a2f74d882f3.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_48 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_49 -->
+    <!-- Part actuation_ankle_4 -->
+    <visual>
+      <origin xyz="-0.12299 -0.0133205 -0.0195" rpy="1.5708 -1.01729e-14 0.925025"/>
+      <geometry>
+        <mesh filename="package://assets/actuation_ankle.stl"/>
+      </geometry>
+      <material name="actuation_ankle_4_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.12299 -0.0133205 -0.0195" rpy="1.5708 -1.01729e-14 0.925025"/>
+      <geometry>
+        <mesh filename="package://assets/actuation_ankle.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_50 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_51 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_52 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_53 -->
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_20__7252065e4445f5ec71347b53fcae11e4_24 -->
+    <!-- Part hat_big_2 -->
+    <visual>
+      <origin xyz="-3.88578e-16 -0.26 -0.019" rpy="1.5708 1.49367e-15 -3.14159"/>
+      <geometry>
+        <mesh filename="package://assets/hat_big.stl"/>
+      </geometry>
+      <material name="hat_big_2_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-3.88578e-16 -0.26 -0.019" rpy="1.5708 1.49367e-15 -3.14159"/>
+      <geometry>
+        <mesh filename="package://assets/hat_big.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_8__dec2226ceabd7d7ca0bb403ec234d89b_6 -->
+    <!-- Part 27628_01_050_catpart_6 -->
+    <visual>
+      <origin xyz="0.0300907 -0.066068 0.0225" rpy="1.5708 2.28082e-16 3.05529"/>
+      <geometry>
+        <mesh filename="package://assets/27628_01_050_catpart.stl"/>
+      </geometry>
+      <material name="27628_01_050_catpart_6_material">
+        <color rgba="0.690196 0.690196 0.690196 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.0300907 -0.066068 0.0225" rpy="1.5708 2.28082e-16 3.05529"/>
+      <geometry>
+        <mesh filename="package://assets/27628_01_050_catpart.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150_54 -->
+    <!-- Part hex_thin_nut_grade_a___b_m4x0_7__a8228d9ce5dcc05f24da0a2f74d882f3_7 -->
+    <visual>
+      <origin xyz="0.0300908 -0.0130682 -0.0129398" rpy="5.50943e-14 1.97698e-14 2.49582"/>
+      <geometry>
+        <mesh filename="package://assets/hex_thin_nut_grade_a___b_m4x0_7__a8228d9ce5dcc05f24da0a2f74d882f3.stl"/>
+      </geometry>
+      <material name="hex_thin_nut_grade_a___b_m4x0_7__a8228d9ce5dcc05f24da0a2f74d882f3_7_material">
+        <color rgba="0.603922 0.647059 0.686275 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.0300908 -0.0130682 -0.0129398" rpy="5.50943e-14 1.97698e-14 2.49582"/>
+      <geometry>
+        <mesh filename="package://assets/hex_thin_nut_grade_a___b_m4x0_7__a8228d9ce5dcc05f24da0a2f74d882f3.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 1_1_31_eb463_510_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_3 -->
+    <visual>
+      <origin xyz="-2.9976e-15 -0.106 0.019" rpy="1.2576e-13 1.1856e-13 2.74889"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_31_eb463_510_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+      <material name="1_1_31_eb463_510_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_3_material">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-2.9976e-15 -0.106 0.019" rpy="1.2576e-13 1.1856e-13 2.74889"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_31_eb463_510_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 1_1_02_eb461_502_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_3 -->
+    <visual>
+      <origin xyz="-2.72005e-15 -0.106 0.009" rpy="1.2576e-13 1.1856e-13 2.74889"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_02_eb461_502_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+      <material name="1_1_02_eb461_502_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_3_material">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-2.72005e-15 -0.106 0.009" rpy="1.2576e-13 1.1856e-13 2.74889"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_02_eb461_502_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 1_1_06_eb463_509_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_3 -->
+    <visual>
+      <origin xyz="-1.66533e-16 -0.106 -0.0225" rpy="8.85586e-16 -1.53096e-16 1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_06_eb463_509_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+      <material name="1_1_06_eb463_509_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_3_material">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-1.66533e-16 -0.106 -0.0225" rpy="8.85586e-16 -1.53096e-16 1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_06_eb463_509_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 1_1_06_eb463_507_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_3 -->
+    <visual>
+      <origin xyz="-5.55112e-16 -0.106 -0.009" rpy="7.24142e-14 1.33677e-13 2.35619"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_06_eb463_507_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+      <material name="1_1_06_eb463_507_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_3_material">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-5.55112e-16 -0.106 -0.009" rpy="7.24142e-14 1.33677e-13 2.35619"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_06_eb463_507_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 1_1_31_eb463_510_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_4 -->
+    <visual>
+      <origin xyz="-1.11022e-16 -0.053 -0.019" rpy="-3.14159 -7.15126e-14 -2.74889"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_31_eb463_510_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+      <material name="1_1_31_eb463_510_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_4_material">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-1.11022e-16 -0.053 -0.019" rpy="-3.14159 -7.15126e-14 -2.74889"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_31_eb463_510_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 1_1_02_eb461_502_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_4 -->
+    <visual>
+      <origin xyz="1.55431e-15 -0.053 -0.009" rpy="-3.14159 -7.15126e-14 -2.74889"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_02_eb461_502_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+      <material name="1_1_02_eb461_502_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_4_material">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="1.55431e-15 -0.053 -0.009" rpy="-3.14159 -7.15126e-14 -2.74889"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_02_eb461_502_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 1_1_06_eb463_509_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_4 -->
+    <visual>
+      <origin xyz="-1.66533e-16 -0.053 0.0225" rpy="-3.14159 -2.16485e-15 -1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_06_eb463_509_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+      <material name="1_1_06_eb463_509_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_4_material">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-1.66533e-16 -0.053 0.0225" rpy="-3.14159 -2.16485e-15 -1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_06_eb463_509_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 1_1_06_eb463_507_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_4 -->
+    <visual>
+      <origin xyz="-6.10623e-16 -0.053 0.009" rpy="-3.14159 -1.58339e-13 -2.35619"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_06_eb463_507_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+      <material name="1_1_06_eb463_507_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_4_material">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-6.10623e-16 -0.053 0.009" rpy="-3.14159 -1.58339e-13 -2.35619"/>
+      <geometry>
+        <mesh filename="package://assets/1_1_06_eb463_507_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 0001755652_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_5 -->
+    <visual>
+      <origin xyz="0.00671751 -0.0992825 0.0235" rpy="3.14159 -1.33172e-13 -0.785398"/>
+      <geometry>
+        <mesh filename="package://assets/0001755652_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+      <material name="0001755652_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_5_material">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.00671751 -0.0992825 0.0235" rpy="3.14159 -1.33172e-13 -0.785398"/>
+      <geometry>
+        <mesh filename="package://assets/0001755652_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 0001755652_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_6 -->
+    <visual>
+      <origin xyz="0.00245878 -0.115176 0.0235" rpy="3.14159 -1.33172e-13 -0.785398"/>
+      <geometry>
+        <mesh filename="package://assets/0001755652_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+      <material name="0001755652_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_6_material">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.00245878 -0.115176 0.0235" rpy="3.14159 -1.33172e-13 -0.785398"/>
+      <geometry>
+        <mesh filename="package://assets/0001755652_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 0001755652_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_7 -->
+    <visual>
+      <origin xyz="0.00671751 -0.0597175 -0.0235" rpy="-2.35282e-14 5.20021e-14 0.785398"/>
+      <geometry>
+        <mesh filename="package://assets/0001755652_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+      <material name="0001755652_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_7_material">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.00671751 -0.0597175 -0.0235" rpy="-2.35282e-14 5.20021e-14 0.785398"/>
+      <geometry>
+        <mesh filename="package://assets/0001755652_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 0001755652_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_8 -->
+    <visual>
+      <origin xyz="0.00245878 -0.0438237 -0.0235" rpy="-2.35282e-14 5.20021e-14 0.785398"/>
+      <geometry>
+        <mesh filename="package://assets/0001755652_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+      <material name="0001755652_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_8_material">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.00245878 -0.0438237 -0.0235" rpy="-2.35282e-14 5.20021e-14 0.785398"/>
+      <geometry>
+        <mesh filename="package://assets/0001755652_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 0001755652_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_3 -->
+    <visual>
+      <origin xyz="-0.0091763 -0.103541 0.0235" rpy="3.14159 -1.33172e-13 -0.785398"/>
+      <geometry>
+        <mesh filename="package://assets/0001755652_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+      <material name="0001755652_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_3_material">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.0091763 -0.103541 0.0235" rpy="3.14159 -1.33172e-13 -0.785398"/>
+      <geometry>
+        <mesh filename="package://assets/0001755652_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 6706__300001_1_1_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_3 -->
+    <visual>
+      <origin xyz="-2.9976e-15 -0.106 0.02" rpy="3.14159 -1.33172e-13 -0.785398"/>
+      <geometry>
+        <mesh filename="package://assets/6706__300001_1_1_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+      <material name="6706__300001_1_1_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_3_material">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-2.9976e-15 -0.106 0.02" rpy="3.14159 -1.33172e-13 -0.785398"/>
+      <geometry>
+        <mesh filename="package://assets/6706__300001_1_1_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 0001755650_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_3 -->
+    <visual>
+      <origin xyz="-3.16414e-15 -0.106 0.0204" rpy="3.14159 -1.33172e-13 -0.785398"/>
+      <geometry>
+        <mesh filename="package://assets/0001755650_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+      <material name="0001755650_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_3_material">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-3.16414e-15 -0.106 0.0204" rpy="3.14159 -1.33172e-13 -0.785398"/>
+      <geometry>
+        <mesh filename="package://assets/0001755650_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 0001755652_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_4 -->
+    <visual>
+      <origin xyz="-0.0091763 -0.0554588 -0.0235" rpy="-2.35282e-14 5.20021e-14 0.785398"/>
+      <geometry>
+        <mesh filename="package://assets/0001755652_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+      <material name="0001755652_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_4_material">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.0091763 -0.0554588 -0.0235" rpy="-2.35282e-14 5.20021e-14 0.785398"/>
+      <geometry>
+        <mesh filename="package://assets/0001755652_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 6706__300001_1_1_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_4 -->
+    <visual>
+      <origin xyz="9.4369e-16 -0.053 -0.02" rpy="-2.35282e-14 5.20021e-14 0.785398"/>
+      <geometry>
+        <mesh filename="package://assets/6706__300001_1_1_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+      <material name="6706__300001_1_1_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_4_material">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="9.4369e-16 -0.053 -0.02" rpy="-2.35282e-14 5.20021e-14 0.785398"/>
+      <geometry>
+        <mesh filename="package://assets/6706__300001_1_1_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 0001755650_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_4 -->
+    <visual>
+      <origin xyz="5.55112e-17 -0.053 -0.0204" rpy="-2.35282e-14 5.20021e-14 0.785398"/>
+      <geometry>
+        <mesh filename="package://assets/0001755650_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+      <material name="0001755650_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de_4_material">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="5.55112e-17 -0.053 -0.0204" rpy="-2.35282e-14 5.20021e-14 0.785398"/>
+      <geometry>
+        <mesh filename="package://assets/0001755650_00mini_000_asm_1_asm_1_asm_00mini__20250103_a0001_asm_1_as_asm_1_1_30_gr_2202_asm_1_asm_1_1_30_gr_2202_asm_fl46blw10_48v_5n_m_de_2__fl46blw10_48v_5n_m_de.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <!-- Link ankle_subassembly_2 -->
+  <link name="ankle_subassembly_2">
+    <inertial>
+      <origin xyz="1.62086e-08 -0.000727483 0.02" rpy="0 0 0"/>
+      <mass value="0.0168168"/>
+      <inertia ixx="5.19458e-06" ixy="-2.61119e-12" ixz="4.35145e-12" iyy="4.86353e-06" iyz="7.24871e-13" izz="8.35665e-07"/>
+    </inertial>
+    <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232_22 -->
+    <!-- Part 07534_05x40_catpart_4 -->
+    <visual>
+      <origin xyz="-4.55191e-15 0.0249999 0.02" rpy="2.08266e-13 2.98924e-14 -1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/07534_05x40_catpart.stl"/>
+      </geometry>
+      <material name="07534_05x40_catpart_4_material">
+        <color rgba="0.690196 0.690196 0.690196 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-4.55191e-15 0.0249999 0.02" rpy="2.08266e-13 2.98924e-14 -1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/07534_05x40_catpart.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part ujoint_2 -->
+    <visual>
+      <origin xyz="-5.55112e-16 -4.66988e-15 0.02" rpy="-3.14159 -1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/ujoint.stl"/>
+      </geometry>
+      <material name="ujoint_2_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-5.55112e-16 -4.66988e-15 0.02" rpy="-3.14159 -1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/ujoint.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232_23 -->
+    <!-- Part spacer_ujoint_3 -->
+    <visual>
+      <origin xyz="4.44089e-16 -6.92502e-15 0.02" rpy="-3.14159 1.54943 -3.14159"/>
+      <geometry>
+        <mesh filename="package://assets/spacer_ujoint.stl"/>
+      </geometry>
+      <material name="spacer_ujoint_3_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="4.44089e-16 -6.92502e-15 0.02" rpy="-3.14159 1.54943 -3.14159"/>
+      <geometry>
+        <mesh filename="package://assets/spacer_ujoint.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_thin_nut_grade_a___b_m4x0_7__a8228d9ce5dcc05f24da0a2f74d882f3_8 -->
+    <visual>
+      <origin xyz="-2.23155e-14 -0.02204 0.02" rpy="1.5708 1.54943 -3.14159"/>
+      <geometry>
+        <mesh filename="package://assets/hex_thin_nut_grade_a___b_m4x0_7__a8228d9ce5dcc05f24da0a2f74d882f3.stl"/>
+      </geometry>
+      <material name="hex_thin_nut_grade_a___b_m4x0_7__a8228d9ce5dcc05f24da0a2f74d882f3_8_material">
+        <color rgba="0.603922 0.647059 0.686275 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-2.23155e-14 -0.02204 0.02" rpy="1.5708 1.54943 -3.14159"/>
+      <geometry>
+        <mesh filename="package://assets/hex_thin_nut_grade_a___b_m4x0_7__a8228d9ce5dcc05f24da0a2f74d882f3.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part part_3_5 -->
+    <visual>
+      <origin xyz="1.11022e-15 -6.13051e-15 0.0205" rpy="-3.14159 -1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/part_3.stl"/>
+      </geometry>
+      <material name="part_3_5_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="1.11022e-15 -6.13051e-15 0.0205" rpy="-3.14159 -1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/part_3.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part bearing_5_16_5_7 -->
+    <visual>
+      <origin xyz="8.77076e-15 -0.01594 0.02" rpy="3.14159 1.54943 -3.14159"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_5_16_5.stl"/>
+      </geometry>
+      <material name="bearing_5_16_5_7_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="8.77076e-15 -0.01594 0.02" rpy="3.14159 1.54943 -3.14159"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_5_16_5.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part bearing_15_21_4_13 -->
+    <visual>
+      <origin xyz="-5.55112e-16 -8.6979e-15 0.04" rpy="-1.5708 -1.32903e-15 -3.14159"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_15_21_4.stl"/>
+      </geometry>
+      <material name="bearing_15_21_4_13_material">
+        <color rgba="0.647059 0.647059 0.647059 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-5.55112e-16 -8.6979e-15 0.04" rpy="-1.5708 -1.32903e-15 -3.14159"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_15_21_4.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232_24 -->
+    <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232_25 -->
+    <!-- Part part_3_6 -->
+    <visual>
+      <origin xyz="-2.55351e-15 -2.27596e-15 0.0195" rpy="3.14159 1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/part_3.stl"/>
+      </geometry>
+      <material name="part_3_6_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-2.55351e-15 -2.27596e-15 0.0195" rpy="3.14159 1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/part_3.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232_26 -->
+    <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232_27 -->
+    <!-- Part bearing_5_16_5_8 -->
+    <visual>
+      <origin xyz="3.66374e-15 0.0209456 0.02" rpy="-4.08272e-14 -0.0146585 1.26585e-13"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_5_16_5.stl"/>
+      </geometry>
+      <material name="bearing_5_16_5_8_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="3.66374e-15 0.0209456 0.02" rpy="-4.08272e-14 -0.0146585 1.26585e-13"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_5_16_5.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part spacer_ujoint_4 -->
+    <visual>
+      <origin xyz="5.55112e-15 5.64895e-06 0.02" rpy="3.29857e-12 -1.55614 3.14159"/>
+      <geometry>
+        <mesh filename="package://assets/spacer_ujoint.stl"/>
+      </geometry>
+      <material name="spacer_ujoint_4_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="5.55112e-15 5.64895e-06 0.02" rpy="3.29857e-12 -1.55614 3.14159"/>
+      <geometry>
+        <mesh filename="package://assets/spacer_ujoint.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part bearing_15_21_4_14 -->
+    <visual>
+      <origin xyz="0 -3.46945e-18 0" rpy="1.5708 -1.114e-18 2.66755e-21"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_15_21_4.stl"/>
+      </geometry>
+      <material name="bearing_15_21_4_14_material">
+        <color rgba="0.647059 0.647059 0.647059 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 -3.46945e-18 0" rpy="1.5708 -1.114e-18 2.66755e-21"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_15_21_4.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <!-- Link foot_subassembly_2 -->
+  <link name="foot_subassembly_2">
+    <inertial>
+      <origin xyz="8.52312e-09 -0.0138418 -0.052232" rpy="0 0 0"/>
+      <mass value="0.122498"/>
+      <inertia ixx="0.000163413" ixy="-1.15065e-10" ixz="-2.96383e-11" iyy="0.000162266" iyz="1.11374e-05" izz="7.07692e-05"/>
+    </inertial>
+    <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232_28 -->
+    <!-- Part 27628_01_050_catpart_7 -->
+    <visual>
+      <origin xyz="0.021 3.53792e-08 -0.0660002" rpy="-3.14159 -7.23269e-19 1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/27628_01_050_catpart.stl"/>
+      </geometry>
+      <material name="27628_01_050_catpart_7_material">
+        <color rgba="0.690196 0.690196 0.690196 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.021 3.53792e-08 -0.0660002" rpy="-3.14159 -7.23269e-19 1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/27628_01_050_catpart.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232_29 -->
+    <!-- Part 07534_05x20_catpart_7 -->
+    <visual>
+      <origin xyz="0.036 0 -0.066" rpy="3.14159 3.03728e-20 -3.14159"/>
+      <geometry>
+        <mesh filename="package://assets/07534_05x20_catpart.stl"/>
+      </geometry>
+      <material name="07534_05x20_catpart_7_material">
+        <color rgba="0.690196 0.690196 0.690196 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.036 0 -0.066" rpy="3.14159 3.03728e-20 -3.14159"/>
+      <geometry>
+        <mesh filename="package://assets/07534_05x20_catpart.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 27628_01_050_catpart_8 -->
+    <visual>
+      <origin xyz="-0.021 -1.89504e-08 -0.066" rpy="3.14159 -1.84706e-15 1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/27628_01_050_catpart.stl"/>
+      </geometry>
+      <material name="27628_01_050_catpart_8_material">
+        <color rgba="0.690196 0.690196 0.690196 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.021 -1.89504e-08 -0.066" rpy="3.14159 -1.84706e-15 1.5708"/>
+      <geometry>
+        <mesh filename="package://assets/27628_01_050_catpart.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part 07534_05x20_catpart_8 -->
+    <visual>
+      <origin xyz="-0.036 0 -0.066" rpy="-5.73743e-19 6.90498e-20 -1.57944e-31"/>
+      <geometry>
+        <mesh filename="package://assets/07534_05x20_catpart.stl"/>
+      </geometry>
+      <material name="07534_05x20_catpart_8_material">
+        <color rgba="0.690196 0.690196 0.690196 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.036 0 -0.066" rpy="-5.73743e-19 6.90498e-20 -1.57944e-31"/>
+      <geometry>
+        <mesh filename="package://assets/07534_05x20_catpart.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hat_small_2 -->
+    <visual>
+      <origin xyz="2.08167e-16 -0.035 -0.0385" rpy="-1.5708 -1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/hat_small.stl"/>
+      </geometry>
+      <material name="hat_small_2_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="2.08167e-16 -0.035 -0.0385" rpy="-1.5708 -1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/hat_small.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232_30 -->
+    <!-- Part foot_2 -->
+    <visual>
+      <origin xyz="1.11022e-16 -0.035 -0.0385" rpy="-1.5708 -1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/foot.stl"/>
+      </geometry>
+      <material name="foot_2_material">
+        <color rgba="0.301961 0.301961 0.301961 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="1.11022e-16 -0.035 -0.0385" rpy="-1.5708 -1.5708 0"/>
+      <geometry>
+        <mesh filename="package://assets/foot.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <!-- Frame foot_left (dummy link + fixed joint) -->
+  <link name="foot_left">
+    <origin xyz="0 0 0" rpy="0 -0 0"/>
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="1e-9"/>
+      <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+    </inertial>
+  </link>
+  <joint name="foot_left_frame" type="fixed">
+    <origin xyz="-6.35351e-08 -0.035 -0.0480606" rpy="-1.5708 1.5708 0"/>
+    <parent link="foot_subassembly_2"/>
+    <child link="foot_left"/>
+    <axis xyz="0 0 0"/>
+  </joint>
+  <!-- Joint from ankle_subassembly_2 to foot_subassembly_2 -->
+  <joint name="anklex_left" type="revolute">
+    <origin xyz="8.77076e-15 -0.01594 0.02" rpy="1.5708 -1.56385 -1.68214e-13"/>
+    <parent link="ankle_subassembly_2"/>
+    <child link="foot_subassembly_2"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
+  </joint>
+  <!-- Joint from shin_subassembly_sym to ankle_subassembly_2 -->
+  <joint name="ankley_left" type="revolute">
+    <origin xyz="-4.44089e-16 -0.26 -0.02" rpy="-1.88315e-15 -1.67074e-15 -0.955182"/>
+    <parent link="shin_subassembly_sym"/>
+    <child link="ankle_subassembly_2"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
+  </joint>
+  <!-- Joint from tigh_subassembly_sym to shin_subassembly_sym -->
+  <joint name="knee_left" type="revolute">
+    <origin xyz="-0.17 -0.294449 -0.0305" rpy="2.3884e-15 -1.02851e-16 -1.52464"/>
+    <parent link="tigh_subassembly_sym"/>
+    <child link="shin_subassembly_sym"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
+  </joint>
+  <!-- Joint from hipy_subassembly_sym to tigh_subassembly_sym -->
+  <joint name="hipy_left" type="revolute">
+    <origin xyz="0.012638 0.0276823 -0.112055" rpy="1.65228 -0.597222 2.66793"/>
+    <parent link="hipy_subassembly_sym"/>
+    <child link="tigh_subassembly_sym"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
+  </joint>
+  <!-- Joint from hipx_subassemby_sym to hipy_subassembly_sym -->
+  <joint name="hipx_left" type="revolute">
+    <origin xyz="-0.01897 0.0289 -0.09689" rpy="0.0666815 0.313077 2.36501"/>
+    <parent link="hipx_subassemby_sym"/>
+    <child link="hipy_subassembly_sym"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
+  </joint>
+  <!-- Joint from torso_subassembly to hipx_subassemby_sym -->
+  <joint name="hipz_left" type="revolute">
+    <origin xyz="-0.000819037 0.13316 0.04164" rpy="-0.0497566 0.132222 1.18484"/>
+    <parent link="torso_subassembly"/>
+    <child link="hipx_subassemby_sym"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10" velocity="10" lower="-3.141592653589793" upper="3.141592653589793"/>
+  </joint>
+  <!-- Link torso_mesh -->
+  <link name="torso_mesh">
+    <inertial>
+      <origin xyz="-2.38855e-06 -1.36057e-58 -0.229519" rpy="0 0 0"/>
+      <mass value="4"/>
+      <inertia ixx="0.0564008" ixy="-2.74257e-59" ixz="-1.78695e-06" iyy="0.0460323" iyz="-9.72416e-63" izz="0.0120348"/>
+    </inertial>
+    <!-- Part torso_mesh -->
+    <visual>
+      <origin xyz="0.025 -0.503548 -0.15" rpy="3.14159 -0 5.44176e-57"/>
+      <geometry>
+        <mesh filename="package://assets/torso_mesh.stl"/>
+      </geometry>
+      <material name="torso_mesh_material">
+        <color rgba="0.301961 0.301961 0.301961 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.025 -0.503548 -0.15" rpy="3.14159 -0 5.44176e-57"/>
+      <geometry>
+        <mesh filename="package://assets/torso_mesh.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <!-- Joint from torso_subassembly to torso_mesh -->
+  <joint name="mesh" type="fixed">
+    <origin xyz="0 0 -0.1" rpy="3.14159 2.63852e-30 4.89822e-27"/>
+    <parent link="torso_subassembly"/>
+    <child link="torso_mesh"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10" velocity="10"/>
+  </joint>
+  <!-- Link torso_assembly -->
+  <link name="torso_assembly">
+    <inertial>
+      <origin xyz="0.0642483 0.0033559 -0.147734" rpy="0 0 0"/>
+      <mass value="5.3328"/>
+      <inertia ixx="0.0809488" ixy="0.00150091" ixz="-0.00814694" iyy="0.0629133" iyz="-0.0019297" izz="0.102673"/>
+    </inertial>
+    <!-- Part shoulder1_part -->
+    <visual>
+      <origin xyz="0.0129272 -0.0907454 -0.21843" rpy="2.74435 0.983006 0.194437"/>
+      <geometry>
+        <mesh filename="package://assets/shoulder1_part.stl"/>
+      </geometry>
+      <material name="shoulder1_part_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.0129272 -0.0907454 -0.21843" rpy="2.74435 0.983006 0.194437"/>
+      <geometry>
+        <mesh filename="package://assets/shoulder1_part.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part shoulder2_part -->
+    <visual>
+      <origin xyz="0.0350801 0.0871187 -0.172987" rpy="-0.702482 -0.171745 0.168369"/>
+      <geometry>
+        <mesh filename="package://assets/shoulder2_part.stl"/>
+      </geometry>
+      <material name="shoulder2_part_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.0350801 0.0871187 -0.172987" rpy="-0.702482 -0.171745 0.168369"/>
+      <geometry>
+        <mesh filename="package://assets/shoulder2_part.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part bearing_holder_upperbody -->
+    <visual>
+      <origin xyz="-0.0349097 0.19219 -0.0559215" rpy="2.52912 0.501178 -0.444575"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_holder_upperbody.stl"/>
+      </geometry>
+      <material name="bearing_holder_upperbody_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.0349097 0.19219 -0.0559215" rpy="2.52912 0.501178 -0.444575"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_holder_upperbody.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part rs00_3 -->
+    <!-- Part robstrideo0_3 -->
+    <visual>
+      <origin xyz="0.681751 0.206845 -0.0299983" rpy="2.27328 0.171745 -2.97322"/>
+      <geometry>
+        <mesh filename="package://assets/robstrideo0.stl"/>
+      </geometry>
+      <material name="robstrideo0_3_material">
+        <color rgba="0.301961 0.301961 0.301961 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.681751 0.206845 -0.0299983" rpy="2.27328 0.171745 -2.97322"/>
+      <geometry>
+        <mesh filename="package://assets/robstrideo0.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part bearing_holder_upperbody_2 -->
+    <visual>
+      <origin xyz="0.0311679 0.07813 -0.229704" rpy="-2.02226 -1.08677 0.158986"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_holder_upperbody.stl"/>
+      </geometry>
+      <material name="bearing_holder_upperbody_2_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.0311679 0.07813 -0.229704" rpy="-2.02226 -1.08677 0.158986"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_holder_upperbody.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part robstrideo0_4 -->
+    <visual>
+      <origin xyz="0.65906 -0.190398 -0.373493" rpy="2.55408 -0.379107 2.58963"/>
+      <geometry>
+        <mesh filename="package://assets/robstrideo0.stl"/>
+      </geometry>
+      <material name="robstrideo0_4_material">
+        <color rgba="0.301961 0.301961 0.301961 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.65906 -0.190398 -0.373493" rpy="2.55408 -0.379107 2.58963"/>
+      <geometry>
+        <mesh filename="package://assets/robstrideo0.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part rs00_4 -->
+    <!-- Part rs00_5 -->
+    <!-- Part robstrideo0_5 -->
+    <visual>
+      <origin xyz="0.639148 -0.0302531 -0.593571" rpy="2.43918 -0.879101 -2.86146"/>
+      <geometry>
+        <mesh filename="package://assets/robstrideo0.stl"/>
+      </geometry>
+      <material name="robstrideo0_5_material">
+        <color rgba="0.301961 0.301961 0.301961 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.639148 -0.0302531 -0.593571" rpy="2.43918 -0.879101 -2.86146"/>
+      <geometry>
+        <mesh filename="package://assets/robstrideo0.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part shoulder3_part -->
+    <visual>
+      <origin xyz="0.211892 -0.165659 -0.0910269" rpy="-2.65029 -0.508488 -0.552405"/>
+      <geometry>
+        <mesh filename="package://assets/shoulder3_part.stl"/>
+      </geometry>
+      <material name="shoulder3_part_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.211892 -0.165659 -0.0910269" rpy="-2.65029 -0.508488 -0.552405"/>
+      <geometry>
+        <mesh filename="package://assets/shoulder3_part.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part forarm_part -->
+    <visual>
+      <origin xyz="0.183463 0.199159 -0.0851981" rpy="2.23331 0.578738 -0.390293"/>
+      <geometry>
+        <mesh filename="package://assets/forarm_part.stl"/>
+      </geometry>
+      <material name="forarm_part_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.183463 0.199159 -0.0851981" rpy="2.23331 0.578738 -0.390293"/>
+      <geometry>
+        <mesh filename="package://assets/forarm_part.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part torso_pperbody_part -->
+    <visual>
+      <origin xyz="-3.46945e-18 0 0" rpy="3.14159 -5.51912e-33 -1.21564e-33"/>
+      <geometry>
+        <mesh filename="package://assets/torso_pperbody_part.stl"/>
+      </geometry>
+      <material name="torso_pperbody_part_material">
+        <color rgba="0.301961 0.301961 0.301961 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-3.46945e-18 0 0" rpy="3.14159 -5.51912e-33 -1.21564e-33"/>
+      <geometry>
+        <mesh filename="package://assets/torso_pperbody_part.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part robstrideo0_6 -->
+    <visual>
+      <origin xyz="-0.491975 -0.221542 0.0994842" rpy="2.5229 0.491394 0.585307"/>
+      <geometry>
+        <mesh filename="package://assets/robstrideo0.stl"/>
+      </geometry>
+      <material name="robstrideo0_6_material">
+        <color rgba="0.301961 0.301961 0.301961 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.491975 -0.221542 0.0994842" rpy="2.5229 0.491394 0.585307"/>
+      <geometry>
+        <mesh filename="package://assets/robstrideo0.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part rs00_6 -->
+    <!-- Part bearing_holder_upperbody_3 -->
+    <visual>
+      <origin xyz="-0.132416 -0.177102 -0.290974" rpy="-0.607143 -0.104716 0.108707"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_holder_upperbody.stl"/>
+      </geometry>
+      <material name="bearing_holder_upperbody_3_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.132416 -0.177102 -0.290974" rpy="-0.607143 -0.104716 0.108707"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_holder_upperbody.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part bearing_holder_upperbody_4 -->
+    <visual>
+      <origin xyz="-0.116047 0.20345 -0.285486" rpy="-0.292208 0.049416 -1.01196"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_holder_upperbody.stl"/>
+      </geometry>
+      <material name="bearing_holder_upperbody_4_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.116047 0.20345 -0.285486" rpy="-0.292208 0.049416 -1.01196"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_holder_upperbody.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part rs00_7 -->
+    <!-- Part robstrideo0_7 -->
+    <visual>
+      <origin xyz="-0.491975 0.236796 0.0837372" rpy="0.61869 0.491394 -0.585307"/>
+      <geometry>
+        <mesh filename="package://assets/robstrideo0.stl"/>
+      </geometry>
+      <material name="robstrideo0_7_material">
+        <color rgba="0.301961 0.301961 0.301961 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.491975 0.236796 0.0837372" rpy="0.61869 0.491394 -0.585307"/>
+      <geometry>
+        <mesh filename="package://assets/robstrideo0.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part forarm_part_2 -->
+    <visual>
+      <origin xyz="0.212053 -0.165136 -0.0907797" rpy="0.53052 0.619054 0.0305204"/>
+      <geometry>
+        <mesh filename="package://assets/forarm_part.stl"/>
+      </geometry>
+      <material name="forarm_part_2_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.212053 -0.165136 -0.0907797" rpy="0.53052 0.619054 0.0305204"/>
+      <geometry>
+        <mesh filename="package://assets/forarm_part.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part shoulder1_part_2 -->
+    <visual>
+      <origin xyz="0.0124217 0.0903539 -0.218164" rpy="2.14268 0.333811 -2.02436"/>
+      <geometry>
+        <mesh filename="package://assets/shoulder1_part.stl"/>
+      </geometry>
+      <material name="shoulder1_part_2_material">
+        <color rgba="0.917647 0.917647 0.917647 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.0124217 0.0903539 -0.218164" rpy="2.14268 0.333811 -2.02436"/>
+      <geometry>
+        <mesh filename="package://assets/shoulder1_part.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part shoulder2_part_2 -->
+    <visual>
+      <origin xyz="0.0400553 -0.090825 -0.175582" rpy="0.844166 0.016044 -0.108377"/>
+      <geometry>
+        <mesh filename="package://assets/shoulder2_part.stl"/>
+      </geometry>
+      <material name="shoulder2_part_2_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.0400553 -0.090825 -0.175582" rpy="0.844166 0.016044 -0.108377"/>
+      <geometry>
+        <mesh filename="package://assets/shoulder2_part.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part bearing_holder_upperbody_5 -->
+    <visual>
+      <origin xyz="-0.00162556 -0.208312 -0.0568274" rpy="-1.86494 0.557101 0.649809"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_holder_upperbody.stl"/>
+      </geometry>
+      <material name="bearing_holder_upperbody_5_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.00162556 -0.208312 -0.0568274" rpy="-1.86494 0.557101 0.649809"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_holder_upperbody.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part rs00_8 -->
+    <!-- Part robstrideo0_8 -->
+    <visual>
+      <origin xyz="0.705486 -0.191653 -0.176017" rpy="0.72663 -0.016044 3.03322"/>
+      <geometry>
+        <mesh filename="package://assets/robstrideo0.stl"/>
+      </geometry>
+      <material name="robstrideo0_8_material">
+        <color rgba="0.301961 0.301961 0.301961 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.705486 -0.191653 -0.176017" rpy="0.72663 -0.016044 3.03322"/>
+      <geometry>
+        <mesh filename="package://assets/robstrideo0.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part bearing_holder_upperbody_6 -->
+    <visual>
+      <origin xyz="0.030938 -0.0347581 -0.184871" rpy="-0.487206 -0.00498805 -1.02321"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_holder_upperbody.stl"/>
+      </geometry>
+      <material name="bearing_holder_upperbody_6_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.030938 -0.0347581 -0.184871" rpy="-0.487206 -0.00498805 -1.02321"/>
+      <geometry>
+        <mesh filename="package://assets/bearing_holder_upperbody.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part robstrideo0_9 -->
+    <visual>
+      <origin xyz="0.587661 0.136802 -0.569134" rpy="0.681196 -0.687036 -2.5981"/>
+      <geometry>
+        <mesh filename="package://assets/robstrideo0.stl"/>
+      </geometry>
+      <material name="robstrideo0_9_material">
+        <color rgba="0.301961 0.301961 0.301961 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.587661 0.136802 -0.569134" rpy="0.681196 -0.687036 -2.5981"/>
+      <geometry>
+        <mesh filename="package://assets/robstrideo0.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part rs00_9 -->
+    <!-- Part rs00_10 -->
+    <!-- Part robstrideo0_10 -->
+    <visual>
+      <origin xyz="-0.326713 0.402161 0.304563" rpy="2.23331 0.578738 -0.390293"/>
+      <geometry>
+        <mesh filename="package://assets/robstrideo0.stl"/>
+      </geometry>
+      <material name="robstrideo0_10_material">
+        <color rgba="0.301961 0.301961 0.301961 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.326713 0.402161 0.304563" rpy="2.23331 0.578738 -0.390293"/>
+      <geometry>
+        <mesh filename="package://assets/robstrideo0.stl"/>
+      </geometry>
+    </collision>
+    <!-- Part shoulder3_part_2 -->
+    <visual>
+      <origin xyz="0.183364 0.199599 -0.0855941" rpy="-0.878813 -0.540934 0.777181"/>
+      <geometry>
+        <mesh filename="package://assets/shoulder3_part.stl"/>
+      </geometry>
+      <material name="shoulder3_part_2_material">
+        <color rgba="1 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.183364 0.199599 -0.0855941" rpy="-0.878813 -0.540934 0.777181"/>
+      <geometry>
+        <mesh filename="package://assets/shoulder3_part.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <!-- Joint from torso_subassembly to torso_assembly -->
+  <joint name="upper_body" type="fixed">
+    <origin xyz="-0.0205428 4.05842e-07 0.036034" rpy="-3.14159 -7.46619e-17 1.59378e-17"/>
+    <parent link="torso_subassembly"/>
+    <child link="torso_assembly"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10" velocity="10"/>
+  </joint>
+</robot>

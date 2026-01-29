@@ -1,0 +1,14 @@
+{
+    "configuration": "Gear_depth=0.003+meter;Last_gear=56.0;Middle_gear=50.0;Module=0.5;Small_gear=20.0",
+    "documentId": "4e205097f2e70aec4e41eedb",
+    "documentMicroversion": "38b653cf65f4e763da81c516",
+    "documentVersion": "dfab45f52715e2a7f2723413",
+    "elementId": "9b8e349f1695f82e8a497351",
+    "fullConfiguration": "Gear_depth=0.003+meter;Last_gear=56.0;Middle_gear=50.0;Module=0.5;Small_gear=20.0",
+    "id": "MNF4LB5jxi/8R22Bg",
+    "isStandardContent": false,
+    "name": "Output_Axis <1>",
+    "partId": "JqD",
+    "suppressed": false,
+    "type": "Part"
+}

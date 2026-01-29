@@ -1,0 +1,36 @@
+<mujoco model="scene">
+  <compiler inertiafromgeom="true"/>
+  <option timestep="0.002" gravity="0 0 -9.81"/>
+<default>
+  <geom contype="1" conaffinity="1"/>
+</default>
+
+  <include file="robot.xml"/>
+  <actuator>
+    <position class="mjcf" name="hipz_right" joint="hipz_right"/>
+    <position class="mjcf" name="hipx_right" joint="hipx_right"/>
+    <position class="mjcf" name="hipy_right" joint="hipy_right"/>
+    <position class="mjcf" name="knee_right" joint="knee_right"/>
+    <position class="mjcf" name="ankley_right" joint="ankley_right"/>
+    <position class="mjcf" name="anklex_right" joint="anklex_right"/>
+    <position class="mjcf" name="hipz_left" joint="hipz_left"/>
+    <position class="mjcf" name="hipx_left" joint="hipx_left"/>
+    <position class="mjcf" name="hipy_left" joint="hipy_left"/>
+    <position class="mjcf" name="knee_left" joint="knee_left"/>
+    <position class="mjcf" name="ankley_left" joint="ankley_left"/>
+    <position class="mjcf" name="anklex_left" joint="anklex_left"/>
+    <position class="mjcf" name="shoulder1_right" joint="shoulder1_right"/>
+    <position class="mjcf" name="shoulder2_right" joint="shoulder2_right"/>
+    <position class="mjcf" name="shoulder3_right" joint="shoulder3_right"/>
+    <position class="mjcf" name="elbow_right" joint="elbow_right"/>
+    <position class="mjcf" name="shoulder1_left" joint="shoulder1_left"/>
+    <position class="mjcf" name="shoulder2_left" joint="shoulder2_left"/>
+    <position class="mjcf" name="shoulder3_left" joint="shoulder3_left"/>
+    <position class="mjcf" name="elbow_left" joint="elbow_left"/>
+  </actuator>
+  <worldbody>
+    <light pos="0 0 5"/>
+    <geom name="floor" type="plane" size="10 10 0.1" contype="1" conaffinity="1" rgba="0.2 0.2 0.2 1"/>
+  </worldbody>
+</mujoco>
+

@@ -1,0 +1,49 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mjlab-hf_zoo"
+version = "0.1.0"
+description = "LeRobot/Pollen legged robot models + MJLab training examples (no pretrained policies)."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "mjlab @ git+https://github.com/mujocolab/mjlab.git",
+]
+
+[project.optional-dependencies]
+visualization = ["rerun-sdk>=0.20.0"]
+dev = [
+  "rerun-sdk>=0.20.0",
+  "ruff>=0.7.0",
+  "pytest>=8.0.0",
+]
+
+# MJLab will import this module; that import must trigger register_mjlab_task(...)
+[project.entry-points."mjlab.tasks"]
+mjlab_hf_zoo = "training_exemples"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+# IMPORTANT: package the top-level package(s) you want importable
+[tool.hatch.build.targets.wheel]
+packages = ["training_exemples"]
+
+# Include your robot assets
+[tool.hatch.build]
+include = [
+  "training_exemples/**",
+  "models/**",
+  "README.md",
+  "pyproject.toml",
+]
+
+[tool.ruff]
+src = ["training_exemples"]
+indent-width = 4
+line-length = 100
+
+[tool.uv]
+override-dependencies = ["mujoco"]
