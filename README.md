@@ -4,9 +4,11 @@ This repo contains legged robot models (MJCF + assets) and MJLab training exampl
 It is meant to be run from the repo root with `uv`, and registers tasks through the
 `training_exemples` package.
 
-Status notes:
-- LeRobot Humanoid is in development.
-- Leggy is a WIP concept and does not exist as hardware yet.
+Status by robot:
+- LeRobot Humanoid family: in development; common CAD source:
+  `https://cad.onshape.com/documents/fb645318a27646d1d8840be6/w/d1cae8805fb652b4d1614997/e/621ef473e7cde4418aaec2ed`
+- Leggy: WIP concept; no hardware yet.
+- Open Duck: reference repo `https://github.com/apirrone/Open_Duck_Playground`
 
 ## How It Fits Together
 
@@ -110,16 +112,6 @@ Each robot has a model folder under `models/` and a matching training example un
  - Updated Open Duck with backlash joints and improved geometry.
 ![Open Duck v2](media/open_duck_v2.svg)
 
-### LeRobot Humanoid (12-DOF)
-- Model: `models/bipedal_plateform/mjcf/robot.xml`
-- Training: `training_exemples/lerobot_humanoid/env_cfgs.py`
-- Constants: `training_exemples/lerobot_humanoid/lerobot_humanoid_constants.py`
-- Tasks: `Mjlab-Velocity-Flat-LeRobot-Humanoid`, `Mjlab-Velocity-Rough-LeRobot-Humanoid`
-- 12‑DOF lower‑body humanoid for fast velocity‑tracking experiments.
-<video src="media/lerobot_humanoide.mp4" controls width="640">
-Your browser does not support the video tag.
-</video>
-
 ### LeRobot Humanoid Full (20-DOF)
 - Model: `models/lerobot_humanoide/mjcf/robot.xml`
 - Training: `training_exemples/lerobot_humanoid_full/env_cfgs.py`
@@ -128,13 +120,21 @@ Your browser does not support the video tag.
  - Full humanoid with upper‑body joints for whole‑body control research.
 ![LeRobot Humanoid Full](media/lerobot_humanoid_full.png)
 
+### LeRobot Humanoid (12-DOF)
+- Model: `models/bipedal_plateform/mjcf/robot.xml`
+- Training: `training_exemples/lerobot_humanoid/env_cfgs.py`
+- Constants: `training_exemples/lerobot_humanoid/lerobot_humanoid_constants.py`
+- Tasks: `Mjlab-Velocity-Flat-LeRobot-Humanoid`, `Mjlab-Velocity-Rough-LeRobot-Humanoid`
+- 12‑DOF lower‑body humanoid for fast velocity‑tracking experiments.
+[![LeRobot Humanoid (rough terrain policy)](media/lerobot_humanoid.png)](media/lerobot_humanoide.mp4)
+
 ### LeRobot Humanoid No-Arms
 - Model: `models/bipedal_plateform_no_arms/mjcf/robot.xml`
 - Training: `training_exemples/lerobot_humanoid_no_arms/env_cfgs.py`
 - Constants: `training_exemples/lerobot_humanoid_no_arms/lerobot_humanoid_no_arms_constants.py`
 - Tasks: `Mjlab-Velocity-Flat-LeRobot-Humanoid-no-arms`, `Mjlab-Velocity-Rough-LeRobot-Humanoid-no-arms`
  - Lower‑body‑only humanoid variant without arms.
-![LeRobot Humanoid No-Arms](media/lerobot_humanoid_no_arms.png)
+![LeRobot Humanoid No-Arms](media/lerobot_humanoid_no_arms.svg)
 
 ## Modify Rewards / Cost Function
 
