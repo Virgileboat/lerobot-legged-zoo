@@ -72,8 +72,6 @@ uv run play Mjlab-Velocity-Flat-Open-Duck-v2 --agent random
 |-----------|-------------|
 | `Mjlab-Velocity-Flat-Leggy` | Train Leggy to walk on flat ground |
 | `Mjlab-Velocity-Rough-Leggy` | Train Leggy to walk on rough terrain |
-| `Mjlab-Velocity-Flat-Open-Duck` | Train Open Duck to walk on flat ground |
-| `Mjlab-Velocity-Rough-Open-Duck` | Train Open Duck to walk on rough terrain |
 | `Mjlab-Velocity-Flat-Open-Duck-v2` | Train Open Duck v2 to walk on flat ground |
 | `Mjlab-Velocity-Rough-Open-Duck-v2` | Train Open Duck v2 to walk on rough terrain |
 | `Mjlab-Velocity-Flat-LeRobot-Humanoid` | Train LeRobot Humanoid to walk on flat ground |
@@ -95,14 +93,6 @@ Each robot has a model folder under `models/` and a matching training example un
 - Tasks: `Mjlab-Velocity-Flat-Leggy`, `Mjlab-Velocity-Rough-Leggy`
  - Small biped with parallel legs, designed for compact locomotion experiments.
 ![Leggy](media/leggy.svg)
-
-### Open Duck
-- Model: `models/open_duck/robot.xml`
-- Training: `training_exemples/open_duck/env_cfgs.py`
-- Constants: `training_exemples/open_duck/open_duck_constants.py`
-- Tasks: `Mjlab-Velocity-Flat-Open-Duck`, `Mjlab-Velocity-Rough-Open-Duck`
- - Small duck‑inspired biped, lightweight and easy to iterate on.
-![Open Duck](media/open_duck.svg)
 
 ### Open Duck v2 (Backlash)
 - Model: `models/open_duck_v2/open_duck_v2_backlash.xml`
