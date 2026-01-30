@@ -1,46 +1,23 @@
 # lerobot-legged-zoo
 
-This repo contains legged robot models (MJCF + assets) and MJLab training examples.
-It is meant to be run from the repo root with `uv`, and registers tasks through the
-`training_exemples` package.
+Legged robot models (MJCF + assets) plus MJLab training examples in one place.
+Run from the repo root with `uv`.
 
 Status by robot:
-- LeRobot Humanoid family: in development; common CAD source:
+- LeRobot Humanoid family: in development (common CAD source):
   `https://cad.onshape.com/documents/fb645318a27646d1d8840be6/w/d1cae8805fb652b4d1614997/e/621ef473e7cde4418aaec2ed`
 - Leggy: WIP concept; no hardware yet.
 - Open Duck: reference repo `https://github.com/apirrone/Open_Duck_Playground`
 
-## How It Fits Together
-
-- **Models** (`models/`): MJCF files + assets (meshs, sensors, scenes). This is the
-  ground‑truth robot description used by MuJoCo.
-- **Constants** (`training_exemples/*/*_constants.py`): lightweight python helpers
-  that load the MJCF, set initial pose, actuators, collisions, and asset packaging.
-- **Training configs** (`training_exemples/*/env_cfgs.py`): environment settings
-  (terrain, rewards, observations, commands). This is where you tune the cost function.
-
-## Repo Layout
-
-- `models/`: robot MJCF files and assets (meshs, sensors, scenes)
-- `training_exemples/`: MJLab task registrations and env configs
-- `pyproject.toml`: dependency and entry point setup
-- `media/`: images/videos used in this README
-
 ## Installation
 
-This project uses `uv` for dependency management.
-
-## Hardware Requirements
-
-- A CUDA-capable GPU is required to run training and play commands.
+This project uses `uv`. A CUDA-capable GPU is required for training/play.
 
 ```bash
 uv sync
 ```
 
 ## Run Training
-
-Pick any task id from the table below.
 
 ```bash
 # Train with default settings
@@ -83,15 +60,15 @@ uv run play Mjlab-Velocity-Flat-Open-Duck-v2 --agent random
 
 ## Robots (Details)
 
-Each robot has a model folder under `models/` and a matching training example under
-`training_exemples/`. These are the main entry points you will edit.
+Each robot has a model under `models/` and a matching training example under
+`training_exemples/`.
 
 ### Leggy
 - Model: `models/leggy/robot.xml`
 - Training: `training_exemples/leggy/env_cfgs.py`
 - Constants: `training_exemples/leggy/leggy_constants.py`
 - Tasks: `Mjlab-Velocity-Flat-Leggy`, `Mjlab-Velocity-Rough-Leggy`
- - Small biped with parallel legs, designed for compact locomotion experiments.
+- Small biped with parallel legs, designed for compact locomotion experiments.
 ![Leggy](media/leggy.svg)
 
 ### Open Duck v2 (Backlash)
@@ -99,7 +76,7 @@ Each robot has a model folder under `models/` and a matching training example un
 - Training: `training_exemples/open_duck_v2/env_cfgs.py`
 - Constants: `training_exemples/open_duck_v2/open_duck_v2_constants.py`
 - Tasks: `Mjlab-Velocity-Flat-Open-Duck-v2`, `Mjlab-Velocity-Rough-Open-Duck-v2`
- - Updated Open Duck with backlash joints and improved geometry.
+- Updated Open Duck with backlash joints and improved geometry.
 ![Open Duck v2](media/open_duck_v2.svg)
 
 ### LeRobot Humanoid Full (20-DOF)
@@ -107,7 +84,7 @@ Each robot has a model folder under `models/` and a matching training example un
 - Training: `training_exemples/lerobot_humanoid_full/env_cfgs.py`
 - Constants: `training_exemples/lerobot_humanoid_full/lerobot_humanoid_full_constants.py`
 - Tasks: `Mjlab-Velocity-Flat-LeRobot-Humanoid-full`, `Mjlab-Velocity-Rough-LeRobot-Humanoid-full`
- - Full humanoid with upper‑body joints for whole‑body control research.
+- Full humanoid with upper‑body joints for whole‑body control research.
 ![LeRobot Humanoid Full](media/lerobot_humanoid_full.png)
 
 ### LeRobot Humanoid (12-DOF)
@@ -123,15 +100,12 @@ Each robot has a model folder under `models/` and a matching training example un
 - Training: `training_exemples/lerobot_humanoid_no_arms/env_cfgs.py`
 - Constants: `training_exemples/lerobot_humanoid_no_arms/lerobot_humanoid_no_arms_constants.py`
 - Tasks: `Mjlab-Velocity-Flat-LeRobot-Humanoid-no-arms`, `Mjlab-Velocity-Rough-LeRobot-Humanoid-no-arms`
- - Lower‑body‑only humanoid variant without arms.
-![LeRobot Humanoid No-Arms](media/lerobot_humanoid_no_arms.svg)
+- Lower‑body‑only humanoid variant without arms.
+![LeRobot Humanoid No-Arms](media/lerobot_humanoid_no_arms.png)
 
 ## Modify Rewards / Cost Function
 
-Each task is registered in `training_exemples/<robot>/__init__.py`, and the
-environment configuration lives in `training_exemples/<robot>/env_cfgs.py`.
-
-The reward (cost) terms are under `cfg.rewards`:
+Edit `training_exemples/<robot>/env_cfgs.py` and tune `cfg.rewards`:
 
 ```python
 # Example: change weights
@@ -149,14 +123,4 @@ cfg.rewards["self_collisions"] = RewardTermCfg(
 )
 ```
 
-Common places to edit:
-- `training_exemples/*/env_cfgs.py`: reward weights, command ranges, terrain settings
-- `training_exemples/*/*_constants.py`: robot initialization, actuators, collision config
-
-After edits, rerun your task with `uv run train ...` and the changes take effect.
-
-
-## Resources
-
-- MJLab: https://github.com/mujocolab/mjlab
-- MuJoCo docs: https://mujoco.readthedocs.io/
+After edits, rerun your task with `uv run train ...`.
