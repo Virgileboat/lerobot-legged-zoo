@@ -64,7 +64,7 @@ HOME_KEYFRAME = EntityCfg.InitialStateCfg(
     "Rpassive2": stand_pose["knee"],
   },
   joint_vel={".*": 0.0},
-  lin_vel=(1.8, 0.0, 1.5),
+  lin_vel=(0., 0.0, 0.),
   ang_vel=(0.0, 0.0, 0.0),
 )
 
