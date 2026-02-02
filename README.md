@@ -51,6 +51,10 @@ uv run play Mjlab-Velocity-Flat-Open-Duck-v2 --agent random
 | `Mjlab-Velocity-Rough-Leggy` | Train Leggy to walk on rough terrain |
 | `Mjlab-Velocity-Flat-Open-Duck-v2` | Train Open Duck v2 to walk on flat ground |
 | `Mjlab-Velocity-Rough-Open-Duck-v2` | Train Open Duck v2 to walk on rough terrain |
+| `Mjlab-Velocity-Flat-Unitree-G1-23dof` | Train Unitree G1 (23-DoF) on flat ground |
+| `Mjlab-Velocity-Rough-Unitree-G1-23dof` | Train Unitree G1 (23-DoF) on rough terrain |
+| `Mjlab-Velocity-Flat-Unitree-G1-29dof` | Train Unitree G1 (29-DoF) on flat ground |
+| `Mjlab-Velocity-Rough-Unitree-G1-29dof` | Train Unitree G1 (29-DoF) on rough terrain |
 | `Mjlab-Velocity-Flat-LeRobot-Humanoid` | Train LeRobot Humanoid to walk on flat ground |
 | `Mjlab-Velocity-Rough-LeRobot-Humanoid` | Train LeRobot Humanoid to walk on rough terrain |
 | `Mjlab-Velocity-Flat-LeRobot-Humanoid-full` | Train LeRobot Humanoid (full) on flat ground |
