@@ -367,17 +367,17 @@ def open_duck_mini_v2_velocity_env_cfg(play: bool = False) -> ManagerBasedRlEnvC
     )
 
     # Velocity command ranges curriculum
-    cfg.curriculum["velocity_command_ranges"] = CurriculumTermCfg(
-        func=open_duck_mdp.velocity_command_ranges_curriculum,
-        params={
-            "command_name": "twist",
-            "velocity_stages": [
-                {"step": 0, "lin_vel_range": 0.4, "ang_vel_range": 1.5},
-                {"step": 500 * 24, "lin_vel_range": 0.5, "ang_vel_range": 1.75},
-                {"step": 1000 * 24, "lin_vel_range": 0.6, "ang_vel_range": 2.0},
-            ],
-        },
-    )
+    # cfg.curriculum["velocity_command_ranges"] = CurriculumTermCfg(
+        # func=open_duck_mdp.velocity_command_ranges_curriculum,
+        # params={
+            # "command_name": "twist",
+            # "velocity_stages": [
+                # {"step": 0, "lin_vel_range": 0.4, "ang_vel_range": 1.5},
+                # {"step": 500 * 24, "lin_vel_range": 0.5, "ang_vel_range": 1.75},
+                # {"step": 1000 * 24, "lin_vel_range": 0.6, "ang_vel_range": 2.0},
+            # ],
+        # },
+    # )
 
     # Disable default curriculum
     del cfg.curriculum["terrain_levels"]
