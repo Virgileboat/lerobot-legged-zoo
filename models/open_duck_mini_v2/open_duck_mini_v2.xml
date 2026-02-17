@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!-- Generated using onshape-to-robot -->
 <!-- Onshape document_id: 64074dfcfa379b37d8a47762 -->
-<mujoco model="open_duck_v2">
+<mujoco model="open_duck_mini_v2">
 
   <option iterations="1" ls_iterations="5">
     <flag eulerdamp="disable"/>
@@ -11,7 +11,7 @@
   <!-- <option noslip_iterations="1"/>
   <compiler angle="radian" meshdir="assets" autolimits="true"/> -->
   <default>
-    <default class="open_duck_v2">
+    <default class="open_duck_mini_v2">
       <joint frictionloss="0.1" armature="0.005"/>
       <position kp="50" dampratio="1"/>
       <default class="visual">
@@ -59,7 +59,7 @@
       <freejoint name="floating_base"/>
       <site name="imu" pos="-0.08 -0.0 0.05"/>
       <!-- Link trunk_assembly -->
-      <body name="trunk_assembly" pos="0 0 0.0" quat="1 0 0 0" childclass="open_duck_v2">
+      <body name="trunk_assembly" pos="0 0 0.0" quat="1 0 0 0" childclass="open_duck_mini_v2">
         <inertial pos="-0.0483259 -9.97823e-05 0.0384971" mass="0.698526"
           fullinertia="0.00167701 0.00344479 0.00292635 -1.31662e-05 -3.24953e-05 -2.15581e-06"/>
         <!-- Part body_front -->

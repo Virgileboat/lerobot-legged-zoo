@@ -1,4 +1,4 @@
-"""RL configuration for Open Duck v2 (backlash) velocity task."""
+"""RL configuration for Open Duck Mini v2 (backlash) velocity task."""
 
 from mjlab.rl import (
   RslRlOnPolicyRunnerCfg,
@@ -7,8 +7,8 @@ from mjlab.rl import (
 )
 
 
-def open_duck_v2_ppo_runner_cfg() -> RslRlOnPolicyRunnerCfg:
-  """Create RL runner configuration for Open Duck v2 (backlash) velocity task."""
+def open_duck_mini_v2_ppo_runner_cfg() -> RslRlOnPolicyRunnerCfg:
+  """Create RL runner configuration for Open Duck Mini v2 (backlash) velocity task."""
   return RslRlOnPolicyRunnerCfg(
     policy=RslRlPpoActorCriticCfg(
       init_noise_std=1.0,
@@ -32,7 +32,7 @@ def open_duck_v2_ppo_runner_cfg() -> RslRlOnPolicyRunnerCfg:
       desired_kl=0.01,
       max_grad_norm=1.0,
     ),
-    experiment_name="open_duck_v2_velocity",
+    experiment_name="open_duck_mini_v2_velocity",
     save_interval=50,
     num_steps_per_env=24,
     max_iterations=30_000,

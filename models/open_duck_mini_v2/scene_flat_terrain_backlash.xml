@@ -1,5 +1,5 @@
 <mujoco model="scene">
-    <include file="open_duck_v2_backlash.xml"/>
+    <include file="open_duck_mini_v2_backlash.xml"/>
 
     <visual>
         <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0"/>

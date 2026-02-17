@@ -1,4 +1,4 @@
-"""Open Duck v2 (backlash) constants."""
+"""Open Duck Mini v2 (backlash) constants."""
 
 from pathlib import Path
 
@@ -21,20 +21,20 @@ def _find_repo_root() -> Path:
   raise FileNotFoundError("Could not locate repo root containing 'models' directory.")
 
 
-OPEN_DUCK_V2_MESH_DIR: Path = _find_repo_root() / "models" / "open_duck_v2"
-OPEN_DUCK_V2_XML: Path = OPEN_DUCK_V2_MESH_DIR / "open_duck_v2_backlash.xml"
+OPEN_DUCK_MINI_V2_MESH_DIR: Path = _find_repo_root() / "models" / "open_duck_mini_v2"
+OPEN_DUCK_MINI_V2_XML: Path = OPEN_DUCK_MINI_V2_MESH_DIR / "open_duck_mini_v2_backlash.xml"
 
-assert OPEN_DUCK_V2_XML.exists(), f"MJCF file not found: {OPEN_DUCK_V2_XML}"
+assert OPEN_DUCK_MINI_V2_XML.exists(), f"MJCF file not found: {OPEN_DUCK_V2_MINI_XML}"
 
 
 def get_assets(meshdir: str) -> dict[str, bytes]:
   assets: dict[str, bytes] = {}
-  update_assets(assets, OPEN_DUCK_V2_MESH_DIR, meshdir)
+  update_assets(assets, OPEN_DUCK_MINI_V2_MESH_DIR, meshdir)
   return assets
 
 
 def get_spec() -> mujoco.MjSpec:
-  spec = mujoco.MjSpec.from_file(str(OPEN_DUCK_V2_XML))
+  spec = mujoco.MjSpec.from_file(str(OPEN_DUCK_MINI_V2_XML))
   spec.assets = get_assets(spec.meshdir)
   return spec
 
@@ -110,7 +110,7 @@ FULL_COLLISION = CollisionCfg(
 # Actuators (XML-defined, exclude backlash joints).
 ##
 
-OPEN_DUCK_V2_ACTUATORS = XmlPositionActuatorCfg(
+OPEN_DUCK_MINI_V2_ACTUATORS = XmlPositionActuatorCfg(
   target_names_expr=(
     "left_hip_yaw",
     "left_hip_roll",
@@ -129,21 +129,21 @@ OPEN_DUCK_V2_ACTUATORS = XmlPositionActuatorCfg(
   ),
 )
 
-OPEN_DUCK_V2_ARTICULATION = EntityArticulationInfoCfg(
-  actuators=(OPEN_DUCK_V2_ACTUATORS,),
+OPEN_DUCK_MINI_V2_ARTICULATION = EntityArticulationInfoCfg(
+  actuators=(OPEN_DUCK_MINI_V2_ACTUATORS,),
   soft_joint_pos_limit_factor=0.9,
 )
 
 
-def get_open_duck_v2_robot_cfg() -> EntityCfg:
-  """Get a fresh Open Duck v2 (backlash) robot configuration instance."""
+def get_open_duck_mini_v2_robot_cfg() -> EntityCfg:
+  """Get a fresh Open Duck Mini v2 (backlash) robot configuration instance."""
   return EntityCfg(
     spec_fn=get_spec,
     init_state=KNEES_BENT_KEYFRAME,
     collisions=(FULL_COLLISION,),
-    articulation=OPEN_DUCK_V2_ARTICULATION,
+    articulation=OPEN_DUCK_MINI_V2_ARTICULATION,
   )
 
 
 # Action scale: fixed for now (XML actuators already define kp/forcerange).
-OPEN_DUCK_V2_ACTION_SCALE = 0.5
+OPEN_DUCK_MINI_V2_ACTION_SCALE = 0.5

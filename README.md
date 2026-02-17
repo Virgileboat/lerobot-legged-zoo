@@ -7,7 +7,7 @@ Status by robot:
 - LeRobot Humanoid family: in development (common CAD source):
   `https://cad.onshape.com/documents/fb645318a27646d1d8840be6/w/d1cae8805fb652b4d1614997/e/621ef473e7cde4418aaec2ed`
 - Leggy: WIP concept; no hardware yet.
-- Open Duck: reference repo `https://github.com/apirrone/Open_Duck_Playground`
+- Open Duck Mini v2: reference repo `https://github.com/apirrone/Open_Duck_Playground`
 
 ## Installation
 
@@ -21,26 +21,26 @@ uv sync
 
 ```bash
 # Train with default settings
-uv run train Mjlab-Velocity-Flat-Open-Duck-v2
+uv run train Mjlab-Velocity-Flat-Open-Duck-Mini-v2
 
 # Adjust number of parallel environments
-uv run train Mjlab-Velocity-Flat-Open-Duck-v2 --env.scene.num-envs 2048
+uv run train Mjlab-Velocity-Flat-Open-Duck-Mini-v2 --env.scene.num-envs 2048
 
 # See all options
-uv run train Mjlab-Velocity-Flat-Open-Duck-v2 --help
+uv run train Mjlab-Velocity-Flat-Open-Duck-Mini-v2 --help
 ```
 
 ## Run Play/Evaluation
 
 ```bash
 # Play with a wandb checkpoint
-uv run play Mjlab-Velocity-Flat-Open-Duck-v2 --wandb-run-path <your-wandb-path>
+uv run play Mjlab-Velocity-Flat-Open-Duck-Mini-v2 --wandb-run-path <your-wandb-path>
 
 # Play with a local checkpoint
-uv run play Mjlab-Velocity-Flat-Open-Duck-v2 --checkpoint-file logs/rsl_rl/open_duck_v2/<run>/model_*.pt
+uv run play Mjlab-Velocity-Flat-Open-Duck-Mini-v2 --checkpoint-file logs/rsl_rl/open_duck_mini_v2/<run>/model_*.pt
 
 # Use random actions (sanity check)
-uv run play Mjlab-Velocity-Flat-Open-Duck-v2 --agent random
+uv run play Mjlab-Velocity-Flat-Open-Duck-Mini-v2 --agent random
 ```
 
 ## Available Tasks
@@ -49,8 +49,8 @@ uv run play Mjlab-Velocity-Flat-Open-Duck-v2 --agent random
 |-----------|-------------|
 | `Mjlab-Velocity-Flat-Leggy` | Train Leggy to walk on flat ground |
 | `Mjlab-Velocity-Rough-Leggy` | Train Leggy to walk on rough terrain |
-| `Mjlab-Velocity-Flat-Open-Duck-v2` | Train Open Duck v2 to walk on flat ground |
-| `Mjlab-Velocity-Rough-Open-Duck-v2` | Train Open Duck v2 to walk on rough terrain |
+| `Mjlab-Velocity-Flat-Open-Duck-Mini-v2` | Train Open Duck Mini v2 to walk on flat ground |
+| `Mjlab-Velocity-Rough-Open-Duck-Mini-v2` | Train Open Duck Mini v2 to walk on rough terrain |
 | `Mjlab-Velocity-Flat-Unitree-G1-23dof` | Train Unitree G1 (23-DoF) on flat ground |
 | `Mjlab-Velocity-Rough-Unitree-G1-23dof` | Train Unitree G1 (23-DoF) on rough terrain |
 | `Mjlab-Velocity-Flat-Unitree-G1-29dof` | Train Unitree G1 (29-DoF) on flat ground |
@@ -75,13 +75,13 @@ Each robot has a model under `models/` and a matching training example under
 - Small biped with parallel legs, designed for compact locomotion experiments.
 ![Leggy](media/leggy.svg)
 
-### Open Duck v2 (Backlash)
-- Model: `models/open_duck_v2/open_duck_v2_backlash.xml`
-- Training: `training_exemples/open_duck_v2/env_cfgs.py`
-- Constants: `training_exemples/open_duck_v2/open_duck_v2_constants.py`
-- Tasks: `Mjlab-Velocity-Flat-Open-Duck-v2`, `Mjlab-Velocity-Rough-Open-Duck-v2`
-- Updated Open Duck with backlash joints and improved geometry.
-![Open Duck v2](media/open_duck_v2.svg)
+### Open Duck Mini v2 (Backlash)
+- Model: `models/open_duck_mini_v2/open_duck_mini_v2_backlash.xml`
+- Training: `training_exemples/open_duck_mini_v2/env_cfgs.py`
+- Constants: `training_exemples/open_duck_mini_v2/open_duck_mini_v2_constants.py`
+- Tasks: `Mjlab-Velocity-Flat-Open-Duck-Mini-v2`, `Mjlab-Velocity-Rough-Open-Duck-Mini-v2`
+- Updated Open Duck Mini v2 with backlash joints and improved geometry.
+![Open Duck Mini v2](media/open_duck_v2.svg)
 
 ### LeRobot Humanoid Full (20-DOF)
 - Model: `models/lerobot_humanoide/mjcf/robot.xml`

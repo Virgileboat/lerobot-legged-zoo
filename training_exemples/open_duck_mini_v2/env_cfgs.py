@@ -1,8 +1,8 @@
-"""Open Duck v2 (backlash) velocity environment configurations."""
+"""Open Duck Mini v2 (backlash) velocity environment configurations."""
 
-from .open_duck_v2_constants import (
-  OPEN_DUCK_V2_ACTION_SCALE,
-  get_open_duck_v2_robot_cfg,
+from .open_duck_mini_v2_constants import (
+  OPEN_DUCK_MINI_V2_ACTION_SCALE,
+  get_open_duck_mini_v2_robot_cfg,
 )
 from mjlab.envs import ManagerBasedRlEnvCfg
 from mjlab.envs import mdp as envs_mdp
@@ -16,15 +16,15 @@ from mjlab.tasks.velocity.mdp import UniformVelocityCommandCfg
 from mjlab.tasks.velocity.velocity_env_cfg import make_velocity_env_cfg
 
 
-def open_duck_v2_rough_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
-  """Create Open Duck v2 (backlash) rough terrain velocity configuration."""
+def open_duck_mini_v2_rough_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
+  """Create Open Duck Mini v2 (backlash) rough terrain velocity configuration."""
   cfg = make_velocity_env_cfg()
 
   cfg.sim.mujoco.ccd_iterations = 500
   cfg.sim.contact_sensor_maxmatch = 500
   cfg.sim.nconmax = 45
 
-  cfg.scene.entities = {"robot": get_open_duck_v2_robot_cfg()}
+  cfg.scene.entities = {"robot": get_open_duck_mini_v2_robot_cfg()}
 
   site_names = ("left_foot", "right_foot")
   geom_names = (
@@ -72,7 +72,7 @@ def open_duck_v2_rough_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
 
   joint_pos_action = cfg.actions["joint_pos"]
   assert isinstance(joint_pos_action, JointPositionActionCfg)
-  joint_pos_action.scale = OPEN_DUCK_V2_ACTION_SCALE
+  joint_pos_action.scale = OPEN_DUCK_MINI_V2_ACTION_SCALE
   joint_pos_action.actuator_names = (
     "left_hip_yaw",
     "left_hip_roll",
@@ -242,9 +242,9 @@ def open_duck_v2_rough_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
   return cfg
 
 
-def open_duck_v2_flat_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
-  """Create Open Duck v2 (backlash) flat terrain velocity configuration."""
-  cfg = open_duck_v2_rough_env_cfg(play=play)
+def open_duck_mini_v2_flat_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
+  """Create Open Duck Mini v2 (backlash) flat terrain velocity configuration."""
+  cfg = open_duck_mini_v2_rough_env_cfg(play=play)
 
   cfg.sim.njmax = 300
   cfg.sim.mujoco.ccd_iterations = 50

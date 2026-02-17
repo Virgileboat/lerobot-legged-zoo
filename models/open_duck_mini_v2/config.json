@@ -4,9 +4,9 @@
     // and comment the default kp frictionloss etc
     "documentId": "64074dfcfa379b37d8a47762",
     "outputFormat": "mujoco",
-    "assemblyName": "Open_Duck_v2",
-    "robot_name": "open_duck_v2",
-    "output_filename": "open_duck_v2",
+    "assemblyName": "Open_Duck_Mini_v2",
+    "robot_name": "open_duck_mini_v2",
+    "output_filename": "open_duck_mini_v2",
     // Simplify STL meshs (default: false)
     "simplify_stls": true,
     // Maximum size of the STL files in MB (default: 3)
