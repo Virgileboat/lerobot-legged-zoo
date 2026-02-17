@@ -166,7 +166,7 @@ def open_duck_mini_v2_velocity_env_cfg(play: bool = False) -> ManagerBasedRlEnvC
 
     # Neck stability
     cfg.rewards["neck_action_rate_l2"] = RewardTermCfg(
-        func=open_duck_mdp.neck_action_rate_l2, weight=-0.1
+        func=open_duck_mdp.neck_action_rate_l2, weight=-0.2
     )
 
     # CoM height target - scaled for larger robot
@@ -360,6 +360,9 @@ def open_duck_mini_v2_velocity_env_cfg(play: bool = False) -> ManagerBasedRlEnvC
                 {"step": 250 * 24, "weight": -0.6},
                 {"step": 500 * 24, "weight": -0.8},
                 {"step": 750 * 24, "weight": -1.0},
+                {"step": 1000 * 24, "weight": -1.2},
+                {"step": 1250 * 24, "weight": -1.4},
+                {"step": 1500 * 24, "weight": -1.6},
             ],
         },
     )
