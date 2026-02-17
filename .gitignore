@@ -10,7 +10,7 @@ __pycache__/
 .venv/
 venv/
 ENV/
-
+wandb_venv/*
 # Tooling
 .ruff_cache/
 .pytest_cache/

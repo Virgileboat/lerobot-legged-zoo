@@ -13,6 +13,27 @@ from mjlab.sensor import ContactMatch, ContactSensorCfg
 from mjlab.tasks.velocity import mdp
 from mjlab.tasks.velocity.mdp import UniformVelocityCommandCfg
 from mjlab.tasks.velocity.velocity_env_cfg import make_velocity_env_cfg
+import sys
+import torch
+
+
+# def _print_actuator_torques(env, env_ids=None) -> None:
+#   """Print mean/max actuator torque (absolute) for quick debugging during play."""
+#   asset = env.scene["robot"]
+#   torques = asset.data.actuator_force
+#   if env_ids is not None:
+#     torques = torques[env_ids]
+#   mean_abs = torques.abs().mean(dim=0).tolist()
+#   max_abs = torques.abs().max(dim=0).values.tolist()
+#   names = getattr(asset, "actuator_names", None)
+#   if names is None:
+#     names = [f"a{i}" for i in range(len(mean_abs))]
+#   rows = [
+#     f"{n}: mean {m:.2f} max {x:.2f}"
+#     for n, m, x in zip(names, mean_abs, max_abs, strict=False)
+#   ]
+#   print("[torque]\n  " + "\n  ".join(rows), flush=True)
+#   sys.stdout.flush()
 
 
 def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
@@ -162,5 +183,11 @@ def lerobot_humanoid_no_arms_flat_env_cfg(play: bool = False) -> ManagerBasedRlE
     twist_cmd.ranges.lin_vel_x = (-1.5, 2.0)
     twist_cmd.ranges.ang_vel_z = (-0.7, 0.7)
 
-  return cfg
+    # cfg.events["print_actuator_torques"] = EventTermCfg(
+    #   func=_print_actuator_torques,
+    #   mode="interval",
+    #   interval_range_s=(0.5, 0.5),
+    #   is_global_time=True,
+    # )
 
+  return cfg
