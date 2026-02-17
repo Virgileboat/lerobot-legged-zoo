@@ -146,4 +146,4 @@ def get_open_duck_mini_v2_robot_cfg() -> EntityCfg:
 
 
 # Action scale: fixed for now (XML actuators already define kp/forcerange).
-OPEN_DUCK_MINI_V2_ACTION_SCALE = 0.5
+OPEN_DUCK_MINI_V2_ACTION_SCALE = 1.0
