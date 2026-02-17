@@ -38,7 +38,7 @@ MASS_INERTIA_RANDOMIZATION_RANGE = (0.95, 1.05)  # ±5%
 KP_RANDOMIZATION_RANGE = (0.85, 1.15)  # ±15%
 KD_RANDOMIZATION_RANGE = (0.9, 1.1)  # ±10%
 VELOCITY_PUSH_INTERVAL_S = (3.0, 6.0)
-VELOCITY_PUSH_RANGE = (-0.4, 0.4)  # Scaled from -0.3,0.3 for larger robot
+VELOCITY_PUSH_RANGE = (-0.3, 0.3)  # Scaled from -0.3,0.3 for larger robot
 IMU_ORIENTATION_RANDOMIZATION_ANGLE = 1.0  # ±2° IMU mounting error
 BASE_ORIENTATION_MAX_PITCH_DEG = 10.0
 BASE_ORIENTATION_MAX_ROLL_DEG = 5.0
@@ -120,7 +120,7 @@ def open_duck_mini_v2_velocity_env_cfg(play: bool = False) -> ManagerBasedRlEnvC
     cfg.rewards["pose"].params["std_walking"] = std_walking
     cfg.rewards["pose"].params["std_running"] = std_walking
     cfg.rewards["pose"].params["walking_threshold"] = 0.01
-    cfg.rewards["pose"].weight = 2.0
+    cfg.rewards["pose"].weight = 3.0
 
     # Body-specific reward configurations
     cfg.rewards["upright"].params["asset_cfg"].body_names = ("trunk_assembly",)
@@ -341,9 +341,9 @@ def open_duck_mini_v2_velocity_env_cfg(play: bool = False) -> ManagerBasedRlEnvC
     command: UniformVelocityCommandCfg = cfg.commands["twist"]
     command.rel_standing_envs = 0.02
     command.rel_heading_envs = 0.0
-    command.ranges.lin_vel_x = (-0.4, 0.4)  # Scaled from -0.3, 0.3
-    command.ranges.lin_vel_y = (-0.4, 0.4)
-    command.ranges.ang_vel_z = (-1.5, 1.5)  # Keep similar angular velocity
+    command.ranges.lin_vel_x = (-0.3, 0.3)  # Scaled from -0.3, 0.3
+    command.ranges.lin_vel_y = (-0.3, 0.3)
+    command.ranges.ang_vel_z = (-1.0, 1.0)  # Keep similar angular velocity
     command.viz.z_offset = 0.8  # Scaled from 0.5 for taller robot
 
     # Terrain
