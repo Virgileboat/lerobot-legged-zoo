@@ -341,9 +341,9 @@ def open_duck_mini_v2_velocity_env_cfg(play: bool = False) -> ManagerBasedRlEnvC
     command: UniformVelocityCommandCfg = cfg.commands["twist"]
     command.rel_standing_envs = 0.02
     command.rel_heading_envs = 0.0
-    command.ranges.lin_vel_x = (-0.4, 0.4)  # Scaled from -0.3, 0.3
-    command.ranges.lin_vel_y = (-0.4, 0.4)
-    command.ranges.ang_vel_z = (-1.5, 1.5)  # Keep similar angular velocity
+    command.ranges.lin_vel_x = (-0.25, 0.25)  # Scaled from -0.3, 0.3
+    command.ranges.lin_vel_y = (-0.25, 0.25)
+    command.ranges.ang_vel_z = (-1.0, 1.0)  # Keep similar angular velocity
     command.viz.z_offset = 0.8  # Scaled from 0.5 for taller robot
 
     # Terrain
@@ -356,9 +356,12 @@ def open_duck_mini_v2_velocity_env_cfg(play: bool = False) -> ManagerBasedRlEnvC
         params={
             "reward_name": "action_rate_l2",
             "weight_stages": [
-                {"step": 0, "weight": -0.4},
-                {"step": 250 * 24, "weight": -0.8},
-                {"step": 500 * 24, "weight": -1.0},
+                {"step": 0, "weight": -0.8},
+                {"step": 250 * 24, "weight": -1.0},
+                {"step": 500 * 24, "weight": -1.2},
+                {"step": 750 * 24, "weight": -1.4},
+                {"step": 1000 * 24, "weight": -1.6},
+                {"step": 1250 * 24, "weight": -1.8},
             ],
         },
     )
