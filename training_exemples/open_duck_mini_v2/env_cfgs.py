@@ -280,16 +280,26 @@ def open_duck_mini_v2_velocity_env_cfg(play: bool = False) -> ManagerBasedRlEnvC
             },
         )
 
-    # Observations - Override IMU sensor names from the XML
-    # Open Duck Mini v2 XML defines sensors as "gyro" and "local_linvel"
-    cfg.observations["policy"].terms["base_lin_vel"] = ObservationTermCfg(
-        func=mdp.builtin_sensor,
-        params={"sensor_name": "robot/local_linvel"},
+    # Configure joint observations to only use actuated joints (14 DoFs, not all 24 including backlash)
+    actuated_joint_names = (
+        "left_hip_yaw", "left_hip_roll", "left_hip_pitch", "left_knee", "left_ankle",
+        "neck_pitch", "head_pitch", "head_yaw", "head_roll",
+        "right_hip_yaw", "right_hip_roll", "right_hip_pitch", "right_knee", "right_ankle",
     )
+
+    from mjlab.managers.scene_entity_config import SceneEntityCfg
+    actuated_joints_cfg = SceneEntityCfg("robot", joint_names=actuated_joint_names)
+
+    # Policy observations - no base_lin_vel (privileged info for critic only)
+    del cfg.observations["policy"].terms["base_lin_vel"]
     cfg.observations["policy"].terms["base_ang_vel"] = ObservationTermCfg(
         func=mdp.builtin_sensor,
         params={"sensor_name": "robot/gyro"},
     )
+    cfg.observations["policy"].terms["joint_pos"].params["asset_cfg"] = actuated_joints_cfg
+    cfg.observations["policy"].terms["joint_vel"].params["asset_cfg"] = actuated_joints_cfg
+
+    # Critic observations - has base_lin_vel (privileged)
     cfg.observations["critic"].terms["base_lin_vel"] = ObservationTermCfg(
         func=mdp.builtin_sensor,
         params={"sensor_name": "robot/local_linvel"},
@@ -298,6 +308,8 @@ def open_duck_mini_v2_velocity_env_cfg(play: bool = False) -> ManagerBasedRlEnvC
         func=mdp.builtin_sensor,
         params={"sensor_name": "robot/gyro"},
     )
+    cfg.observations["critic"].terms["joint_pos"].params["asset_cfg"] = actuated_joints_cfg
+    cfg.observations["critic"].terms["joint_vel"].params["asset_cfg"] = actuated_joints_cfg
 
     # Determine gravity/accelerometer term name
     gravity_term_name = "projected_gravity" if USE_PROJECTED_GRAVITY else "raw_accelerometer"
