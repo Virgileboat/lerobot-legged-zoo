@@ -49,8 +49,7 @@ uv run play Mjlab-Velocity-Flat-Open-Duck-Mini-v2 --agent random
 |-----------|-------------|
 | `Mjlab-Velocity-Flat-Leggy` | Train Leggy to walk on flat ground |
 | `Mjlab-Velocity-Rough-Leggy` | Train Leggy to walk on rough terrain |
-| `Mjlab-Velocity-Flat-Open-Duck-Mini-v2` | Train Open Duck Mini v2 to walk on flat ground |
-| `Mjlab-Velocity-Rough-Open-Duck-Mini-v2` | Train Open Duck Mini v2 to walk on rough terrain |
+| `Mjlab-Velocity-Open-Duck-Mini-v2` | Train Open Duck Mini v2 to walk on flat ground |
 | `Mjlab-Velocity-Flat-Unitree-G1-23dof` | Train Unitree G1 (23-DoF) on flat ground |
 | `Mjlab-Velocity-Rough-Unitree-G1-23dof` | Train Unitree G1 (23-DoF) on rough terrain |
 | `Mjlab-Velocity-Flat-Unitree-G1-29dof` | Train Unitree G1 (29-DoF) on flat ground |
@@ -79,7 +78,7 @@ Each robot has a model under `models/` and a matching training example under
 - Model: `models/open_duck_mini_v2/open_duck_mini_v2_backlash.xml`
 - Training: `training_exemples/open_duck_mini_v2/env_cfgs.py`
 - Constants: `training_exemples/open_duck_mini_v2/open_duck_mini_v2_constants.py`
-- Tasks: `Mjlab-Velocity-Flat-Open-Duck-Mini-v2`, `Mjlab-Velocity-Rough-Open-Duck-Mini-v2`
+- Tasks: `Mjlab-Velocity-Open-Duck-Mini-v2`
 - Updated Open Duck Mini v2 with backlash joints and improved geometry.
 ![Open Duck Mini v2](media/open_duck_mini_v2.png)
 
