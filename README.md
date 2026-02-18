@@ -81,7 +81,7 @@ Each robot has a model under `models/` and a matching training example under
 - Constants: `training_exemples/open_duck_mini_v2/open_duck_mini_v2_constants.py`
 - Tasks: `Mjlab-Velocity-Flat-Open-Duck-Mini-v2`, `Mjlab-Velocity-Rough-Open-Duck-Mini-v2`
 - Updated Open Duck Mini v2 with backlash joints and improved geometry.
-![Open Duck Mini v2](media/open_duck_v2.svg)
+![Open Duck Mini v2](media/open_duck_mini_v2.png)
 
 ### LeRobot Humanoid Full (20-DOF)
 - Model: `models/lerobot_humanoide/mjcf/robot.xml`
