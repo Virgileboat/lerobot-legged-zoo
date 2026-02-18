@@ -71,32 +71,43 @@ HIP_EFFORT_LIMIT = 15.0
 KNEE_EFFORT_LIMIT = 35.0
 ANKLE_EFFORT_LIMIT = 3.0
 
-LEROBOT_ACTUATOR_HIP = BuiltinPositionActuatorCfg(
+
+LEROBOT_ACTUATOR_HIP1 = BuiltinPositionActuatorCfg(
   target_names_expr=(
     "hipz_.*",
-    "hipx_.*",
   ),
   stiffness=HIP_STIFFNESS,
   damping=HIP_DAMPING,
-  effort_limit=HIP_EFFORT_LIMIT,
+  effort_limit=8,
   armature=HIP_ARMATURE,
 )
 
 
 LEROBOT_ACTUATOR_HIP2 = BuiltinPositionActuatorCfg(
   target_names_expr=(
+        "hipx_.*",
+  ),
+  stiffness=HIP_STIFFNESS,
+  damping=HIP_DAMPING,
+  effort_limit=12,
+  armature=HIP_ARMATURE,
+)
+
+
+LEROBOT_ACTUATOR_HIP3 = BuiltinPositionActuatorCfg(
+  target_names_expr=(
     "hipy_.*",
   ),
   stiffness=HIP_STIFFNESS,
   damping=HIP_DAMPING,
-  effort_limit=35,
+  effort_limit=40.0,
   armature=HIP_ARMATURE,
 )
 LEROBOT_ACTUATOR_KNEE = BuiltinPositionActuatorCfg(
   target_names_expr=("knee_.*",),
   stiffness=KNEE_STIFFNESS,
   damping=KNEE_DAMPING,
-  effort_limit=KNEE_EFFORT_LIMIT,
+  effort_limit=40,
   armature=KNEE_ARMATURE,
 )
 
@@ -107,7 +118,7 @@ LEROBOT_ACTUATOR_ANKLE = BuiltinPositionActuatorCfg(
   ),
   stiffness=ANKLE_STIFFNESS,
   damping=ANKLE_DAMPING,
-  effort_limit=ANKLE_EFFORT_LIMIT,
+  effort_limit=4,
   armature=ANKLE_ARMATURE,
 )
 
@@ -170,7 +181,8 @@ FULL_COLLISION = CollisionCfg(
 
 LEROBOT_HUMANOID_NO_ARMS_ARTICULATION = EntityArticulationInfoCfg(
   actuators=(
-    LEROBOT_ACTUATOR_HIP,
+    LEROBOT_ACTUATOR_HIP1,
+    LEROBOT_ACTUATOR_HIP2,
     LEROBOT_ACTUATOR_HIP2,
     LEROBOT_ACTUATOR_KNEE,
     LEROBOT_ACTUATOR_ANKLE,

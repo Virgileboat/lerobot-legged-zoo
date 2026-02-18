@@ -86,6 +86,9 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   twist_cmd = cfg.commands["twist"]
   assert isinstance(twist_cmd, UniformVelocityCommandCfg)
   twist_cmd.viz.z_offset = 0.9  # Adjust based on robot height.
+  # Lower velocity command ranges for training stability.
+  twist_cmd.ranges.lin_vel_x = (-0.5, 0.5)
+  twist_cmd.ranges.ang_vel_z = (-0.2, 0.2)
 
   cfg.observations["critic"].terms["foot_height"].params[
     "asset_cfg"
@@ -180,8 +183,8 @@ def lerobot_humanoid_no_arms_flat_env_cfg(play: bool = False) -> ManagerBasedRlE
   if play:
     twist_cmd = cfg.commands["twist"]
     assert isinstance(twist_cmd, UniformVelocityCommandCfg)
-    twist_cmd.ranges.lin_vel_x = (-1.5, 2.0)
-    twist_cmd.ranges.ang_vel_z = (-0.7, 0.7)
+    twist_cmd.ranges.lin_vel_x = (-0.6, 1.0)
+    twist_cmd.ranges.ang_vel_z = (-0.4, 0.4)
 
     # cfg.events["print_actuator_torques"] = EventTermCfg(
     #   func=_print_actuator_torques,
