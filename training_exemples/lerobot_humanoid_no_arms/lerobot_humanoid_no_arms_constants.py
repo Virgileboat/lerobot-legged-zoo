@@ -89,7 +89,7 @@ LEROBOT_ACTUATOR_HIP2 = BuiltinPositionActuatorCfg(
   ),
   stiffness=HIP_STIFFNESS,
   damping=HIP_DAMPING,
-  effort_limit=20,
+  effort_limit=88,
   armature=HIP_ARMATURE,
 )
 
@@ -118,7 +118,7 @@ LEROBOT_ACTUATOR_ANKLE = BuiltinPositionActuatorCfg(
   ),
   stiffness=ANKLE_STIFFNESS,
   damping=ANKLE_DAMPING,
-  effort_limit=1,
+  effort_limit=44,
   armature=ANKLE_ARMATURE,
 )
 

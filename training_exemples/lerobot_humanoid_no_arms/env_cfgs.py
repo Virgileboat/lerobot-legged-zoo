@@ -17,6 +17,14 @@ import sys
 import torch
 
 
+def _get_ankle_actuator_ids(asset) -> list[int]:
+  """Return actuator indices for ankle joints."""
+  actuator_names = getattr(asset, "actuator_names", None)
+  if actuator_names is None:
+    return []
+  return [i for i, name in enumerate(actuator_names) if ("anklex" in name or "ankley" in name)]
+
+
 def _all_actuator_torque_l2(env) -> torch.Tensor:
   """L2 torque cost over all actuators (per environment)."""
   asset = env.scene["robot"]
@@ -29,19 +37,43 @@ def _ankle_actuator_torque_l2(env) -> torch.Tensor:
   asset = env.scene["robot"]
   torques = asset.data.actuator_force
 
-  # Use actuator names to isolate ankle torques (anklex/ankley on both legs).
-  actuator_names = getattr(asset, "actuator_names", None)
-  if actuator_names is None:
-    return torch.zeros(torques.shape[0], device=torques.device, dtype=torques.dtype)
-
-  ankle_ids = [
-    i for i, name in enumerate(actuator_names) if ("anklex" in name or "ankley" in name)
-  ]
+  ankle_ids = _get_ankle_actuator_ids(asset)
   if not ankle_ids:
     return torch.zeros(torques.shape[0], device=torques.device, dtype=torques.dtype)
 
   ankle_torques = torques[:, ankle_ids]
   return torch.sum(torch.square(ankle_torques), dim=1)
+
+
+def _ankle_actuator_power_l1(env) -> torch.Tensor:
+  """L1 ankle mechanical power proxy: sum(|tau * qdot|) per environment."""
+  asset = env.scene["robot"]
+  torques = asset.data.actuator_force
+  ankle_ids = _get_ankle_actuator_ids(asset)
+  if not ankle_ids:
+    return torch.zeros(torques.shape[0], device=torques.device, dtype=torques.dtype)
+
+  ankle_torques = torques[:, ankle_ids]
+  actuator_vel = getattr(asset.data, "actuator_velocity", None)
+  if actuator_vel is not None:
+    ankle_vel = actuator_vel[:, ankle_ids]
+    return torch.sum(torch.abs(ankle_torques * ankle_vel), dim=1)
+
+  # Fallback for backends that don't expose actuator_velocity.
+  return torch.sum(torch.abs(ankle_torques), dim=1)
+
+
+def _ankle_torque_above_limit_l2(env, limit_nm: float = 4.0) -> torch.Tensor:
+  """Penalize only torque usage above a soft ankle target limit."""
+  asset = env.scene["robot"]
+  torques = asset.data.actuator_force
+  ankle_ids = _get_ankle_actuator_ids(asset)
+  if not ankle_ids:
+    return torch.zeros(torques.shape[0], device=torques.device, dtype=torques.dtype)
+
+  ankle_abs = torch.abs(torques[:, ankle_ids])
+  over = torch.clamp(ankle_abs - limit_nm, min=0.0)
+  return torch.sum(torch.square(over), dim=1)
 
 
 def _print_actuator_torques(env, env_ids=None) -> None:
@@ -133,8 +165,8 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
     r".*hipx.*": 0.15,
     r".*hipz.*": 0.15,
     r".*knee.*": 0.35,
-    r".*ankley.*": 0.25,
-    r".*anklex.*": 0.1,
+    r".*ankley.*": 0.35,
+    r".*anklex.*": 0.2,
   }
   
   cfg.rewards["pose"].params["std_running"] = {
@@ -143,8 +175,8 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
     r".*hipx.*": 0.2,
     r".*hipz.*": 0.2,
     r".*knee.*": 0.6,
-    r".*ankley.*": 0.35,
-    r".*anklex.*": 0.15,
+    r".*ankley.*": 0.45,
+    r".*anklex.*": 0.25,
   }
 
   cfg.rewards["upright"].params["asset_cfg"].body_names = ("torso_mesh",)
@@ -164,7 +196,16 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   )
   cfg.rewards["ankle_torque_l2"] = RewardTermCfg(
     func=_ankle_actuator_torque_l2,
-    weight=-10e-4,
+    weight=-30e-4,
+  )
+  cfg.rewards["ankle_power_l1"] = RewardTermCfg(
+    func=_ankle_actuator_power_l1,
+    weight=-5e-4,
+  )
+  cfg.rewards["ankle_torque_over_4nm_l2"] = RewardTermCfg(
+    func=_ankle_torque_above_limit_l2,
+    weight=-40e-4,
+    params={"limit_nm": 4.0},
   )
 
   cfg.rewards["self_collisions"] = RewardTermCfg(
