@@ -142,8 +142,8 @@ def open_duck_mini_v2_velocity_env_cfg(play: bool = False) -> ManagerBasedRlEnvC
     # Air time reward - scaled for larger robot (longer swing times)
     cfg.rewards["air_time"].weight = 5.0
     cfg.rewards["air_time"].params["command_threshold"] = 0.01
-    cfg.rewards["air_time"].params["threshold_min"] = 0.13  # Scaled from 0.10 (30% longer for taller robot)
-    cfg.rewards["air_time"].params["threshold_max"] = 0.32  # Scaled from 0.25
+    cfg.rewards["air_time"].params["threshold_min"] = 0.2  # Was 0.13
+    cfg.rewards["air_time"].params["threshold_max"] = 0.5  # Was 0.32
 
     cfg.rewards["body_ang_vel"].weight = -0.05
     cfg.rewards["angular_momentum"].weight = -0.02
@@ -166,7 +166,7 @@ def open_duck_mini_v2_velocity_env_cfg(play: bool = False) -> ManagerBasedRlEnvC
 
     # Neck stability
     cfg.rewards["neck_action_rate_l2"] = RewardTermCfg(
-        func=open_duck_mdp.neck_action_rate_l2, weight=-0.2
+        func=open_duck_mdp.neck_action_rate_l2, weight=-0.5
     )
 
     # CoM height target - scaled for larger robot

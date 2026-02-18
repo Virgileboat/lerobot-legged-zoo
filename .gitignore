@@ -32,3 +32,4 @@ wandb/
 dist/
 build/
 *.egg-info/
+*.onnx
