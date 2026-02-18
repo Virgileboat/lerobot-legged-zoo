@@ -44,23 +44,23 @@ def _ankle_actuator_torque_l2(env) -> torch.Tensor:
   return torch.sum(torch.square(ankle_torques), dim=1)
 
 
-# def _print_actuator_torques(env, env_ids=None) -> None:
-#   """Print mean/max actuator torque (absolute) for quick debugging during play."""
-#   asset = env.scene["robot"]
-#   torques = asset.data.actuator_force
-#   if env_ids is not None:
-#     torques = torques[env_ids]
-#   mean_abs = torques.abs().mean(dim=0).tolist()
-#   max_abs = torques.abs().max(dim=0).values.tolist()
-#   names = getattr(asset, "actuator_names", None)
-#   if names is None:
-#     names = [f"a{i}" for i in range(len(mean_abs))]
-#   rows = [
-#     f"{n}: mean {m:.2f} max {x:.2f}"
-#     for n, m, x in zip(names, mean_abs, max_abs, strict=False)
-#   ]
-#   print("[torque]\n  " + "\n  ".join(rows), flush=True)
-#   sys.stdout.flush()
+def _print_actuator_torques(env, env_ids=None) -> None:
+  """Print mean/max actuator torque (absolute) for quick debugging during play."""
+  asset = env.scene["robot"]
+  torques = asset.data.actuator_force
+  if env_ids is not None:
+    torques = torques[env_ids]
+  mean_abs = torques.abs().mean(dim=0).tolist()
+  max_abs = torques.abs().max(dim=0).values.tolist()
+  names = getattr(asset, "actuator_names", None)
+  if names is None:
+    names = [f"a{i}" for i in range(len(mean_abs))]
+  rows = [
+    f"{n}: mean {m:.2f} max {x:.2f}"
+    for n, m, x in zip(names, mean_abs, max_abs, strict=False)
+  ]
+  print("[torque]\n  " + "\n  ".join(rows), flush=True)
+  sys.stdout.flush()
 
 
 def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
@@ -164,7 +164,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   )
   cfg.rewards["ankle_torque_l2"] = RewardTermCfg(
     func=_ankle_actuator_torque_l2,
-    weight=-6e-4,
+    weight=-10e-4,
   )
 
   cfg.rewards["self_collisions"] = RewardTermCfg(
