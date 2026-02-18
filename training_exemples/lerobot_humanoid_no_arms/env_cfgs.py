@@ -17,6 +17,33 @@ import sys
 import torch
 
 
+def _all_actuator_torque_l2(env) -> torch.Tensor:
+  """L2 torque cost over all actuators (per environment)."""
+  asset = env.scene["robot"]
+  torques = asset.data.actuator_force
+  return torch.sum(torch.square(torques), dim=1)
+
+
+def _ankle_actuator_torque_l2(env) -> torch.Tensor:
+  """L2 torque cost over ankle actuators only (per environment)."""
+  asset = env.scene["robot"]
+  torques = asset.data.actuator_force
+
+  # Use actuator names to isolate ankle torques (anklex/ankley on both legs).
+  actuator_names = getattr(asset, "actuator_names", None)
+  if actuator_names is None:
+    return torch.zeros(torques.shape[0], device=torques.device, dtype=torques.dtype)
+
+  ankle_ids = [
+    i for i, name in enumerate(actuator_names) if ("anklex" in name or "ankley" in name)
+  ]
+  if not ankle_ids:
+    return torch.zeros(torques.shape[0], device=torques.device, dtype=torques.dtype)
+
+  ankle_torques = torques[:, ankle_ids]
+  return torch.sum(torch.square(ankle_torques), dim=1)
+
+
 # def _print_actuator_torques(env, env_ids=None) -> None:
 #   """Print mean/max actuator torque (absolute) for quick debugging during play."""
 #   asset = env.scene["robot"]
@@ -129,6 +156,16 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   cfg.rewards["body_ang_vel"].weight = -0.05
   cfg.rewards["angular_momentum"].weight = -0.02
   cfg.rewards["air_time"].weight = 0.0
+
+  # Encourage lower overall effort, with an extra penalty on ankle torque demand.
+  cfg.rewards["actuator_torque_l2"] = RewardTermCfg(
+    func=_all_actuator_torque_l2,
+    weight=-2e-4,
+  )
+  cfg.rewards["ankle_torque_l2"] = RewardTermCfg(
+    func=_ankle_actuator_torque_l2,
+    weight=-6e-4,
+  )
 
   cfg.rewards["self_collisions"] = RewardTermCfg(
     func=mdp.self_collision_cost,

@@ -78,7 +78,7 @@ LEROBOT_ACTUATOR_HIP1 = BuiltinPositionActuatorCfg(
   ),
   stiffness=HIP_STIFFNESS,
   damping=HIP_DAMPING,
-  effort_limit=8,
+  effort_limit=15,
   armature=HIP_ARMATURE,
 )
 
@@ -89,7 +89,7 @@ LEROBOT_ACTUATOR_HIP2 = BuiltinPositionActuatorCfg(
   ),
   stiffness=HIP_STIFFNESS,
   damping=HIP_DAMPING,
-  effort_limit=12,
+  effort_limit=20,
   armature=HIP_ARMATURE,
 )
 
@@ -118,7 +118,7 @@ LEROBOT_ACTUATOR_ANKLE = BuiltinPositionActuatorCfg(
   ),
   stiffness=ANKLE_STIFFNESS,
   damping=ANKLE_DAMPING,
-  effort_limit=4,
+  effort_limit=7,
   armature=ANKLE_ARMATURE,
 )
 
@@ -183,7 +183,7 @@ LEROBOT_HUMANOID_NO_ARMS_ARTICULATION = EntityArticulationInfoCfg(
   actuators=(
     LEROBOT_ACTUATOR_HIP1,
     LEROBOT_ACTUATOR_HIP2,
-    LEROBOT_ACTUATOR_HIP2,
+    LEROBOT_ACTUATOR_HIP3,
     LEROBOT_ACTUATOR_KNEE,
     LEROBOT_ACTUATOR_ANKLE,
   ),
