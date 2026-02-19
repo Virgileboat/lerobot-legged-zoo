@@ -264,11 +264,11 @@ def lerobot_humanoid_no_arms_flat_env_cfg(play: bool = False) -> ManagerBasedRlE
     twist_cmd.ranges.lin_vel_x = (-0.6, 1.0)
     twist_cmd.ranges.ang_vel_z = (-0.4, 0.4)
 
-    cfg.events["print_actuator_torques"] = EventTermCfg(
-      func=_print_actuator_torques,
-      mode="interval",
-      interval_range_s=(0.5, 0.5),
-      is_global_time=True,
-    )
+    # cfg.events["print_actuator_torques"] = EventTermCfg(
+    #   func=_print_actuator_torques,
+    #   mode="interval",
+    #   interval_range_s=(0.5, 0.5),
+    #   is_global_time=True,
+    # )
 
   return cfg
