@@ -202,10 +202,10 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
     func=_ankle_actuator_power_l1,
     weight=-5e-4,
   )
-  cfg.rewards["ankle_torque_over_4nm_l2"] = RewardTermCfg(
+  cfg.rewards["ankle_torque_over_6nm_l2"] = RewardTermCfg(
     func=_ankle_torque_above_limit_l2,
-    weight=-40e-4,
-    params={"limit_nm": 4.0},
+    weight=-200e-4,
+    params={"limit_nm": 6.0},
   )
 
   cfg.rewards["self_collisions"] = RewardTermCfg(
@@ -264,11 +264,11 @@ def lerobot_humanoid_no_arms_flat_env_cfg(play: bool = False) -> ManagerBasedRlE
     twist_cmd.ranges.lin_vel_x = (-0.6, 1.0)
     twist_cmd.ranges.ang_vel_z = (-0.4, 0.4)
 
-    # cfg.events["print_actuator_torques"] = EventTermCfg(
-    #   func=_print_actuator_torques,
-    #   mode="interval",
-    #   interval_range_s=(0.5, 0.5),
-    #   is_global_time=True,
-    # )
+    cfg.events["print_actuator_torques"] = EventTermCfg(
+      func=_print_actuator_torques,
+      mode="interval",
+      interval_range_s=(0.5, 0.5),
+      is_global_time=True,
+    )
 
   return cfg
