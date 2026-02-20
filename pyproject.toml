@@ -9,6 +9,7 @@ description = "LeRobot/Pollen legged robot models + MJLab training examples (no 
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+  "matplotlib>=3.10.8",
   "mjlab @ git+https://github.com/mujocolab/mjlab.git",
 ]
 

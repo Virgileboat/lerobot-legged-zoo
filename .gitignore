@@ -28,6 +28,10 @@ wandb/
 .idea/
 .vscode/
 
+*.pkl
+*.onnx
+*.pt
+
 # Build artifacts
 dist/
 build/

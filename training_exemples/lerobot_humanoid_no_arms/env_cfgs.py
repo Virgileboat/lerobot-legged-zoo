@@ -1,5 +1,11 @@
 """LeRobot Humanoid velocity environment configurations."""
 
+import csv
+import math
+from datetime import datetime
+from pathlib import Path
+from typing import Any
+
 from .lerobot_humanoid_no_arms_constants import (
   LEROBOT_HUMANOID_NO_ARMS_ACTION_SCALE,
   get_lerobot_humanoid_no_arms_robot_cfg,
@@ -15,6 +21,129 @@ from mjlab.tasks.velocity.mdp import UniformVelocityCommandCfg
 from mjlab.tasks.velocity.velocity_env_cfg import make_velocity_env_cfg
 import sys
 import torch
+
+
+_CSV_LOG_STATE_BY_ENV: dict[int, dict[str, Any]] = {}
+
+
+class _ActionHighFrequencyPenalty:
+  """Penalty on action energy above a cutoff frequency via 1st-order HP filter."""
+
+  def __init__(self) -> None:
+    self._state_by_env: dict[int, dict[str, torch.Tensor]] = {}
+    self._last_env_key: int | None = None
+
+  def __call__(self, env, cutoff_hz: float = 2.0) -> torch.Tensor:
+    actions = env.action_manager.action
+    env_key = id(env)
+    self._last_env_key = env_key
+
+    state = self._state_by_env.get(env_key)
+    if state is None or state["lp"].shape != actions.shape:
+      state = {"lp": torch.zeros_like(actions)}
+      self._state_by_env[env_key] = state
+
+    dt = float(env.step_dt)
+    alpha = math.exp(-2.0 * math.pi * cutoff_hz * dt)
+    lp = state["lp"]
+    lp.mul_(alpha).add_(actions, alpha=1.0 - alpha)
+    high_pass = actions - lp
+    return torch.sum(torch.square(high_pass), dim=1)
+
+  def reset(self, env_ids: torch.Tensor | slice | None = None) -> None:
+    if self._last_env_key is None:
+      return
+    state = self._state_by_env.get(self._last_env_key)
+    if state is None:
+      return
+    lp = state["lp"]
+    if env_ids is None or isinstance(env_ids, slice):
+      lp[:] = 0.0
+    else:
+      lp[env_ids] = 0.0
+
+
+_ACTION_HIGH_FREQ_PENALTY = _ActionHighFrequencyPenalty()
+
+
+def _flatten_obs_policy(
+  obs_policy: torch.Tensor | dict[str, torch.Tensor],
+  env_index: int,
+) -> list[float]:
+  """Flatten policy observation for one environment into a 1D list."""
+  if isinstance(obs_policy, torch.Tensor):
+    return obs_policy[env_index].detach().cpu().reshape(-1).tolist()
+
+  flat_values: list[float] = []
+  for term in obs_policy.values():
+    flat_values.extend(term[env_index].detach().cpu().reshape(-1).tolist())
+  return flat_values
+
+
+def _log_obs_action_csv(
+  env,
+  env_ids=None,
+  env_index: int = 0,
+  csv_path: str | None = None,
+) -> None:
+  """Log policy observation and action to CSV at every environment step."""
+  del env_ids  # Unused for global interval events.
+  if env_index < 0 or env_index >= env.num_envs:
+    return
+
+  obs_dict = env.observation_manager.compute(update_history=False)
+  obs_policy = obs_dict.get("policy")
+  if obs_policy is None:
+    return
+
+  obs_values = _flatten_obs_policy(obs_policy, env_index)
+  action_values = (
+    env.action_manager.action[env_index].detach().cpu().reshape(-1).tolist()
+  )
+
+  env_key = id(env)
+  state = _CSV_LOG_STATE_BY_ENV.get(env_key)
+  if state is None:
+    if csv_path is None:
+      stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+      csv_file = (
+        Path("logs")
+        / "csv"
+        / f"lerobot_humanoid_no_arms_flat_play_{stamp}.csv"
+      )
+    else:
+      csv_file = Path(csv_path)
+    csv_file.parent.mkdir(parents=True, exist_ok=True)
+    state = {"path": csv_file, "header_written": False}
+    _CSV_LOG_STATE_BY_ENV[env_key] = state
+    print(f"[csv] Logging observations/actions to: {csv_file.resolve()}", flush=True)
+
+  csv_file = state["path"]
+  header_written = bool(state["header_written"])
+
+  if not header_written:
+    header = (
+      ["global_step", "episode_step", "env_index"]
+      + [f"action_{i}" for i in range(len(action_values))]
+      + [f"obs_{i}" for i in range(len(obs_values))]
+    )
+    with csv_file.open("w", newline="") as f:
+      writer = csv.writer(f)
+      writer.writerow(header)
+    state["header_written"] = True
+
+  row = (
+    [
+      int(env.common_step_counter),
+      int(env.episode_length_buf[env_index].item()),
+      env_index,
+    ]
+    + action_values
+    + obs_values
+  )
+  with csv_file.open("a", newline="") as f:
+    writer = csv.writer(f)
+    writer.writerow(row)
 
 
 def _get_ankle_actuator_ids(asset) -> list[int]:
@@ -207,6 +336,11 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
     weight=-200e-4,
     params={"limit_nm": 6.0},
   )
+  cfg.rewards["action_high_freq_l2"] = RewardTermCfg(
+    func=_ACTION_HIGH_FREQ_PENALTY,
+    weight=-5e-3,
+    params={"cutoff_hz": 2.0},
+  )
 
   cfg.rewards["self_collisions"] = RewardTermCfg(
     func=mdp.self_collision_cost,
@@ -263,6 +397,14 @@ def lerobot_humanoid_no_arms_flat_env_cfg(play: bool = False) -> ManagerBasedRlE
     assert isinstance(twist_cmd, UniformVelocityCommandCfg)
     twist_cmd.ranges.lin_vel_x = (-0.6, 1.0)
     twist_cmd.ranges.ang_vel_z = (-0.4, 0.4)
+
+    cfg.events["log_obs_action_csv"] = EventTermCfg(
+      func=_log_obs_action_csv,
+      mode="interval",
+      interval_range_s=(0.0, 0.0),
+      is_global_time=True,
+      params={"env_index": 0},
+    )
 
     # cfg.events["print_actuator_torques"] = EventTermCfg(
     #   func=_print_actuator_torques,
