@@ -192,7 +192,7 @@ def _ankle_actuator_power_l1(env) -> torch.Tensor:
   return torch.sum(torch.abs(ankle_torques), dim=1)
 
 
-def _ankle_torque_above_limit_l2(env, limit_nm: float = 4.0) -> torch.Tensor:
+def _ankle_torque_above_limit_l2(env, limit_nm: float = 5.0) -> torch.Tensor:
   """Penalize only torque usage above a soft ankle target limit."""
   asset = env.scene["robot"]
   torques = asset.data.actuator_force
@@ -331,15 +331,10 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
     func=_ankle_actuator_power_l1,
     weight=-5e-4,
   )
-  cfg.rewards["ankle_torque_over_6nm_l2"] = RewardTermCfg(
+  cfg.rewards["ankle_torque_over_5nm_l2"] = RewardTermCfg(
     func=_ankle_torque_above_limit_l2,
     weight=-200e-4,
-    params={"limit_nm": 6.0},
-  )
-  cfg.rewards["action_high_freq_l2"] = RewardTermCfg(
-    func=_ACTION_HIGH_FREQ_PENALTY,
-    weight=-5e-3,
-    params={"cutoff_hz": 2.0},
+    params={"limit_nm": 5.0},
   )
 
   cfg.rewards["self_collisions"] = RewardTermCfg(
