@@ -336,6 +336,11 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
     weight=-200e-4,
     params={"limit_nm": 5.0},
   )
+  cfg.rewards["action_high_freq_l2"] = RewardTermCfg(
+    func=_ACTION_HIGH_FREQ_PENALTY,
+    weight=-5e-3,
+    params={"cutoff_hz": 2.0},
+  )
 
   cfg.rewards["self_collisions"] = RewardTermCfg(
     func=mdp.self_collision_cost,
