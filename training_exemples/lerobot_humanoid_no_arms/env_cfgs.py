@@ -1,7 +1,6 @@
 """LeRobot Humanoid velocity environment configurations."""
 
 import csv
-import math
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -24,80 +23,6 @@ import torch
 
 
 _CSV_LOG_STATE_BY_ENV: dict[int, dict[str, Any]] = {}
-_LAST_ACTION_HIGH_FREQ_PENALTY_BY_ENV: dict[int, torch.Tensor] = {}
-
-
-class _ActionHighFrequencyPenalty:
-  """Penalty on action energy above a cutoff frequency via 1st-order HP filter."""
-
-  def __init__(self) -> None:
-    self._state_by_env: dict[int, dict[str, torch.Tensor]] = {}
-    self._last_env_key: int | None = None
-
-  def __call__(self, env, cutoff_hz: float = 2.0) -> torch.Tensor:
-    actions = env.action_manager.action
-    env_key = id(env)
-    self._last_env_key = env_key
-
-    state = self._state_by_env.get(env_key)
-    if state is None or state["lp"].shape != actions.shape:
-      state = {"lp": torch.zeros_like(actions)}
-      self._state_by_env[env_key] = state
-
-    dt = float(env.step_dt)
-    alpha = math.exp(-2.0 * math.pi * cutoff_hz * dt)
-    lp = state["lp"]
-    lp.mul_(alpha).add_(actions, alpha=1.0 - alpha)
-    high_pass = actions - lp
-    penalty = torch.sum(torch.square(high_pass), dim=1)
-    _LAST_ACTION_HIGH_FREQ_PENALTY_BY_ENV[env_key] = penalty.detach()
-    return penalty
-
-  def reset(self, env_ids: torch.Tensor | slice | None = None) -> None:
-    if self._last_env_key is None:
-      return
-    state = self._state_by_env.get(self._last_env_key)
-    if state is None:
-      return
-    lp = state["lp"]
-    if env_ids is None or isinstance(env_ids, slice):
-      lp[:] = 0.0
-    else:
-      lp[env_ids] = 0.0
-
-
-_ACTION_HIGH_FREQ_PENALTY = _ActionHighFrequencyPenalty()
-
-
-def _publish_action_high_freq_metric(
-  env,
-  env_ids=None,
-  metric_name: str = "custom/action_high_freq_l2_raw",
-  weighted_metric_name: str = "custom/action_high_freq_l2_weighted",
-  reward_weight: float = -5e-3,
-) -> None:
-  """Publish cached frequency penalty into env extras for downstream loggers."""
-  del env_ids
-  penalty = _LAST_ACTION_HIGH_FREQ_PENALTY_BY_ENV.get(id(env))
-  if penalty is None or penalty.numel() == 0:
-    return
-
-  mean_penalty = float(penalty.mean().item())
-  weighted_penalty = reward_weight * mean_penalty
-
-  extras = getattr(env, "extras", None)
-  if isinstance(extras, dict):
-    log_dict = extras.setdefault("log", {})
-    if isinstance(log_dict, dict):
-      log_dict[metric_name] = mean_penalty
-      log_dict[weighted_metric_name] = weighted_penalty
-    metrics_dict = extras.setdefault("metrics", {})
-    if isinstance(metrics_dict, dict):
-      metrics_dict[metric_name] = mean_penalty
-      metrics_dict[weighted_metric_name] = weighted_penalty
-    # Flat fallback in case the runner forwards top-level extras only.
-    extras[metric_name] = mean_penalty
-    extras[weighted_metric_name] = weighted_penalty
 
 
 def _flatten_obs_policy(
@@ -375,27 +300,13 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
     weight=-200e-4,
     params={"limit_nm": 5.0},
   )
-  cfg.rewards["action_high_freq_l2"] = RewardTermCfg(
-    func=_ACTION_HIGH_FREQ_PENALTY,
-    weight=-1e-2,
-    params={"cutoff_hz": 2.0},
-  )
+  # Replace custom frequency penalty with standard action-rate smoothing penalty.
+  cfg.rewards["action_rate_l2"].weight = -0.1
 
   cfg.rewards["self_collisions"] = RewardTermCfg(
     func=mdp.self_collision_cost,
     weight=-1.0,
     params={"sensor_name": self_collision_cfg.name},
-  )
-  cfg.events["log_action_high_freq_metric"] = EventTermCfg(
-    func=_publish_action_high_freq_metric,
-    mode="interval",
-    interval_range_s=(0.0, 0.0),
-    is_global_time=True,
-    params={
-      "metric_name": "custom/action_high_freq_l2_raw",
-      "weighted_metric_name": "custom/action_high_freq_l2_weighted",
-      "reward_weight": -1e-2,
-    },
   )
   cfg.scene.terrain.friction = "1.2 0.005 0.0001"
   cfg.scene.terrain.solref = "0.01 1"
@@ -456,11 +367,11 @@ def lerobot_humanoid_no_arms_flat_env_cfg(play: bool = False) -> ManagerBasedRlE
       params={"env_index": 0},
     )
 
-    # cfg.events["print_actuator_torques"] = EventTermCfg(
-    #   func=_print_actuator_torques,
-    #   mode="interval",
-    #   interval_range_s=(0.5, 0.5),
-    #   is_global_time=True,
-    # )
+    cfg.events["print_actuator_torques"] = EventTermCfg(
+      func=_print_actuator_torques,
+      mode="interval",
+      interval_range_s=(0.5, 0.5),
+      is_global_time=True,
+    )
 
   return cfg
