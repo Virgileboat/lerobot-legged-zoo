@@ -24,6 +24,7 @@ import torch
 
 
 _CSV_LOG_STATE_BY_ENV: dict[int, dict[str, Any]] = {}
+_LAST_ACTION_HIGH_FREQ_PENALTY_BY_ENV: dict[int, torch.Tensor] = {}
 
 
 class _ActionHighFrequencyPenalty:
@@ -48,7 +49,9 @@ class _ActionHighFrequencyPenalty:
     lp = state["lp"]
     lp.mul_(alpha).add_(actions, alpha=1.0 - alpha)
     high_pass = actions - lp
-    return torch.sum(torch.square(high_pass), dim=1)
+    penalty = torch.sum(torch.square(high_pass), dim=1)
+    _LAST_ACTION_HIGH_FREQ_PENALTY_BY_ENV[env_key] = penalty.detach()
+    return penalty
 
   def reset(self, env_ids: torch.Tensor | slice | None = None) -> None:
     if self._last_env_key is None:
@@ -64,6 +67,37 @@ class _ActionHighFrequencyPenalty:
 
 
 _ACTION_HIGH_FREQ_PENALTY = _ActionHighFrequencyPenalty()
+
+
+def _publish_action_high_freq_metric(
+  env,
+  env_ids=None,
+  metric_name: str = "custom/action_high_freq_l2_raw",
+  weighted_metric_name: str = "custom/action_high_freq_l2_weighted",
+  reward_weight: float = -5e-3,
+) -> None:
+  """Publish cached frequency penalty into env extras for downstream loggers."""
+  del env_ids
+  penalty = _LAST_ACTION_HIGH_FREQ_PENALTY_BY_ENV.get(id(env))
+  if penalty is None or penalty.numel() == 0:
+    return
+
+  mean_penalty = float(penalty.mean().item())
+  weighted_penalty = reward_weight * mean_penalty
+
+  extras = getattr(env, "extras", None)
+  if isinstance(extras, dict):
+    log_dict = extras.setdefault("log", {})
+    if isinstance(log_dict, dict):
+      log_dict[metric_name] = mean_penalty
+      log_dict[weighted_metric_name] = weighted_penalty
+    metrics_dict = extras.setdefault("metrics", {})
+    if isinstance(metrics_dict, dict):
+      metrics_dict[metric_name] = mean_penalty
+      metrics_dict[weighted_metric_name] = weighted_penalty
+    # Flat fallback in case the runner forwards top-level extras only.
+    extras[metric_name] = mean_penalty
+    extras[weighted_metric_name] = weighted_penalty
 
 
 def _flatten_obs_policy(
@@ -278,6 +312,11 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   twist_cmd.ranges.lin_vel_x = (-0.5, 0.5)
   twist_cmd.ranges.ang_vel_z = (-0.2, 0.2)
 
+  # Disable velocity/command curricula while keeping terrain curriculum.
+  for curriculum_name in list(cfg.curriculum.keys()):
+    if curriculum_name != "terrain_levels":
+      cfg.curriculum.pop(curriculum_name, None)
+
   cfg.observations["critic"].terms["foot_height"].params[
     "asset_cfg"
   ].site_names = site_names
@@ -338,7 +377,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   )
   cfg.rewards["action_high_freq_l2"] = RewardTermCfg(
     func=_ACTION_HIGH_FREQ_PENALTY,
-    weight=-5e-3,
+    weight=-1e-2,
     params={"cutoff_hz": 2.0},
   )
 
@@ -346,6 +385,17 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
     func=mdp.self_collision_cost,
     weight=-1.0,
     params={"sensor_name": self_collision_cfg.name},
+  )
+  cfg.events["log_action_high_freq_metric"] = EventTermCfg(
+    func=_publish_action_high_freq_metric,
+    mode="interval",
+    interval_range_s=(0.0, 0.0),
+    is_global_time=True,
+    params={
+      "metric_name": "custom/action_high_freq_l2_raw",
+      "weighted_metric_name": "custom/action_high_freq_l2_weighted",
+      "reward_weight": -1e-2,
+    },
   )
   cfg.scene.terrain.friction = "1.2 0.005 0.0001"
   cfg.scene.terrain.solref = "0.01 1"

@@ -58,13 +58,13 @@ NATURAL_FREQ = 10 * 2.0 * 3.1415926535  # 10Hz
 DAMPING_RATIO = 2.0
 
 # Stiffness and damping derived from armature.
-HIP_STIFFNESS = HIP_ARMATURE * NATURAL_FREQ**2  
-KNEE_STIFFNESS = KNEE_ARMATURE * NATURAL_FREQ**2 
-ANKLE_STIFFNESS = ANKLE_ARMATURE * NATURAL_FREQ**2 
+HIP_STIFFNESS = 90
+KNEE_STIFFNESS = 90
+ANKLE_STIFFNESS = 20
 
 HIP_DAMPING = 5.0
 KNEE_DAMPING = 5.0
-ANKLE_DAMPING = 2.0 * DAMPING_RATIO * ANKLE_ARMATURE * NATURAL_FREQ
+ANKLE_DAMPING = 3
 
 # Effort limits (Nm) - adjust based on your motors.
 HIP_EFFORT_LIMIT = 88.0
@@ -76,7 +76,7 @@ LEROBOT_ACTUATOR_HIP1 = BuiltinPositionActuatorCfg(
   target_names_expr=(
     "hipz_.*",
   ),
-  stiffness=HIP_STIFFNESS,
+  stiffness=40,
   damping=HIP_DAMPING,
   effort_limit=15,
   armature=HIP_ARMATURE,
