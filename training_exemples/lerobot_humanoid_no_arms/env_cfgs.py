@@ -3,6 +3,7 @@
 import csv
 from datetime import datetime
 from pathlib import Path
+import re
 from typing import Any
 
 from .lerobot_humanoid_no_arms_constants import (
@@ -38,6 +39,7 @@ class _ActionQuadraticResidualPenalty:
     self._state_by_env: dict[int, dict[str, Any]] = {}
     self._last_env_key: int | None = None
     self._projector_cache: dict[tuple[int, str, str], torch.Tensor] = {}
+    self._action_scale_cache: dict[tuple[int, str, str, int], torch.Tensor] = {}
 
   def _get_residual_projector(
     self,
@@ -60,12 +62,46 @@ class _ActionQuadraticResidualPenalty:
     self._projector_cache[key] = proj
     return proj
 
+  def _get_action_scale_vector(
+    self,
+    env,
+    action_dim: int,
+    device: torch.device,
+    dtype: torch.dtype,
+  ) -> torch.Tensor:
+    key = (id(env), str(device), str(dtype), action_dim)
+    scale_vec = self._action_scale_cache.get(key)
+    if scale_vec is not None:
+      return scale_vec
+
+    # Fallback to normalized action units if actuator names are unavailable.
+    scale_vec = torch.ones(action_dim, device=device, dtype=dtype)
+    try:
+      asset = env.scene["robot"]
+      actuator_names = getattr(asset, "actuator_names", None)
+      if actuator_names is not None and len(actuator_names) == action_dim:
+        vals: list[float] = []
+        for name in actuator_names:
+          s = 1.0
+          for pattern, scale in LEROBOT_HUMANOID_NO_ARMS_ACTION_SCALE.items():
+            if re.fullmatch(pattern, name):
+              s = float(scale)
+              break
+          vals.append(s)
+        scale_vec = torch.tensor(vals, device=device, dtype=dtype)
+    except Exception:
+      pass
+
+    self._action_scale_cache[key] = scale_vec
+    return scale_vec
+
   def __call__(
     self,
     env,
     history_len: int = 20,
     min_history: int = 20,
     exp_scale: float = 1.0,
+    residual_tolerance_rad: float = 0.0,
   ) -> torch.Tensor:
     actions = env.action_manager.action
     env_key = id(env)
@@ -112,7 +148,13 @@ class _ActionQuadraticResidualPenalty:
     y = hist.permute(1, 0, 2).reshape(history_len, -1)  # [T, N*D]
     resid = proj @ y
     resid = resid.reshape(history_len, actions.shape[0], actions.shape[1]).permute(1, 0, 2)
-    energy = torch.sum(torch.mean(torch.square(resid), dim=1), dim=1)
+    if residual_tolerance_rad > 0.0:
+      scale_vec = self._get_action_scale_vector(env, actions.shape[1], actions.device, actions.dtype)
+      resid_rad = resid * scale_vec.view(1, 1, -1)
+      resid_excess = torch.clamp(torch.abs(resid_rad) - residual_tolerance_rad, min=0.0)
+      energy = torch.sum(torch.mean(torch.square(resid_excess), dim=1), dim=1)
+    else:
+      energy = torch.sum(torch.mean(torch.square(resid), dim=1), dim=1)
     # Exponential penalty on residual energy; expm1 keeps zero-energy penalty at 0.
     penalty = torch.expm1(exp_scale * energy)
 
@@ -421,7 +463,12 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   cfg.rewards["action_quadfit_residual_l2"] = RewardTermCfg(
     func=_ACTION_QUADRATIC_RESIDUAL_PENALTY,
     weight=-0.8,
-    params={"history_len": 50, "min_history": 50, "exp_scale": 1.0},
+    params={
+      "history_len": 30,
+      "min_history": 30,
+      "exp_scale": 1.0,
+      "residual_tolerance_rad": 0.3,
+    },
   )
   # Keep the standard action-rate smoothing penalty in addition.
   cfg.rewards["action_rate_l2"].weight = -0.005
