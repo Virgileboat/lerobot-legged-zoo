@@ -414,12 +414,14 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
     weight=-200e-4,
     params={"limit_nm": 5.0},
   )
-  # Replace standard action-rate penalty with a quadratic-fit residual penalty.
-  cfg.rewards["action_rate_l2"] = RewardTermCfg(
+  # Add a stronger quadratic-fit residual penalty (irregular action history).
+  cfg.rewards["action_quadfit_residual_l2"] = RewardTermCfg(
     func=_ACTION_QUADRATIC_RESIDUAL_PENALTY,
-    weight=-0.1,
+    weight=-0.2,
     params={"history_len": 20, "min_history": 20},
   )
+  # Keep the standard action-rate smoothing penalty in addition.
+  cfg.rewards["action_rate_l2"].weight = -0.1
 
   cfg.rewards["self_collisions"] = RewardTermCfg(
     func=mdp.self_collision_cost,
