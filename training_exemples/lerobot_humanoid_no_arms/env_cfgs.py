@@ -25,23 +25,45 @@ import torch
 _CSV_LOG_STATE_BY_ENV: dict[int, dict[str, Any]] = {}
 
 
-class _ActionOscillationPenalty:
-  """Penalize oscillatory actions that cancel out over a short recent window.
+class _ActionQuadraticResidualPenalty:
+  """Penalize action histories that are poorly explained by a quadratic trend.
 
-  We keep a 20-step history and compute a penalty from the last 5 actions.
-  If the last-5 mean is close to zero while their absolute magnitude is not,
-  this indicates a periodic/alternating command and is penalized.
+  We keep a rolling action history and fit a 2nd-order polynomial on the last
+  `history_len` samples (time -> action) for each action dimension. The reward
+  term returns the residual energy of the fit: higher residual means more
+  oscillatory/irregular commands and is penalized.
   """
 
   def __init__(self) -> None:
     self._state_by_env: dict[int, dict[str, Any]] = {}
     self._last_env_key: int | None = None
+    self._projector_cache: dict[tuple[int, str, str], torch.Tensor] = {}
+
+  def _get_residual_projector(
+    self,
+    history_len: int,
+    device: torch.device,
+    dtype: torch.dtype,
+  ) -> torch.Tensor:
+    key = (history_len, str(device), str(dtype))
+    proj = self._projector_cache.get(key)
+    if proj is not None:
+      return proj
+
+    # Normalize time to improve conditioning of the quadratic fit.
+    t = torch.linspace(-1.0, 1.0, history_len, device=device, dtype=dtype)
+    x = torch.stack((t * t, t, torch.ones_like(t)), dim=1)  # [T, 3]
+    xtx = x.T @ x  # [3, 3]
+    xtx_inv = torch.linalg.pinv(xtx)
+    hat = x @ xtx_inv @ x.T  # [T, T]
+    proj = torch.eye(history_len, device=device, dtype=dtype) - hat
+    self._projector_cache[key] = proj
+    return proj
 
   def __call__(
     self,
     env,
     history_len: int = 20,
-    recent_len: int = 5,
     min_history: int = 20,
   ) -> torch.Tensor:
     actions = env.action_manager.action
@@ -67,9 +89,6 @@ class _ActionOscillationPenalty:
       }
       self._state_by_env[env_key] = state
 
-    if recent_len <= 0 or recent_len > history_len:
-      raise ValueError(f"recent_len must be in [1, history_len], got {recent_len=}, {history_len=}")
-
     buf = state["buf"]
     pos = int(state["pos"])
     count = state["count"]
@@ -78,20 +97,21 @@ class _ActionOscillationPenalty:
     state["pos"] = (pos + 1) % history_len
     count.add_(1).clamp_(max=history_len)
 
-    # Indices of the last `recent_len` actions in chronological order.
+    # Indices of the last `history_len` actions in chronological order.
     idx = torch.tensor(
-      [((state["pos"] - recent_len + i) % history_len) for i in range(recent_len)],
+      [((state["pos"] - history_len + i) % history_len) for i in range(history_len)],
       device=actions.device,
       dtype=torch.long,
     )
-    recent = buf.index_select(1, idx)
+    hist = buf.index_select(1, idx)  # [N, T, D]
 
-    # Oscillation score: mean(|a|) - |mean(a)| is high for sign-alternating signals,
-    # and near zero for steady-sign or near-zero actions.
-    mean_abs = recent.abs().mean(dim=1)
-    abs_mean = recent.mean(dim=1).abs()
-    penalty_per_dim = torch.clamp(mean_abs - abs_mean, min=0.0)
-    penalty = torch.sum(penalty_per_dim, dim=1)
+    # Fit quadratic y(t) = at^2 + bt + c and penalize residual energy.
+    # Apply residual projector along the time axis for each env/action dim.
+    proj = self._get_residual_projector(history_len, actions.device, actions.dtype)
+    y = hist.permute(1, 0, 2).reshape(history_len, -1)  # [T, N*D]
+    resid = proj @ y
+    resid = resid.reshape(history_len, actions.shape[0], actions.shape[1]).permute(1, 0, 2)
+    penalty = torch.sum(torch.mean(torch.square(resid), dim=1), dim=1)
 
     if min_history > 0:
       ready = count >= min(min_history, history_len)
@@ -116,7 +136,7 @@ class _ActionOscillationPenalty:
     count[env_ids] = 0
 
 
-_ACTION_OSCILLATION_PENALTY = _ActionOscillationPenalty()
+_ACTION_QUADRATIC_RESIDUAL_PENALTY = _ActionQuadraticResidualPenalty()
 
 
 def _flatten_obs_policy(
@@ -394,11 +414,11 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
     weight=-200e-4,
     params={"limit_nm": 5.0},
   )
-  # Replace standard action-rate penalty with a periodic-action detector.
+  # Replace standard action-rate penalty with a quadratic-fit residual penalty.
   cfg.rewards["action_rate_l2"] = RewardTermCfg(
-    func=_ACTION_OSCILLATION_PENALTY,
+    func=_ACTION_QUADRATIC_RESIDUAL_PENALTY,
     weight=-0.1,
-    params={"history_len": 20, "recent_len": 5, "min_history": 20},
+    params={"history_len": 20, "min_history": 20},
   )
 
   cfg.rewards["self_collisions"] = RewardTermCfg(
