@@ -25,6 +25,100 @@ import torch
 _CSV_LOG_STATE_BY_ENV: dict[int, dict[str, Any]] = {}
 
 
+class _ActionOscillationPenalty:
+  """Penalize oscillatory actions that cancel out over a short recent window.
+
+  We keep a 20-step history and compute a penalty from the last 5 actions.
+  If the last-5 mean is close to zero while their absolute magnitude is not,
+  this indicates a periodic/alternating command and is penalized.
+  """
+
+  def __init__(self) -> None:
+    self._state_by_env: dict[int, dict[str, Any]] = {}
+    self._last_env_key: int | None = None
+
+  def __call__(
+    self,
+    env,
+    history_len: int = 20,
+    recent_len: int = 5,
+    min_history: int = 20,
+  ) -> torch.Tensor:
+    actions = env.action_manager.action
+    env_key = id(env)
+    self._last_env_key = env_key
+
+    state = self._state_by_env.get(env_key)
+    needs_init = (
+      state is None
+      or state["buf"].shape[0] != actions.shape[0]
+      or state["buf"].shape[2] != actions.shape[1]
+      or state["buf"].shape[1] != history_len
+    )
+    if needs_init:
+      state = {
+        "buf": torch.zeros(
+          (actions.shape[0], history_len, actions.shape[1]),
+          device=actions.device,
+          dtype=actions.dtype,
+        ),
+        "pos": 0,
+        "count": torch.zeros(actions.shape[0], device=actions.device, dtype=torch.long),
+      }
+      self._state_by_env[env_key] = state
+
+    if recent_len <= 0 or recent_len > history_len:
+      raise ValueError(f"recent_len must be in [1, history_len], got {recent_len=}, {history_len=}")
+
+    buf = state["buf"]
+    pos = int(state["pos"])
+    count = state["count"]
+
+    buf[:, pos, :] = actions
+    state["pos"] = (pos + 1) % history_len
+    count.add_(1).clamp_(max=history_len)
+
+    # Indices of the last `recent_len` actions in chronological order.
+    idx = torch.tensor(
+      [((state["pos"] - recent_len + i) % history_len) for i in range(recent_len)],
+      device=actions.device,
+      dtype=torch.long,
+    )
+    recent = buf.index_select(1, idx)
+
+    # Oscillation score: mean(|a|) - |mean(a)| is high for sign-alternating signals,
+    # and near zero for steady-sign or near-zero actions.
+    mean_abs = recent.abs().mean(dim=1)
+    abs_mean = recent.mean(dim=1).abs()
+    penalty_per_dim = torch.clamp(mean_abs - abs_mean, min=0.0)
+    penalty = torch.sum(penalty_per_dim, dim=1)
+
+    if min_history > 0:
+      ready = count >= min(min_history, history_len)
+      penalty = torch.where(ready, penalty, torch.zeros_like(penalty))
+
+    return penalty
+
+  def reset(self, env_ids: torch.Tensor | slice | None = None) -> None:
+    if self._last_env_key is None:
+      return
+    state = self._state_by_env.get(self._last_env_key)
+    if state is None:
+      return
+    buf = state["buf"]
+    count = state["count"]
+    if env_ids is None or isinstance(env_ids, slice):
+      buf.zero_()
+      count.zero_()
+      state["pos"] = 0
+      return
+    buf[env_ids] = 0.0
+    count[env_ids] = 0
+
+
+_ACTION_OSCILLATION_PENALTY = _ActionOscillationPenalty()
+
+
 def _flatten_obs_policy(
   obs_policy: torch.Tensor | dict[str, torch.Tensor],
   env_index: int,
@@ -300,8 +394,12 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
     weight=-200e-4,
     params={"limit_nm": 5.0},
   )
-  # Replace custom frequency penalty with standard action-rate smoothing penalty.
-  cfg.rewards["action_rate_l2"].weight = -0.1
+  # Replace standard action-rate penalty with a periodic-action detector.
+  cfg.rewards["action_rate_l2"] = RewardTermCfg(
+    func=_ACTION_OSCILLATION_PENALTY,
+    weight=-0.1,
+    params={"history_len": 20, "recent_len": 5, "min_history": 20},
+  )
 
   cfg.rewards["self_collisions"] = RewardTermCfg(
     func=mdp.self_collision_cost,
