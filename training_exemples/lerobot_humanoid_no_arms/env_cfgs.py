@@ -418,11 +418,11 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   # Reward the fraction of action spectral energy within the <=3 Hz band.
   cfg.rewards["action_fft_band_le_3hz_ratio"] = RewardTermCfg(
     func=_ACTION_FFT_BAND_RATIO_REWARD,
-    weight=1.0,
+    weight=3.0,
     params={"history_len": 50, "min_history": 50, "cutoff_hz": 3.0},
   )
   # Keep the standard action-rate smoothing penalty in addition.
-  cfg.rewards["action_rate_l2"].weight = -0.05
+  cfg.rewards["action_rate_l2"].weight = -0.2
 
   cfg.rewards["self_collisions"] = RewardTermCfg(
     func=mdp.self_collision_cost,
