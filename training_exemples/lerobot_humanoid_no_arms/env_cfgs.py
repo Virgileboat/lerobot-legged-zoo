@@ -3,7 +3,6 @@
 import csv
 from datetime import datetime
 from pathlib import Path
-import re
 from typing import Any
 
 from .lerobot_humanoid_no_arms_constants import (
@@ -26,84 +25,41 @@ import torch
 _CSV_LOG_STATE_BY_ENV: dict[int, dict[str, Any]] = {}
 
 
-class _ActionQuadraticResidualPenalty:
-  """Penalize action histories that are poorly explained by a quadratic trend.
-
-  We keep a rolling action history and fit a 2nd-order polynomial on the last
-  `history_len` samples (time -> action) for each action dimension. The reward
-  term returns the residual energy of the fit: higher residual means more
-  oscillatory/irregular commands and is penalized.
-  """
+class _ActionFftHighFreqPenalty:
+  """Penalize action spectral energy above a cutoff frequency using an FFT."""
 
   def __init__(self) -> None:
     self._state_by_env: dict[int, dict[str, Any]] = {}
     self._last_env_key: int | None = None
-    self._projector_cache: dict[tuple[int, str, str], torch.Tensor] = {}
-    self._action_scale_cache: dict[tuple[int, str, str, int], torch.Tensor] = {}
+    self._freq_mask_cache: dict[tuple[int, float, float, str], torch.Tensor] = {}
 
-  def _get_residual_projector(
+  def _get_high_freq_mask(
     self,
     history_len: int,
+    step_dt: float,
+    cutoff_hz: float,
     device: torch.device,
-    dtype: torch.dtype,
   ) -> torch.Tensor:
-    key = (history_len, str(device), str(dtype))
-    proj = self._projector_cache.get(key)
-    if proj is not None:
-      return proj
-
-    # Normalize time to improve conditioning of the quadratic fit.
-    t = torch.linspace(-1.0, 1.0, history_len, device=device, dtype=dtype)
-    x = torch.stack((t * t, t, torch.ones_like(t)), dim=1)  # [T, 3]
-    xtx = x.T @ x  # [3, 3]
-    xtx_inv = torch.linalg.pinv(xtx)
-    hat = x @ xtx_inv @ x.T  # [T, T]
-    proj = torch.eye(history_len, device=device, dtype=dtype) - hat
-    self._projector_cache[key] = proj
-    return proj
-
-  def _get_action_scale_vector(
-    self,
-    env,
-    action_dim: int,
-    device: torch.device,
-    dtype: torch.dtype,
-  ) -> torch.Tensor:
-    key = (id(env), str(device), str(dtype), action_dim)
-    scale_vec = self._action_scale_cache.get(key)
-    if scale_vec is not None:
-      return scale_vec
-
-    # Fallback to normalized action units if actuator names are unavailable.
-    scale_vec = torch.ones(action_dim, device=device, dtype=dtype)
-    try:
-      asset = env.scene["robot"]
-      actuator_names = getattr(asset, "actuator_names", None)
-      if actuator_names is not None and len(actuator_names) == action_dim:
-        vals: list[float] = []
-        for name in actuator_names:
-          s = 1.0
-          for pattern, scale in LEROBOT_HUMANOID_NO_ARMS_ACTION_SCALE.items():
-            if re.fullmatch(pattern, name):
-              s = float(scale)
-              break
-          vals.append(s)
-        scale_vec = torch.tensor(vals, device=device, dtype=dtype)
-    except Exception:
-      pass
-
-    self._action_scale_cache[key] = scale_vec
-    return scale_vec
+    key = (history_len, round(step_dt, 8), cutoff_hz, str(device))
+    mask = self._freq_mask_cache.get(key)
+    if mask is not None:
+      return mask
+    freqs = torch.fft.rfftfreq(history_len, d=step_dt, device=device)
+    # Exclude DC and penalize strictly above cutoff.
+    mask = freqs > cutoff_hz
+    self._freq_mask_cache[key] = mask
+    return mask
 
   def __call__(
     self,
     env,
-    history_len: int = 20,
-    min_history: int = 20,
-    exp_scale: float = 1.0,
-    residual_tolerance_rad: float = 0.0,
+    history_len: int = 50,
+    min_history: int = 50,
+    cutoff_hz: float = 3.0,
   ) -> torch.Tensor:
     actions = env.action_manager.action
+    if history_len < 4:
+      raise ValueError(f"history_len must be >= 4 for FFT penalty, got {history_len}")
     env_key = id(env)
     self._last_env_key = env_key
 
@@ -141,22 +97,17 @@ class _ActionQuadraticResidualPenalty:
       dtype=torch.long,
     )
     hist = buf.index_select(1, idx)  # [N, T, D]
-
-    # Fit quadratic y(t) = at^2 + bt + c and penalize residual energy.
-    # Apply residual projector along the time axis for each env/action dim.
-    proj = self._get_residual_projector(history_len, actions.device, actions.dtype)
-    y = hist.permute(1, 0, 2).reshape(history_len, -1)  # [T, N*D]
-    resid = proj @ y
-    resid = resid.reshape(history_len, actions.shape[0], actions.shape[1]).permute(1, 0, 2)
-    if residual_tolerance_rad > 0.0:
-      scale_vec = self._get_action_scale_vector(env, actions.shape[1], actions.device, actions.dtype)
-      resid_rad = resid * scale_vec.view(1, 1, -1)
-      resid_excess = torch.clamp(torch.abs(resid_rad) - residual_tolerance_rad, min=0.0)
-      energy = torch.sum(torch.mean(torch.square(resid_excess), dim=1), dim=1)
+    # Remove per-window mean so DC offset does not affect the spectral penalty.
+    hist = hist - hist.mean(dim=1, keepdim=True)
+    spec = torch.fft.rfft(hist, dim=1)  # [N, F, D]
+    power = spec.real.square() + spec.imag.square()
+    mask = self._get_high_freq_mask(history_len, float(env.step_dt), cutoff_hz, actions.device)
+    if not bool(mask.any()):
+      penalty = torch.zeros(actions.shape[0], device=actions.device, dtype=actions.dtype)
     else:
-      energy = torch.sum(torch.mean(torch.square(resid), dim=1), dim=1)
-    # Exponential penalty on residual energy; expm1 keeps zero-energy penalty at 0.
-    penalty = torch.expm1(exp_scale * energy)
+      # Average over selected frequencies, then sum over action dims.
+      high_power = power[:, mask, :]
+      penalty = high_power.mean(dim=1).sum(dim=1) / float(history_len * history_len)
 
     if min_history > 0:
       ready = count >= min(min_history, history_len)
@@ -181,7 +132,7 @@ class _ActionQuadraticResidualPenalty:
     count[env_ids] = 0
 
 
-_ACTION_QUADRATIC_RESIDUAL_PENALTY = _ActionQuadraticResidualPenalty()
+_ACTION_FFT_HIGH_FREQ_PENALTY = _ActionFftHighFreqPenalty()
 
 
 def _flatten_obs_policy(
@@ -461,17 +412,12 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
     weight=-200e-4,
     params={"limit_nm": 5.0},
   )
-  # Add a stronger quadratic-fit residual penalty (irregular action history).
-  # cfg.rewards["action_quadfit_residual_l2"] = RewardTermCfg(
-  #   func=_ACTION_QUADRATIC_RESIDUAL_PENALTY,
-  #   weight=-0.8,
-  #   params={
-  #     "history_len": 10,
-  #     "min_history": 10,
-  #     "exp_scale": 1.0,
-  #     "residual_tolerance_rad": 0.015,
-  #   },
-  # )
+  # Penalize action spectral energy above 3 Hz using an FFT over the last 50 actions.
+  cfg.rewards["action_fft_over_3hz_l2"] = RewardTermCfg(
+    func=_ACTION_FFT_HIGH_FREQ_PENALTY,
+    weight=-0.8,
+    params={"history_len": 50, "min_history": 50, "cutoff_hz": 3.0},
+  )
   # Keep the standard action-rate smoothing penalty in addition.
   cfg.rewards["action_rate_l2"].weight = -0.05
 
