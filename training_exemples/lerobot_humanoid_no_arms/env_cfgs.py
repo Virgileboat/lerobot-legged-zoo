@@ -25,30 +25,31 @@ import torch
 _CSV_LOG_STATE_BY_ENV: dict[int, dict[str, Any]] = {}
 
 
-class _ActionFftHighFreqPenalty:
-  """Penalize action spectral energy above a cutoff frequency using an FFT."""
+class _ActionFftBandRatioReward:
+  """Reward the fraction of action spectral energy inside a low-frequency band."""
 
   def __init__(self) -> None:
     self._state_by_env: dict[int, dict[str, Any]] = {}
     self._last_env_key: int | None = None
-    self._freq_mask_cache: dict[tuple[int, float, float, str], torch.Tensor] = {}
+    self._freq_masks_cache: dict[tuple[int, float, float, str], tuple[torch.Tensor, torch.Tensor]] = {}
 
-  def _get_high_freq_mask(
+  def _get_freq_masks(
     self,
     history_len: int,
     step_dt: float,
     cutoff_hz: float,
     device: torch.device,
-  ) -> torch.Tensor:
+  ) -> tuple[torch.Tensor, torch.Tensor]:
     key = (history_len, round(step_dt, 8), cutoff_hz, str(device))
-    mask = self._freq_mask_cache.get(key)
-    if mask is not None:
-      return mask
+    masks = self._freq_masks_cache.get(key)
+    if masks is not None:
+      return masks
     freqs = torch.fft.rfftfreq(history_len, d=step_dt, device=device)
-    # Exclude DC and penalize strictly above cutoff.
-    mask = freqs > cutoff_hz
-    self._freq_mask_cache[key] = mask
-    return mask
+    valid_mask = freqs > 0.0
+    inband_mask = (freqs <= cutoff_hz) & valid_mask
+    masks = (inband_mask, valid_mask)
+    self._freq_masks_cache[key] = masks
+    return masks
 
   def __call__(
     self,
@@ -59,7 +60,7 @@ class _ActionFftHighFreqPenalty:
   ) -> torch.Tensor:
     actions = env.action_manager.action
     if history_len < 4:
-      raise ValueError(f"history_len must be >= 4 for FFT penalty, got {history_len}")
+      raise ValueError(f"history_len must be >= 4 for FFT reward, got {history_len}")
     env_key = id(env)
     self._last_env_key = env_key
 
@@ -97,23 +98,27 @@ class _ActionFftHighFreqPenalty:
       dtype=torch.long,
     )
     hist = buf.index_select(1, idx)  # [N, T, D]
-    # Remove per-window mean so DC offset does not affect the spectral penalty.
+    # Remove per-window mean so DC offset does not dominate the spectral ratio.
     hist = hist - hist.mean(dim=1, keepdim=True)
     spec = torch.fft.rfft(hist, dim=1)  # [N, F, D]
     power = spec.real.square() + spec.imag.square()
-    mask = self._get_high_freq_mask(history_len, float(env.step_dt), cutoff_hz, actions.device)
-    if not bool(mask.any()):
-      penalty = torch.zeros(actions.shape[0], device=actions.device, dtype=actions.dtype)
+    inband_mask, valid_mask = self._get_freq_masks(history_len, float(env.step_dt), cutoff_hz, actions.device)
+    if not bool(valid_mask.any()):
+      reward = torch.ones(actions.shape[0], device=actions.device, dtype=actions.dtype)
     else:
-      # Average over selected frequencies, then sum over action dims.
-      high_power = power[:, mask, :]
-      penalty = high_power.mean(dim=1).sum(dim=1) / float(history_len * history_len)
+      total_power = power[:, valid_mask, :].sum(dim=(1, 2))
+      inband_power = power[:, inband_mask, :].sum(dim=(1, 2))
+      reward = torch.where(
+        total_power > 1e-12,
+        inband_power / total_power,
+        torch.ones_like(total_power),
+      )
 
     if min_history > 0:
       ready = count >= min(min_history, history_len)
-      penalty = torch.where(ready, penalty, torch.zeros_like(penalty))
+      reward = torch.where(ready, reward, torch.zeros_like(reward))
 
-    return penalty
+    return reward
 
   def reset(self, env_ids: torch.Tensor | slice | None = None) -> None:
     if self._last_env_key is None:
@@ -132,7 +137,7 @@ class _ActionFftHighFreqPenalty:
     count[env_ids] = 0
 
 
-_ACTION_FFT_HIGH_FREQ_PENALTY = _ActionFftHighFreqPenalty()
+_ACTION_FFT_BAND_RATIO_REWARD = _ActionFftBandRatioReward()
 
 
 def _flatten_obs_policy(
@@ -412,10 +417,10 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
     weight=-200e-4,
     params={"limit_nm": 5.0},
   )
-  # Penalize action spectral energy above 3 Hz using an FFT over the last 50 actions.
-  cfg.rewards["action_fft_over_3hz_l2"] = RewardTermCfg(
-    func=_ACTION_FFT_HIGH_FREQ_PENALTY,
-    weight=-0.8,
+  # Reward the fraction of action spectral energy within the <=3 Hz band.
+  cfg.rewards["action_fft_band_le_3hz_ratio"] = RewardTermCfg(
+    func=_ACTION_FFT_BAND_RATIO_REWARD,
+    weight=1.0,
     params={"history_len": 50, "min_history": 50, "cutoff_hz": 3.0},
   )
   # Keep the standard action-rate smoothing penalty in addition.
