@@ -62,8 +62,8 @@ HIP_STIFFNESS = 90.0
 KNEE_STIFFNESS = 90.0
 ANKLE_STIFFNESS = 20.0
 
-HIP_DAMPING = 3.0
-KNEE_DAMPING = 3.0
+HIP_DAMPING =2.0
+KNEE_DAMPING = 2.0
 ANKLE_DAMPING = 3.0
 
 # Effort limits (Nm) - adjust based on your motors.
