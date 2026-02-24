@@ -466,14 +466,14 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
     func=_ACTION_QUADRATIC_RESIDUAL_PENALTY,
     weight=-0.8,
     params={
-      "history_len": 40,
-      "min_history": 40,
+      "history_len": 10,
+      "min_history": 10,
       "exp_scale": 1.0,
-      "residual_tolerance_rad": 0.025,
+      "residual_tolerance_rad": 0.015,
     },
   )
   # Keep the standard action-rate smoothing penalty in addition.
-  cfg.rewards["action_rate_l2"].weight = -0.07
+  cfg.rewards["action_rate_l2"].weight = -0.0
 
   cfg.rewards["self_collisions"] = RewardTermCfg(
     func=mdp.self_collision_cost,
