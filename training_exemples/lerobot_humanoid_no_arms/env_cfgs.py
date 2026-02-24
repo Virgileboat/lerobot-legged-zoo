@@ -381,7 +381,8 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   cfg.scene.sensors = (feet_ground_cfg, self_collision_cfg)
   
   if cfg.scene.terrain is not None and cfg.scene.terrain.terrain_generator is not None:
-    cfg.scene.terrain.terrain_generator.curriculum = False
+    cfg.scene.terrain.terrain_generator.curriculum = True
+    cfg.scene.terrain.terrain_generator.difficulty_range = (0.0, 0.3)
 
   joint_pos_action = cfg.actions["joint_pos"]
   assert isinstance(joint_pos_action, JointPositionActionCfg)
@@ -396,9 +397,14 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   twist_cmd.ranges.lin_vel_x = (-0.5, 0.5)
   twist_cmd.ranges.ang_vel_z = (-0.2, 0.2)
 
-  # Disable velocity/command curricula and terrain curriculum manager.
+  # Disable velocity/command curricula while keeping terrain_levels curriculum.
   for curriculum_name in list(cfg.curriculum.keys()):
-    cfg.curriculum.pop(curriculum_name, None)
+    if curriculum_name != "terrain_levels":
+      cfg.curriculum.pop(curriculum_name, None)
+  if "terrain_levels" in cfg.curriculum:
+    terrain_levels_cfg = cfg.curriculum["terrain_levels"]
+    if hasattr(terrain_levels_cfg, "params") and isinstance(terrain_levels_cfg.params, dict):
+      terrain_levels_cfg.params["max_init_terrain_level"] = 2
 
   cfg.observations["critic"].terms["foot_height"].params[
     "asset_cfg"
