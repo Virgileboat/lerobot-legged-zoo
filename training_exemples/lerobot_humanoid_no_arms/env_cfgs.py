@@ -383,6 +383,8 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   if cfg.scene.terrain is not None and cfg.scene.terrain.terrain_generator is not None:
     cfg.scene.terrain.terrain_generator.curriculum = True
     cfg.scene.terrain.terrain_generator.difficulty_range = (0.0, 0.3)
+    if hasattr(cfg.scene.terrain, "max_init_terrain_level"):
+      cfg.scene.terrain.max_init_terrain_level = 2
 
   joint_pos_action = cfg.actions["joint_pos"]
   assert isinstance(joint_pos_action, JointPositionActionCfg)
@@ -401,11 +403,6 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   for curriculum_name in list(cfg.curriculum.keys()):
     if curriculum_name != "terrain_levels":
       cfg.curriculum.pop(curriculum_name, None)
-  if "terrain_levels" in cfg.curriculum:
-    terrain_levels_cfg = cfg.curriculum["terrain_levels"]
-    if hasattr(terrain_levels_cfg, "params") and isinstance(terrain_levels_cfg.params, dict):
-      terrain_levels_cfg.params["max_init_terrain_level"] = 2
-
   cfg.observations["critic"].terms["foot_height"].params[
     "asset_cfg"
   ].site_names = site_names
