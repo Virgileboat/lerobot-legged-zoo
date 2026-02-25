@@ -519,11 +519,13 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
       "reward_name": "action_rate_l2",
       "weight_stages": [
         {"step": 0, "weight": -0.1},
-        {"step": 5_000, "weight": -0.38},
-        {"step": 10_000, "weight": -0.66},
-        {"step": 15_000, "weight": -0.94},
-        {"step": 20_000, "weight": -1.22},
-        {"step": 25_000, "weight": -1.5},
+        # Curriculum uses env.common_step_counter (env steps), while W&B "Step"
+        # is PPO iterations. Here num_steps_per_env=24, so multiply by 24.
+        {"step": 5_000 * 24, "weight": -0.38},
+        {"step": 10_000 * 24, "weight": -0.66},
+        {"step": 15_000 * 24, "weight": -0.94},
+        {"step": 20_000 * 24, "weight": -1.22},
+        {"step": 25_000 * 24, "weight": -1.5},
       ],
     },
   )
