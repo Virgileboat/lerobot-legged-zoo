@@ -35,23 +35,26 @@ def _adaptive_reward_weight_curriculum(
   start_weight: float,
   end_weight: float,
   level_step: float = 0.1,
-  success_rate_up_threshold: float = 0.8,
-  success_rate_down_threshold: float = 0.3,
+  tracking_reward_name: str = "track_linear_velocity",
+  tracking_reward_up_threshold: float = 1.2,
+  tracking_reward_down_threshold: float = 0.4,
 ) -> float:
-  """Adapt a reward weight using reset success rate (works on flat terrain too)."""
+  """Adapt a reward weight using reset-time tracking reward (works on flat terrain too)."""
   state = _ACTION_RATE_CURRICULUM_STATE_BY_ENV.setdefault(id(env), {"level": 0.0})
   # Initial reset path / manual reset may call curriculum before reset buffers exist.
-  reset_time_outs = getattr(env, "reset_time_outs", None)
-  if reset_time_outs is not None and env_ids is not None:
+  step_reward = getattr(env.reward_manager, "_step_reward", None)
+  term_names = getattr(env.reward_manager, "_term_names", None)
+  if step_reward is not None and term_names is not None and env_ids is not None:
     # env_ids can be a slice(None) during full reset.
-    ids = env_ids
-    timeout_flags = reset_time_outs[ids].float()
-    if timeout_flags.numel() > 0:
-      success_rate = float(timeout_flags.mean().item())
-      if success_rate >= success_rate_up_threshold:
-        state["level"] += float(level_step)
-      elif success_rate <= success_rate_down_threshold:
-        state["level"] -= float(level_step)
+    if tracking_reward_name in term_names:
+      term_idx = term_names.index(tracking_reward_name)
+      reward_vals = step_reward[env_ids, term_idx].float()
+      if reward_vals.numel() > 0:
+        mean_tracking_reward = float(reward_vals.mean().item())
+        if mean_tracking_reward >= tracking_reward_up_threshold:
+          state["level"] += float(level_step)
+        elif mean_tracking_reward <= tracking_reward_down_threshold:
+          state["level"] -= float(level_step)
   state["level"] = min(max(state["level"], 0.0), 1.0)
   alpha = state["level"]
   weight = (1.0 - alpha) * float(start_weight) + alpha * float(end_weight)
@@ -444,6 +447,8 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   if base_lin_vel_term is not None and getattr(base_lin_vel_term, "noise", None) is not None:
     base_lin_vel_term.noise.n_min = -0.15
     base_lin_vel_term.noise.n_max = 0.15
+  # Sim-to-real test: remove linear velocity from the actor observation.
+  policy_obs.terms.pop("base_lin_vel", None)
   base_ang_vel_term = policy_obs.terms.get("base_ang_vel")
   if base_ang_vel_term is not None and getattr(base_ang_vel_term, "noise", None) is not None:
     base_ang_vel_term.noise.n_min = -0.35
@@ -554,8 +559,9 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
       "start_weight": -0.1,
       "end_weight": -1.5,
       "level_step": 0.1,
-      "success_rate_up_threshold": 0.8,
-      "success_rate_down_threshold": 0.3,
+      "tracking_reward_name": "track_linear_velocity",
+      "tracking_reward_up_threshold": 1.2,
+      "tracking_reward_down_threshold": 0.4,
     },
   )
 
