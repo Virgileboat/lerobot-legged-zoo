@@ -25,43 +25,6 @@ import torch
 
 
 _CSV_LOG_STATE_BY_ENV: dict[int, dict[str, Any]] = {}
-_ACTION_RATE_CURRICULUM_STATE_BY_ENV: dict[int, dict[str, float]] = {}
-
-
-def _adaptive_reward_weight_curriculum(
-  env,
-  env_ids,
-  reward_name: str,
-  start_weight: float,
-  end_weight: float,
-  level_step: float = 0.1,
-  tracking_reward_name: str = "track_linear_velocity",
-  tracking_reward_up_threshold: float = 1.2,
-  tracking_reward_down_threshold: float = 0.4,
-) -> float:
-  """Adapt a reward weight using reset-time tracking reward (works on flat terrain too)."""
-  state = _ACTION_RATE_CURRICULUM_STATE_BY_ENV.setdefault(id(env), {"level": 0.0})
-  # Initial reset path / manual reset may call curriculum before reset buffers exist.
-  step_reward = getattr(env.reward_manager, "_step_reward", None)
-  term_names = getattr(env.reward_manager, "_term_names", None)
-  if step_reward is not None and term_names is not None and env_ids is not None:
-    # env_ids can be a slice(None) during full reset.
-    if tracking_reward_name in term_names:
-      term_idx = term_names.index(tracking_reward_name)
-      reward_vals = step_reward[env_ids, term_idx].float()
-      if reward_vals.numel() > 0:
-        mean_tracking_reward = float(reward_vals.mean().item())
-        if mean_tracking_reward >= tracking_reward_up_threshold:
-          state["level"] += float(level_step)
-        elif mean_tracking_reward <= tracking_reward_down_threshold:
-          state["level"] -= float(level_step)
-  state["level"] = min(max(state["level"], 0.0), 1.0)
-  alpha = state["level"]
-  weight = (1.0 - alpha) * float(start_weight) + alpha * float(end_weight)
-  env.reward_manager.get_term_cfg(reward_name).weight = weight
-  return weight
-
-
 class _ActionFftBandRatioReward:
   """Reward the fraction of action spectral energy inside a low-frequency band."""
 
@@ -447,8 +410,6 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   if base_lin_vel_term is not None and getattr(base_lin_vel_term, "noise", None) is not None:
     base_lin_vel_term.noise.n_min = -0.15
     base_lin_vel_term.noise.n_max = 0.15
-  # Sim-to-real test: remove linear velocity from the actor observation.
-  policy_obs.terms.pop("base_lin_vel", None)
   base_ang_vel_term = policy_obs.terms.get("base_ang_vel")
   if base_ang_vel_term is not None and getattr(base_ang_vel_term, "noise", None) is not None:
     base_ang_vel_term.noise.n_min = -0.35
@@ -553,15 +514,17 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   # Keep the standard action-rate smoothing penalty in addition.
   cfg.rewards["action_rate_l2"].weight = -0.1
   cfg.curriculum["action_rate_weight"] = CurriculumTermCfg(
-    func=_adaptive_reward_weight_curriculum,
+    func=mdp.reward_weight,
     params={
       "reward_name": "action_rate_l2",
-      "start_weight": -0.1,
-      "end_weight": -1.5,
-      "level_step": 0.1,
-      "tracking_reward_name": "track_linear_velocity",
-      "tracking_reward_up_threshold": 1.2,
-      "tracking_reward_down_threshold": 0.4,
+      "weight_stages": [
+        {"step": 0, "weight": -0.1},
+        {"step": 5_000, "weight": -0.38},
+        {"step": 10_000, "weight": -0.66},
+        {"step": 15_000, "weight": -0.94},
+        {"step": 20_000, "weight": -1.22},
+        {"step": 25_000, "weight": -1.5},
+      ],
     },
   )
 
