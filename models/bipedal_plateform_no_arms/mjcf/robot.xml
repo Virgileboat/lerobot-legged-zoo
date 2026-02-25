@@ -69,7 +69,17 @@
       <!-- Part hex_socket_head_cap_screw_m4x0_70_x_20__832e47d784177ea3f1dabbaab534416e_16 -->
       <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_12 -->
       <!-- Frame imu -->
-      <site group="3" name="imu" pos="1.28979e-17 1.37152e-17 -3.20924e-17" quat="1 -0 2.44249e-15 -0"/>
+      <site group="3" name="imu" pos="1.28979e-17 1.37152e-17 1.20924e-1" quat="1 -0 2.44249e-15 -0"/>
+      <geom
+        name="imu_marker"
+        type="box"
+        size="0.15 0.006 0.006"
+        pos="1.28979e-17 1.37152e-17 1.20924e-1"
+        quat="1 -0 2.44249e-15 -0"
+        rgba="1 0 0 0.95"
+        contype="0"
+        conaffinity="0"
+        group="2"/>
       <!-- Link hipx_subassembly -->
       <body name="hipx_subassembly" pos="-0.000819037 -0.133159 0.04164" quat="0.821908 0.0571233 0.0414078 -0.565234">
         <!-- Joint from torso_subassembly to hipx_subassembly -->

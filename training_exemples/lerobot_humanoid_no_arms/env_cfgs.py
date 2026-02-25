@@ -1,6 +1,7 @@
 """LeRobot Humanoid velocity environment configurations."""
 
 import csv
+import math
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -12,6 +13,7 @@ from .lerobot_humanoid_no_arms_constants import (
 from mjlab.envs import ManagerBasedRlEnvCfg
 from mjlab.envs import mdp as envs_mdp
 from mjlab.envs.mdp.actions import JointPositionActionCfg
+from mjlab.managers.curriculum_manager import CurriculumTermCfg
 from mjlab.managers.event_manager import EventTermCfg
 from mjlab.managers.reward_manager import RewardTermCfg
 from mjlab.sensor import ContactMatch, ContactSensorCfg
@@ -23,6 +25,24 @@ import torch
 
 
 _CSV_LOG_STATE_BY_ENV: dict[int, dict[str, Any]] = {}
+
+
+def _ramp_reward_weight_curriculum(
+  env,
+  env_ids,
+  reward_name: str,
+  start_weight: float,
+  end_weight: float,
+  ramp_steps: int,
+) -> float:
+  """Linearly ramp a reward weight from start to end over global env steps."""
+  del env_ids  # Global schedule.
+  step = int(getattr(env, "common_step_counter", 0))
+  ramp_steps = max(int(ramp_steps), 1)
+  alpha = min(max(step / ramp_steps, 0.0), 1.0)
+  weight = (1.0 - alpha) * float(start_weight) + alpha * float(end_weight)
+  env.reward_manager.get_term_cfg(reward_name).weight = weight
+  return weight
 
 
 class _ActionFftBandRatioReward:
@@ -154,6 +174,43 @@ def _flatten_obs_policy(
   return flat_values
 
 
+def _flatten_obs_policy_with_names(
+  obs_policy: torch.Tensor | dict[str, torch.Tensor],
+  env_index: int,
+) -> tuple[list[str], list[float]]:
+  """Flatten policy observation with stable CSV column names."""
+  if isinstance(obs_policy, torch.Tensor):
+    vals = obs_policy[env_index].detach().cpu().reshape(-1).tolist()
+    return ([f"obs_{i}" for i in range(len(vals))], vals)
+
+  names: list[str] = []
+  values: list[float] = []
+  for term_name, term in obs_policy.items():
+    term_vals = term[env_index].detach().cpu().reshape(-1).tolist()
+    if len(term_vals) == 1:
+      names.append(str(term_name))
+    else:
+      names.extend(f"{term_name}_{i}" for i in range(len(term_vals)))
+    values.extend(term_vals)
+  return names, values
+
+
+def _get_projected_gravity_from_policy_obs(
+  obs_policy: torch.Tensor | dict[str, torch.Tensor],
+  env_index: int,
+) -> list[float] | None:
+  """Extract projected gravity (x, y, z) when policy obs is a named dict."""
+  if not isinstance(obs_policy, dict):
+    return None
+  gravity = obs_policy.get("projected_gravity")
+  if gravity is None:
+    return None
+  vals = gravity[env_index].detach().cpu().reshape(-1).tolist()
+  if len(vals) < 3:
+    return None
+  return [float(vals[0]), float(vals[1]), float(vals[2])]
+
+
 def _log_obs_action_csv(
   env,
   env_ids=None,
@@ -170,10 +227,20 @@ def _log_obs_action_csv(
   if obs_policy is None:
     return
 
-  obs_values = _flatten_obs_policy(obs_policy, env_index)
+  obs_names, obs_values = _flatten_obs_policy_with_names(obs_policy, env_index)
+  projected_gravity = _get_projected_gravity_from_policy_obs(obs_policy, env_index)
   action_values = (
     env.action_manager.action[env_index].detach().cpu().reshape(-1).tolist()
   )
+  action_applied_values = None
+  for attr_name in ("processed_action", "applied_action", "command", "action_scaled"):
+    attr = getattr(env.action_manager, attr_name, None)
+    if isinstance(attr, torch.Tensor):
+      try:
+        action_applied_values = attr[env_index].detach().cpu().reshape(-1).tolist()
+        break
+      except Exception:
+        continue
 
   env_key = id(env)
   state = _CSV_LOG_STATE_BY_ENV.get(env_key)
@@ -196,25 +263,29 @@ def _log_obs_action_csv(
   header_written = bool(state["header_written"])
 
   if not header_written:
-    header = (
-      ["global_step", "episode_step", "env_index"]
-      + [f"action_{i}" for i in range(len(action_values))]
-      + [f"obs_{i}" for i in range(len(obs_values))]
-    )
+    header = ["global_step", "episode_step", "env_index"]
+    if projected_gravity is not None:
+      header += ["projected_gravity_x", "projected_gravity_y", "projected_gravity_z"]
+    header += [f"action_{i}" for i in range(len(action_values))]
+    if action_applied_values is not None:
+      header += [f"action_applied_{i}" for i in range(len(action_applied_values))]
+    header += obs_names
     with csv_file.open("w", newline="") as f:
       writer = csv.writer(f)
       writer.writerow(header)
     state["header_written"] = True
 
-  row = (
-    [
-      int(env.common_step_counter),
-      int(env.episode_length_buf[env_index].item()),
-      env_index,
-    ]
-    + action_values
-    + obs_values
-  )
+  row = [
+    int(env.common_step_counter),
+    int(env.episode_length_buf[env_index].item()),
+    env_index,
+  ]
+  if projected_gravity is not None:
+    row += projected_gravity
+  row += action_values
+  if action_applied_values is not None:
+    row += action_applied_values
+  row += obs_values
   with csv_file.open("a", newline="") as f:
     writer = csv.writer(f)
     writer.writerow(row)
@@ -353,9 +424,33 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   twist_cmd.ranges.lin_vel_x = (-0.5, 0.5)
   twist_cmd.ranges.ang_vel_z = (-0.2, 0.2)
 
+  # Stronger observation randomization for sim-to-real robustness.
+  policy_obs = cfg.observations["policy"]
+  base_lin_vel_term = policy_obs.terms.get("base_lin_vel")
+  if base_lin_vel_term is not None and getattr(base_lin_vel_term, "noise", None) is not None:
+    base_lin_vel_term.noise.n_min = -0.15
+    base_lin_vel_term.noise.n_max = 0.15
+  base_ang_vel_term = policy_obs.terms.get("base_ang_vel")
+  if base_ang_vel_term is not None and getattr(base_ang_vel_term, "noise", None) is not None:
+    base_ang_vel_term.noise.n_min = -0.35
+    base_ang_vel_term.noise.n_max = 0.35
+  projected_gravity_term = policy_obs.terms.get("projected_gravity")
+  if projected_gravity_term is not None and getattr(projected_gravity_term, "noise", None) is not None:
+    projected_gravity_term.noise.n_min = -0.07
+    projected_gravity_term.noise.n_max = 0.07
+  joint_pos_term = policy_obs.terms.get("joint_pos")
+  if joint_pos_term is not None and getattr(joint_pos_term, "noise", None) is not None:
+    joint_pos_noise_rad = math.radians(3.0)
+    joint_pos_term.noise.n_min = -joint_pos_noise_rad
+    joint_pos_term.noise.n_max = joint_pos_noise_rad
+  joint_vel_term = policy_obs.terms.get("joint_vel")
+  if joint_vel_term is not None and getattr(joint_vel_term, "noise", None) is not None:
+    joint_vel_term.noise.n_min = -4.0
+    joint_vel_term.noise.n_max = 4.0
+
   # Disable velocity/command curricula while keeping terrain_levels curriculum.
   for curriculum_name in list(cfg.curriculum.keys()):
-    if curriculum_name != "terrain_levels":
+    if curriculum_name not in {"terrain_levels", "action_rate_weight"}:
       cfg.curriculum.pop(curriculum_name, None)
   cfg.observations["critic"].terms["foot_height"].params[
     "asset_cfg"
@@ -363,6 +458,21 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
 
   cfg.events["foot_friction"].params["asset_cfg"].geom_names = geom_names
   cfg.events["base_com"].params["asset_cfg"].body_names = ("torso_mesh",)
+  cfg.events["base_com"].params["ranges"] = {
+    0: (-0.05, 0.05),
+    1: (-0.05, 0.05),
+    2: (-0.06, 0.06),
+  }
+  # Simulate encoder calibration mismatch up to +/-5 deg.
+  if "encoder_bias" in cfg.events:
+    encoder_bias_rad = math.radians(5.0)
+    cfg.events["encoder_bias"].params["bias_range"] = (-encoder_bias_rad, encoder_bias_rad)
+  # Add reset-time base attitude bias (e.g. IMU mounting / calibration mismatch proxy).
+  if "reset_base" in cfg.events:
+    reset_pose_range = cfg.events["reset_base"].params.setdefault("pose_range", {})
+    tilt_bias_rad = math.radians(5.0)
+    reset_pose_range["roll"] = (-tilt_bias_rad, tilt_bias_rad)
+    reset_pose_range["pitch"] = (-tilt_bias_rad, tilt_bias_rad)
 
   # Pose reward std values for the 12-DOF humanoid.
   # Hip joints get more freedom, ankle roll is tight for balance.
@@ -423,6 +533,15 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   )
   # Keep the standard action-rate smoothing penalty in addition.
   cfg.rewards["action_rate_l2"].weight = -0.2
+  cfg.curriculum["action_rate_weight"] = CurriculumTermCfg(
+    func=_ramp_reward_weight_curriculum,
+    params={
+      "reward_name": "action_rate_l2",
+      "start_weight": -0.02,
+      "end_weight": -0.5,
+      "ramp_steps": 50_000,
+    },
+  )
 
   cfg.rewards["self_collisions"] = RewardTermCfg(
     func=mdp.self_collision_cost,
@@ -434,7 +553,9 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
     # Effectively infinite episode length.
     cfg.episode_length_s = int(1e9)
 
-    cfg.observations["policy"].enable_corruption = False
+    # Keep observation corruption enabled in play so logged observations reflect
+    # the same noisy pipeline used for sim-to-real tuning.
+    cfg.observations["policy"].enable_corruption = True
     cfg.events.pop("push_robot", None)
     cfg.events["randomize_terrain"] = EventTermCfg(
       func=envs_mdp.randomize_terrain,
