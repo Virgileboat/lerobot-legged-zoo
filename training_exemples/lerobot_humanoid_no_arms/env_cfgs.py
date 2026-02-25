@@ -25,21 +25,35 @@ import torch
 
 
 _CSV_LOG_STATE_BY_ENV: dict[int, dict[str, Any]] = {}
+_ACTION_RATE_CURRICULUM_STATE_BY_ENV: dict[int, dict[str, float]] = {}
 
 
-def _ramp_reward_weight_curriculum(
+def _adaptive_reward_weight_curriculum(
   env,
   env_ids,
   reward_name: str,
   start_weight: float,
   end_weight: float,
-  ramp_steps: int,
+  level_step: float = 0.1,
+  success_rate_up_threshold: float = 0.8,
+  success_rate_down_threshold: float = 0.3,
 ) -> float:
-  """Linearly ramp a reward weight from start to end over global env steps."""
-  del env_ids  # Global schedule.
-  step = int(getattr(env, "common_step_counter", 0))
-  ramp_steps = max(int(ramp_steps), 1)
-  alpha = min(max(step / ramp_steps, 0.0), 1.0)
+  """Adapt a reward weight using reset success rate (works on flat terrain too)."""
+  state = _ACTION_RATE_CURRICULUM_STATE_BY_ENV.setdefault(id(env), {"level": 0.0})
+  # Initial reset path / manual reset may call curriculum before reset buffers exist.
+  reset_time_outs = getattr(env, "reset_time_outs", None)
+  if reset_time_outs is not None and env_ids is not None:
+    # env_ids can be a slice(None) during full reset.
+    ids = env_ids
+    timeout_flags = reset_time_outs[ids].float()
+    if timeout_flags.numel() > 0:
+      success_rate = float(timeout_flags.mean().item())
+      if success_rate >= success_rate_up_threshold:
+        state["level"] += float(level_step)
+      elif success_rate <= success_rate_down_threshold:
+        state["level"] -= float(level_step)
+  state["level"] = min(max(state["level"], 0.0), 1.0)
+  alpha = state["level"]
   weight = (1.0 - alpha) * float(start_weight) + alpha * float(end_weight)
   env.reward_manager.get_term_cfg(reward_name).weight = weight
   return weight
@@ -532,14 +546,16 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
     params={"history_len": 50, "min_history": 50, "cutoff_hz": 3.0},
   )
   # Keep the standard action-rate smoothing penalty in addition.
-  cfg.rewards["action_rate_l2"].weight = -0.2
+  cfg.rewards["action_rate_l2"].weight = -0.1
   cfg.curriculum["action_rate_weight"] = CurriculumTermCfg(
-    func=_ramp_reward_weight_curriculum,
+    func=_adaptive_reward_weight_curriculum,
     params={
       "reward_name": "action_rate_l2",
-      "start_weight": -0.02,
-      "end_weight": -0.5,
-      "ramp_steps": 50_000,
+      "start_weight": -0.1,
+      "end_weight": -1.5,
+      "level_step": 0.1,
+      "success_rate_up_threshold": 0.8,
+      "success_rate_down_threshold": 0.3,
     },
   )
 
