@@ -479,6 +479,8 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
     r".*ankley.*": 0.45,
     r".*anklex.*": 0.25,
   }
+  # Increase posture tracking pressure toward the default (knee-bent) pose.
+  cfg.rewards["pose"].weight = 2.0
 
   cfg.rewards["upright"].params["asset_cfg"].body_names = ("torso_mesh",)
   cfg.rewards["body_ang_vel"].params["asset_cfg"].body_names = ("torso_mesh",)
