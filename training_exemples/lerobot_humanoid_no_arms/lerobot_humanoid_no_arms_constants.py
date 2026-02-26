@@ -58,13 +58,13 @@ NATURAL_FREQ = 10 * 2.0 * 3.1415926535  # 10Hz
 DAMPING_RATIO = 2.0
 
 # Stiffness and damping derived from armature.
-HIP_STIFFNESS = 90.0
-KNEE_STIFFNESS = 90.0
-ANKLE_STIFFNESS = 20.0
+HIP_STIFFNESS = 110.0
+KNEE_STIFFNESS = 110.0
+ANKLE_STIFFNESS = 60.0
 
-HIP_DAMPING =2.0
-KNEE_DAMPING = 2.0
-ANKLE_DAMPING = 3.0
+HIP_DAMPING =1
+KNEE_DAMPING = 1
+ANKLE_DAMPING = 2
 
 # Effort limits (Nm) - adjust based on your motors.
 HIP_EFFORT_LIMIT = 88.0
@@ -78,7 +78,7 @@ LEROBOT_ACTUATOR_HIP1 = BuiltinPositionActuatorCfg(
   ),
   stiffness=40.0,
   damping=HIP_DAMPING,
-  effort_limit=15.0,
+  effort_limit=150.0,
   armature=HIP_ARMATURE,
 )
 
@@ -127,24 +127,45 @@ LEROBOT_ACTUATOR_ANKLE = BuiltinPositionActuatorCfg(
 ##
 
 HOME_KEYFRAME = EntityCfg.InitialStateCfg(
-  pos=(0, 0, 0.75),
+  pos=(0, 0, 0.78),
   joint_pos={
-    # Standing pose - all joints at zero.
-    ".*": 0.0,
+    # Slight crouch reference pose used as the robot default posture.
+    # This becomes the target posture for the variable_posture reward
+    # (it reads asset.data.default_joint_pos).
+    "hipz_right": 0.0,
+    "hipx_right": 0.0,
+    "hipy_right": 0.35,
+    "knee_right": 0.30,
+    "ankley_right": 0.35,
+    "anklex_right": 0.0,
+    "hipz_left": 0.0,
+    "hipx_left": 0.0,
+    "hipy_left": -0.35,
+    "knee_left": 0.30,
+    "ankley_left": -0.35,
+    "anklex_left": 0.0,
   },
   joint_vel={".*": 0.0},
 )
 
 KNEES_BENT_KEYFRAME = EntityCfg.InitialStateCfg(
-  pos=(0, 0, 0.75),
+  pos=(0, 0, 0.77),
   joint_pos={
-    # Slightly bent knees for better initial stability.
-    ".*": -0.,
-    ".*": 0.,
-    ".*": -0.,
-    ".*": 0.0,
-    ".*": 0.0,
-    ".*": 0.0,
+    # Slight crouch reference pose used as the robot default posture.
+    # This becomes the target posture for the variable_posture reward
+    # (it reads asset.data.default_joint_pos).
+    "hipz_right": 0.0,
+    "hipx_right": 0.0,
+    "hipy_right": 0.35,
+    "knee_right": 0.70,
+    "ankley_right": 0.35,
+    "anklex_right": 0.0,
+    "hipz_left": 0.0,
+    "hipx_left": 0.0,
+    "hipy_left": -0.35,
+    "knee_left": 0.70,
+    "ankley_left": -0.35,
+    "anklex_left": 0.0,
   },
   joint_vel={".*": 0.0},
 )
