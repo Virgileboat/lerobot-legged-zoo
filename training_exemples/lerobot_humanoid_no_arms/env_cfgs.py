@@ -410,6 +410,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   if base_lin_vel_term is not None and getattr(base_lin_vel_term, "noise", None) is not None:
     base_lin_vel_term.noise.n_min = -0.15
     base_lin_vel_term.noise.n_max = 0.15
+  policy_obs.terms.pop("base_lin_vel", None)
   base_ang_vel_term = policy_obs.terms.get("base_ang_vel")
   if base_ang_vel_term is not None and getattr(base_ang_vel_term, "noise", None) is not None:
     base_ang_vel_term.noise.n_min = -0.35
