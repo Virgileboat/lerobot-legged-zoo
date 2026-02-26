@@ -353,9 +353,9 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   """Create LeRobot Humanoid rough terrain velocity configuration."""
   cfg = make_velocity_env_cfg()
 
-  cfg.sim.mujoco.ccd_iterations = 500
-  cfg.sim.contact_sensor_maxmatch = 500
-  cfg.sim.nconmax = 45
+  cfg.sim.mujoco.ccd_iterations = 1000
+  cfg.sim.contact_sensor_maxmatch = 1000
+  cfg.sim.nconmax = 70
 
   cfg.scene.entities = {"robot": get_lerobot_humanoid_no_arms_robot_cfg()}
 
@@ -401,7 +401,8 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   assert isinstance(twist_cmd, UniformVelocityCommandCfg)
   twist_cmd.viz.z_offset = 0.9  # Adjust based on robot height.
   # Lower velocity command ranges for training stability.
-  twist_cmd.ranges.lin_vel_x = (-0.5, 0.5)
+  twist_cmd.ranges.lin_vel_x = (-0.7, 0.7)
+  twist_cmd.ranges.lin_vel_y = (-0.2, 0.2)
   twist_cmd.ranges.ang_vel_z = (-0.2, 0.2)
 
   # Stronger observation randomization for sim-to-real robustness.
@@ -438,6 +439,19 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   ].site_names = site_names
 
   cfg.events["foot_friction"].params["asset_cfg"].geom_names = geom_names
+  # Randomize total robot weight by scaling all body masses together (+/-10%).
+  cfg.events["robot_weight"] = EventTermCfg(
+    func=envs_mdp.randomize_field,
+    mode="startup",
+    domain_randomization=True,
+    params={
+      "asset_cfg": {"name": "robot"},
+      "field": "body_mass",
+      "operation": "scale",
+      "ranges": (0.9, 1.1),
+      "shared_random": True,
+    },
+  )
   cfg.events["base_com"].params["asset_cfg"].body_names = ("torso_mesh",)
   cfg.events["base_com"].params["ranges"] = {
     0: (-0.05, 0.05),
