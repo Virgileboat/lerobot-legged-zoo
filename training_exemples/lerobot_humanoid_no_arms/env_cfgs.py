@@ -16,6 +16,7 @@ from mjlab.envs.mdp.actions import JointPositionActionCfg
 from mjlab.managers.curriculum_manager import CurriculumTermCfg
 from mjlab.managers.event_manager import EventTermCfg
 from mjlab.managers.reward_manager import RewardTermCfg
+from mjlab.managers.scene_entity_config import SceneEntityCfg
 from mjlab.sensor import ContactMatch, ContactSensorCfg
 from mjlab.tasks.velocity import mdp
 from mjlab.tasks.velocity.mdp import UniformVelocityCommandCfg
@@ -445,7 +446,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
     mode="startup",
     domain_randomization=True,
     params={
-      "asset_cfg": {"name": "robot"},
+      "asset_cfg": SceneEntityCfg(name="robot"),
       "field": "body_mass",
       "operation": "scale",
       "ranges": (0.9, 1.1),
