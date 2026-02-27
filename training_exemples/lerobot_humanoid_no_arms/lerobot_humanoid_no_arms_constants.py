@@ -176,7 +176,7 @@ KNEES_BENT_KEYFRAME = EntityCfg.InitialStateCfg(
 
 # Enable foot collisions with appropriate friction.
 FEET_ONLY_COLLISION = CollisionCfg(
-  geom_names_expr=(r"^(left|right)_foot[1-6]_collision$",),
+  geom_names_expr=(r"^(left|right)_foot[1-4]_collision$",),
   # contype=0 disables contacts entirely; keep it enabled for ground contact.
   contype=1,
   conaffinity=1,
@@ -188,9 +188,9 @@ FEET_ONLY_COLLISION = CollisionCfg(
 # Full collision including self-collisions.
 FULL_COLLISION = CollisionCfg(
   geom_names_expr=(".*_collision",),
-  condim={r"^(left|right)_foot[1-6]_collision$": 3, ".*_collision": 1},
-  priority={r"^(left|right)_foot[1-6]_collision$": 1},
-  friction={r"^(left|right)_foot[1-6]_collision$": (0.6,)},
+  condim={r"^(left|right)_foot[1-4]_collision$": 3, ".*_collision": 1},
+  priority={r"^(left|right)_foot[1-4]_collision$": 1},
+  friction={r"^(left|right)_foot[1-4]_collision$": (0.6,)},
 )
 ##
 # Final config.
