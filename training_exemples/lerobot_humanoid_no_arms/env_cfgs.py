@@ -414,26 +414,26 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   policy_obs = cfg.observations["policy"]
   base_lin_vel_term = policy_obs.terms.get("base_lin_vel")
   if base_lin_vel_term is not None and getattr(base_lin_vel_term, "noise", None) is not None:
-    base_lin_vel_term.noise.n_min = -0.15
-    base_lin_vel_term.noise.n_max = 0.15
+    base_lin_vel_term.noise.n_min = -0.075
+    base_lin_vel_term.noise.n_max = 0.075
   policy_obs.terms.pop("base_lin_vel", None)
   base_ang_vel_term = policy_obs.terms.get("base_ang_vel")
   if base_ang_vel_term is not None and getattr(base_ang_vel_term, "noise", None) is not None:
-    base_ang_vel_term.noise.n_min = -0.35
-    base_ang_vel_term.noise.n_max = 0.35
+    base_ang_vel_term.noise.n_min = -0.175
+    base_ang_vel_term.noise.n_max = 0.175
   projected_gravity_term = policy_obs.terms.get("projected_gravity")
   if projected_gravity_term is not None and getattr(projected_gravity_term, "noise", None) is not None:
-    projected_gravity_term.noise.n_min = -0.07
-    projected_gravity_term.noise.n_max = 0.07
+    projected_gravity_term.noise.n_min = -0.035
+    projected_gravity_term.noise.n_max = 0.035
   joint_pos_term = policy_obs.terms.get("joint_pos")
   if joint_pos_term is not None and getattr(joint_pos_term, "noise", None) is not None:
-    joint_pos_noise_rad = math.radians(3.0)
+    joint_pos_noise_rad = math.radians(1.5)
     joint_pos_term.noise.n_min = -joint_pos_noise_rad
     joint_pos_term.noise.n_max = joint_pos_noise_rad
   joint_vel_term = policy_obs.terms.get("joint_vel")
   if joint_vel_term is not None and getattr(joint_vel_term, "noise", None) is not None:
-    joint_vel_term.noise.n_min = -4.0
-    joint_vel_term.noise.n_max = 4.0
+    joint_vel_term.noise.n_min = -2.0
+    joint_vel_term.noise.n_max = 2.0
 
   # Disable velocity/command curricula while keeping terrain_levels curriculum.
   for curriculum_name in list(cfg.curriculum.keys()):
