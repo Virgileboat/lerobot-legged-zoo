@@ -418,19 +418,19 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
     base_lin_vel_term.noise.n_max = 0.075
   policy_obs.terms.pop("base_lin_vel", None)
   base_ang_vel_term = policy_obs.terms.get("base_ang_vel")
-  base_ang_vel_term.noise.n_min = -0.35
-  base_ang_vel_term.noise.n_max = 0.35
+  base_ang_vel_term.noise.n_min = -0.2
+  base_ang_vel_term.noise.n_max = 0.2
   projected_gravity_term = policy_obs.terms.get("projected_gravity")
-  projected_gravity_term.noise.n_min = -0.07
-  projected_gravity_term.noise.n_max = 0.07
+  projected_gravity_term.noise.n_min = -0.05
+  projected_gravity_term.noise.n_max = 0.05
   joint_pos_term = policy_obs.terms.get("joint_pos")
   if joint_pos_term is not None and getattr(joint_pos_term, "noise", None) is not None:
     joint_pos_noise_rad = math.radians(1.5)
     joint_pos_term.noise.n_min = -joint_pos_noise_rad
     joint_pos_term.noise.n_max = joint_pos_noise_rad
   joint_vel_term = policy_obs.terms.get("joint_vel")
-  joint_vel_term.noise.n_min = -4.0
-  joint_vel_term.noise.n_max = 4.0
+  joint_vel_term.noise.n_min = -3.0
+  joint_vel_term.noise.n_max = 3.0
 
   # Disable velocity/command curricula while keeping terrain_levels curriculum.
   for curriculum_name in list(cfg.curriculum.keys()):
@@ -450,11 +450,12 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
       "asset_cfg": SceneEntityCfg(name="robot"),
       "field": "body_mass",
       "operation": "scale",
-      "ranges": (0.9, 1.1),
+      "ranges": (0.8, 1.2),
       "shared_random": True,
     },
   )
-  cfg.events["base_com"].params["asset_cfg"].body_names = ("torso_mesh",)
+  # Randomize COM placement on all body segments (per-body, not shared).
+  cfg.events["base_com"].params["asset_cfg"] = SceneEntityCfg(name="robot")
   cfg.events["base_com"].params["ranges"] = {
     0: (-0.05, 0.05),
     1: (-0.05, 0.05),
@@ -462,12 +463,12 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   }
   # Simulate encoder calibration mismatch up to +/-5 deg.
   if "encoder_bias" in cfg.events:
-    encoder_bias_rad = math.radians(5.0)
+    encoder_bias_rad = math.radians(10.0)
     cfg.events["encoder_bias"].params["bias_range"] = (-encoder_bias_rad, encoder_bias_rad)
   # Add reset-time base attitude bias (e.g. IMU mounting / calibration mismatch proxy).
   if "reset_base" in cfg.events:
     reset_pose_range = cfg.events["reset_base"].params.setdefault("pose_range", {})
-    tilt_bias_rad = math.radians(5.0)
+    tilt_bias_rad = math.radians(2.0)
     reset_pose_range["roll"] = (-tilt_bias_rad, tilt_bias_rad)
     reset_pose_range["pitch"] = (-tilt_bias_rad, tilt_bias_rad)
 
