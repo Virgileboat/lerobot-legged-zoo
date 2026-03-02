@@ -418,22 +418,19 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
     base_lin_vel_term.noise.n_max = 0.075
   policy_obs.terms.pop("base_lin_vel", None)
   base_ang_vel_term = policy_obs.terms.get("base_ang_vel")
-  if base_ang_vel_term is not None and getattr(base_ang_vel_term, "noise", None) is not None:
-    base_ang_vel_term.noise.n_min = -0.175
-    base_ang_vel_term.noise.n_max = 0.175
+  base_ang_vel_term.noise.n_min = -0.35
+  base_ang_vel_term.noise.n_max = 0.35
   projected_gravity_term = policy_obs.terms.get("projected_gravity")
-  if projected_gravity_term is not None and getattr(projected_gravity_term, "noise", None) is not None:
-    projected_gravity_term.noise.n_min = -0.035
-    projected_gravity_term.noise.n_max = 0.035
+  projected_gravity_term.noise.n_min = -0.07
+  projected_gravity_term.noise.n_max = 0.07
   joint_pos_term = policy_obs.terms.get("joint_pos")
   if joint_pos_term is not None and getattr(joint_pos_term, "noise", None) is not None:
     joint_pos_noise_rad = math.radians(1.5)
     joint_pos_term.noise.n_min = -joint_pos_noise_rad
     joint_pos_term.noise.n_max = joint_pos_noise_rad
   joint_vel_term = policy_obs.terms.get("joint_vel")
-  if joint_vel_term is not None and getattr(joint_vel_term, "noise", None) is not None:
-    joint_vel_term.noise.n_min = -2.0
-    joint_vel_term.noise.n_max = 2.0
+  joint_vel_term.noise.n_min = -4.0
+  joint_vel_term.noise.n_max = 4.0
 
   # Disable velocity/command curricula while keeping terrain_levels curriculum.
   for curriculum_name in list(cfg.curriculum.keys()):
@@ -533,7 +530,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   cfg.rewards["action_fft_band_le_3hz_ratio"] = RewardTermCfg(
     func=_ACTION_FFT_BAND_RATIO_REWARD,
     weight=3.0,
-    params={"history_len": 50, "min_history": 50, "cutoff_hz": 3.0},
+    params={"history_len": 50, "min_history": 50, "cutoff_hz": 2.},
   )
   # Keep the standard action-rate smoothing penalty in addition.
   cfg.rewards["action_rate_l2"].weight = -0.1
@@ -545,11 +542,11 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
         {"step": 0, "weight": -0.1},
         # Curriculum uses env.common_step_counter (env steps), while W&B "Step"
         # is PPO iterations. Here num_steps_per_env=24, so multiply by 24.
-        {"step": 5_000 * 24, "weight": -0.38},
-        {"step": 10_000 * 24, "weight": -0.66},
-        {"step": 15_000 * 24, "weight": -0.94},
-        {"step": 20_000 * 24, "weight": -1.22},
-        {"step": 25_000 * 24, "weight": -1.5},
+        {"step": 5_000 * 24, "weight": -0.5},
+        {"step": 10_000 * 24, "weight": -0.75},
+        {"step": 15_000 * 24, "weight": -1.0},
+        {"step": 20_000 * 24, "weight": -1.5},
+        {"step": 25_000 * 24, "weight": -2.0},
       ],
     },
   )

@@ -134,19 +134,42 @@ HOME_KEYFRAME = EntityCfg.InitialStateCfg(
     # (it reads asset.data.default_joint_pos).
     "hipz_right": 0.0,
     "hipx_right": 0.0,
-    "hipy_right": 0.35,
-    "knee_right": 0.30,
-    "ankley_right": 0.35,
+    "hipy_right": 0.0,
+    "knee_right": 0.0,
+    "ankley_right": 0.0,
     "anklex_right": 0.0,
     "hipz_left": 0.0,
     "hipx_left": 0.0,
-    "hipy_left": -0.35,
-    "knee_left": 0.30,
-    "ankley_left": -0.35,
+    "hipy_left": -0.0,
+    "knee_left": 0.0,
+    "ankley_left": -0.0,
     "anklex_left": 0.0,
   },
   joint_vel={".*": 0.0},
 )
+
+# KNEES_BENT_KEYFRAME = EntityCfg.InitialStateCfg(
+#   pos=(0, 0, 0.77),
+#   joint_pos={
+#     # Slight crouch reference pose used as the robot default posture.
+#     # This becomes the target posture for the variable_posture reward
+#     # (it reads asset.data.default_joint_pos).
+#     "hipz_right": 0.0,
+#     "hipx_right": 0.0,
+#     "hipy_right": 0.35,
+#     "knee_right": 0.70,
+#     "ankley_right": 0.35,
+#     "anklex_right": 0.0,
+#     "hipz_left": 0.0,
+#     "hipx_left": 0.0,
+#     "hipy_left": -0.35,
+#     "knee_left": 0.70,
+#     "ankley_left": -0.35,
+#     "anklex_left": 0.0,
+#   },
+#   joint_vel={".*": 0.0},
+# )
+
 
 KNEES_BENT_KEYFRAME = EntityCfg.InitialStateCfg(
   pos=(0, 0, 0.77),
@@ -156,15 +179,15 @@ KNEES_BENT_KEYFRAME = EntityCfg.InitialStateCfg(
     # (it reads asset.data.default_joint_pos).
     "hipz_right": 0.0,
     "hipx_right": 0.0,
-    "hipy_right": 0.35,
-    "knee_right": 0.70,
-    "ankley_right": 0.35,
+    "hipy_right": 0.0,
+    "knee_right": 0.0,
+    "ankley_right": 0.0,
     "anklex_right": 0.0,
     "hipz_left": 0.0,
     "hipx_left": 0.0,
-    "hipy_left": -0.35,
-    "knee_left": 0.70,
-    "ankley_left": -0.35,
+    "hipy_left": -0.0,
+    "knee_left": 0.0,
+    "ankley_left": -0.0,
     "anklex_left": 0.0,
   },
   joint_vel={".*": 0.0},
