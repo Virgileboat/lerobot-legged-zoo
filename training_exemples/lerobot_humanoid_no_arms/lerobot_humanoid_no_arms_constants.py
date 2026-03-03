@@ -48,27 +48,34 @@ def get_spec() -> mujoco.MjSpec:
 # Adjust based on your actual motor specifications.
 ##
 
-# Conservative actuator parameters for humanoid locomotion.
-# These should be tuned based on actual motor specs.
-HIP_ARMATURE = 0.02  # Reflected inertia for hip joints.
-KNEE_ARMATURE = 0.015  # Reflected inertia for knee joints.
+# Identified actuator parameters.
+HIPZ_ARMATURE = 0.03630317163452016
+HIPX_ARMATURE = 0.04682185962389506
+HIPY_ARMATURE = 0.04805047840123755
+KNEE_ARMATURE = 0.04805047840123755
 ANKLE_ARMATURE = 0.01  # Reflected inertia for ankle joints.
 
 NATURAL_FREQ = 10 * 2.0 * 3.1415926535  # 10Hz
 DAMPING_RATIO = 2.0
 
-# Stiffness and damping derived from armature.
-HIP_STIFFNESS = 110.0
-KNEE_STIFFNESS = 110.0
+# Identified gains.
+HIPZ_STIFFNESS = 98.92525911421382
+HIPX_STIFFNESS = 305.3819028946636
+HIPY_STIFFNESS = 119.93582922139161
+KNEE_STIFFNESS = 119.93582922139161
 ANKLE_STIFFNESS = 60.0
 
-HIP_DAMPING =1.
-KNEE_DAMPING = 1.
+HIPZ_DAMPING = 2.430158270946069
+HIPX_DAMPING = 3.5444373834683174
+HIPY_DAMPING = 4.140316075357987
+KNEE_DAMPING = 4.140316075357987
 ANKLE_DAMPING = 2.
 
-# Effort limits (Nm) - adjust based on your motors.
-HIP_EFFORT_LIMIT = 88.0
-KNEE_EFFORT_LIMIT = 88.
+# Identified torque limits (Nm).
+HIPZ_EFFORT_LIMIT = 131.86793225923452
+HIPX_EFFORT_LIMIT = 1994.3763244249262
+HIPY_EFFORT_LIMIT = 95.72569340785736
+KNEE_EFFORT_LIMIT = 95.72569340785736
 ANKLE_EFFORT_LIMIT = 44.
 
 
@@ -76,10 +83,10 @@ LEROBOT_ACTUATOR_HIP1 = BuiltinPositionActuatorCfg(
   target_names_expr=(
     "hipz_.*",
   ),
-  stiffness=40.0,
-  damping=HIP_DAMPING,
-  effort_limit=150.0,
-  armature=HIP_ARMATURE,
+  stiffness=HIPZ_STIFFNESS,
+  damping=HIPZ_DAMPING,
+  effort_limit=HIPZ_EFFORT_LIMIT,
+  armature=HIPZ_ARMATURE,
 )
 
 
@@ -87,10 +94,10 @@ LEROBOT_ACTUATOR_HIP2 = BuiltinPositionActuatorCfg(
   target_names_expr=(
         "hipx_.*",
   ),
-  stiffness=HIP_STIFFNESS,
-  damping=HIP_DAMPING,
-  effort_limit=88.0,
-  armature=HIP_ARMATURE,
+  stiffness=HIPX_STIFFNESS,
+  damping=HIPX_DAMPING,
+  effort_limit=HIPX_EFFORT_LIMIT,
+  armature=HIPX_ARMATURE,
 )
 
 
@@ -98,16 +105,16 @@ LEROBOT_ACTUATOR_HIP3 = BuiltinPositionActuatorCfg(
   target_names_expr=(
     "hipy_.*",
   ),
-  stiffness=HIP_STIFFNESS,
-  damping=HIP_DAMPING,
-  effort_limit=88.0,
-  armature=HIP_ARMATURE,
+  stiffness=HIPY_STIFFNESS,
+  damping=HIPY_DAMPING,
+  effort_limit=HIPY_EFFORT_LIMIT,
+  armature=HIPY_ARMATURE,
 )
 LEROBOT_ACTUATOR_KNEE = BuiltinPositionActuatorCfg(
   target_names_expr=("knee_.*",),
   stiffness=KNEE_STIFFNESS,
   damping=KNEE_DAMPING,
-  effort_limit=88.0,
+  effort_limit=KNEE_EFFORT_LIMIT,
   armature=KNEE_ARMATURE,
 )
 
