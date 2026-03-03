@@ -425,12 +425,12 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   projected_gravity_term.noise.n_max = 0.025
   joint_pos_term = policy_obs.terms.get("joint_pos")
   if joint_pos_term is not None and getattr(joint_pos_term, "noise", None) is not None:
-    joint_pos_noise_rad = math.radians(2.5)
+    joint_pos_noise_rad = math.radians(1.5)
     joint_pos_term.noise.n_min = -joint_pos_noise_rad
     joint_pos_term.noise.n_max = joint_pos_noise_rad
   joint_vel_term = policy_obs.terms.get("joint_vel")
-  joint_vel_term.noise.n_min = -math.radians(8.0)
-  joint_vel_term.noise.n_max = math.radians(8.0)
+  joint_vel_term.noise.n_min = -math.radians(5.0)
+  joint_vel_term.noise.n_max = math.radians(5.0)
 
   # Disable velocity/command curricula while keeping terrain_levels curriculum.
   for curriculum_name in list(cfg.curriculum.keys()):
@@ -450,16 +450,16 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
       "asset_cfg": SceneEntityCfg(name="robot"),
       "field": "body_mass",
       "operation": "scale",
-      "ranges": (0.8, 1.2),
+      "ranges": (0.9, 1.1),
       "shared_random": True,
     },
   )
   # Randomize COM placement on all body segments (per-body, not shared).
   cfg.events["base_com"].params["asset_cfg"] = SceneEntityCfg(name="robot")
   cfg.events["base_com"].params["ranges"] = {
-    0: (-0.05, 0.05),
-    1: (-0.05, 0.05),
-    2: (-0.06, 0.06),
+    0: (-0.03, 0.03),
+    1: (-0.03, 0.03),
+    2: (-0.03, 0.03),
   }
   # Simulate encoder calibration mismatch up to +/-5 deg.
   if "encoder_bias" in cfg.events:
