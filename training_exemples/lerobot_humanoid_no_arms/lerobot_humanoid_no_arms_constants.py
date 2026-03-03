@@ -73,7 +73,7 @@ ANKLE_DAMPING = 2.
 
 # Identified torque limits (Nm).
 HIPZ_EFFORT_LIMIT = 131.86793225923452
-HIPX_EFFORT_LIMIT = 1994.3763244249262
+HIPX_EFFORT_LIMIT = 100.0
 HIPY_EFFORT_LIMIT = 95.72569340785736
 KNEE_EFFORT_LIMIT = 95.72569340785736
 ANKLE_EFFORT_LIMIT = 44.
@@ -262,6 +262,9 @@ for a in LEROBOT_HUMANOID_NO_ARMS_ARTICULATION.actuators:
   assert e is not None
   for n in names:
     LEROBOT_HUMANOID_NO_ARMS_ACTION_SCALE[n] = 0.25 * e / s
+
+# Keep hipx action amplitude bounded for stability.
+LEROBOT_HUMANOID_NO_ARMS_ACTION_SCALE[r"hipx_.*"] = 0.3
 
 
 if __name__ == "__main__":
