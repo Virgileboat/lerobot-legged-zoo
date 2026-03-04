@@ -481,19 +481,6 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
       "shared_random": False,
     },
   )
-  # Randomize actuator gains (MuJoCo gain parameters, includes kp for position actuators).
-  cfg.events["actuator_gain"] = EventTermCfg(
-    func=envs_mdp.randomize_field,
-    mode="startup",
-    domain_randomization=True,
-    params={
-      "asset_cfg": SceneEntityCfg(name="robot"),
-      "field": "actuator_gainprm",
-      "operation": "scale",
-      "ranges": (0.7, 1.3),
-      "shared_random": False,
-    },
-  )
   # Randomize COM placement on all body segments (per-body, not shared).
   cfg.events["base_com"].params["asset_cfg"] = SceneEntityCfg(name="robot")
   cfg.events["base_com"].params["ranges"] = {
