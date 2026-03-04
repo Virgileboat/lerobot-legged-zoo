@@ -455,14 +455,14 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
       "shared_random": False,
     },
   )
-  # Randomize DoF armature per-joint.
-  cfg.events["joint_armature"] = EventTermCfg(
+  # Randomize joint Coulomb friction per-joint.
+  cfg.events["joint_coulomb_friction"] = EventTermCfg(
     func=envs_mdp.randomize_field,
     mode="startup",
     domain_randomization=True,
     params={
       "asset_cfg": SceneEntityCfg(name="robot"),
-      "field": "dof_armature",
+      "field": "dof_frictionloss",
       "operation": "scale",
       "ranges": (0.5, 1.5),
       "shared_random": False,
