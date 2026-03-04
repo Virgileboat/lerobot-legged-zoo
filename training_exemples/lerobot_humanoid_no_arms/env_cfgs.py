@@ -429,8 +429,8 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
     joint_pos_term.noise.n_min = -joint_pos_noise_rad
     joint_pos_term.noise.n_max = joint_pos_noise_rad
   joint_vel_term = policy_obs.terms.get("joint_vel")
-  joint_vel_term.noise.n_min = -math.radians(5.0)
-  joint_vel_term.noise.n_max = math.radians(5.0)
+  joint_vel_term.noise.n_min = -math.radians(10.0)
+  joint_vel_term.noise.n_max = math.radians(10.0)
 
   # Disable velocity/command curricula while keeping terrain_levels curriculum.
   for curriculum_name in list(cfg.curriculum.keys()):
@@ -450,8 +450,48 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
       "asset_cfg": SceneEntityCfg(name="robot"),
       "field": "body_mass",
       "operation": "scale",
-      "ranges": (0.9, 1.1),
-      "shared_random": True,
+      "ranges": (0.8, 1.2),
+      # Randomize each body independently (not a single global scale).
+      "shared_random": False,
+    },
+  )
+  # Randomize DoF armature per-joint.
+  cfg.events["joint_armature"] = EventTermCfg(
+    func=envs_mdp.randomize_field,
+    mode="startup",
+    domain_randomization=True,
+    params={
+      "asset_cfg": SceneEntityCfg(name="robot"),
+      "field": "dof_armature",
+      "operation": "scale",
+      "ranges": (0.5, 1.5),
+      "shared_random": False,
+    },
+  )
+  # Randomize joint viscous friction (damping) per-joint.
+  cfg.events["joint_viscous_friction"] = EventTermCfg(
+    func=envs_mdp.randomize_field,
+    mode="startup",
+    domain_randomization=True,
+    params={
+      "asset_cfg": SceneEntityCfg(name="robot"),
+      "field": "dof_damping",
+      "operation": "scale",
+      "ranges": (0.5, 1.5),
+      "shared_random": False,
+    },
+  )
+  # Randomize actuator gains (MuJoCo gain parameters, includes kp for position actuators).
+  cfg.events["actuator_gain"] = EventTermCfg(
+    func=envs_mdp.randomize_field,
+    mode="startup",
+    domain_randomization=True,
+    params={
+      "asset_cfg": SceneEntityCfg(name="robot"),
+      "field": "actuator_gainprm",
+      "operation": "scale",
+      "ranges": (0.7, 1.3),
+      "shared_random": False,
     },
   )
   # Randomize COM placement on all body segments (per-body, not shared).
