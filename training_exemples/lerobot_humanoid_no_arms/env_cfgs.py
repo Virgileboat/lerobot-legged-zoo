@@ -450,7 +450,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
       "asset_cfg": SceneEntityCfg(name="robot"),
       "field": "body_mass",
       "operation": "scale",
-      "ranges": (0.5, 1.5),
+      "ranges": (0.8, 1.2),
       # Randomize each body independently (not a single global scale).
       "shared_random": False,
     },
@@ -484,9 +484,9 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   # Randomize COM placement on all body segments (per-body, not shared).
   cfg.events["base_com"].params["asset_cfg"] = SceneEntityCfg(name="robot")
   cfg.events["base_com"].params["ranges"] = {
-    0: (-0.04, 0.04),
-    1: (-0.04, 0.04),
-    2: (-0.04, 0.04),
+    0: (-0.025, 0.025),
+    1: (-0.025, 0.025),
+    2: (-0.025, 0.025),
   }
   # Simulate encoder calibration mismatch up to +/-5 deg.
   if "encoder_bias" in cfg.events:
@@ -555,11 +555,11 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
     params={"limit_nm": 4.0},
   )
   # Reward the fraction of action spectral energy within the <=3 Hz band.
-  cfg.rewards["action_fft_band_le_3hz_ratio"] = RewardTermCfg(
-    func=_ACTION_FFT_BAND_RATIO_REWARD,
-    weight=3.0,
-    params={"history_len": 50, "min_history": 50, "cutoff_hz": 0.5},
-  )
+  # cfg.rewards["action_fft_band_le_3hz_ratio"] = RewardTermCfg(
+  #   func=_ACTION_FFT_BAND_RATIO_REWARD,
+  #   weight=3.0,
+  #   params={"history_len": 50, "min_history": 50, "cutoff_hz": 0.8},
+  # )
   # Keep the standard action-rate smoothing penalty in addition.
   cfg.rewards["action_rate_l2"].weight = -0.1
   cfg.curriculum["action_rate_weight"] = CurriculumTermCfg(
@@ -570,13 +570,13 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
         {"step": 0, "weight": -0.1},
         # Curriculum uses env.common_step_counter (env steps), while W&B "Step"
         # is PPO iterations. Here num_steps_per_env=24, so multiply by 24.
-        {"step": 5_000 * 24, "weight": -0.5},
-        {"step": 10_000 * 24, "weight": -0.75},
-        {"step": 15_000 * 24, "weight": -1.0},
-        {"step": 20_000 * 24, "weight": -2.0},
-        {"step": 25_000 * 24, "weight": -4.0},
-        {"step": 30_000 * 24, "weight": -8.0},
-        {"step": 35_000 * 24, "weight": -16.0},
+        {"step": 5_000 * 24, "weight": -0.1},
+        {"step": 10_000 * 24, "weight": -0.3},
+        {"step": 15_000 * 24, "weight": -0.5},
+        {"step": 20_000 * 24, "weight": -0.8},
+        {"step": 25_000 * 24, "weight": -1.0},
+        {"step": 30_000 * 24, "weight": -1.5},
+        {"step": 35_000 * 24, "weight": -3.0},
       ],
     },
   )
