@@ -450,7 +450,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
       "asset_cfg": SceneEntityCfg(name="robot"),
       "field": "body_mass",
       "operation": "scale",
-      "ranges": (0.8, 1.2),
+      "ranges": (0.5, 1.5),
       # Randomize each body independently (not a single global scale).
       "shared_random": False,
     },
@@ -464,7 +464,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
       "asset_cfg": SceneEntityCfg(name="robot"),
       "field": "dof_frictionloss",
       "operation": "scale",
-      "ranges": (0.5, 1.5),
+      "ranges": (0.2, 5.0),
       "shared_random": False,
     },
   )
@@ -477,16 +477,16 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
       "asset_cfg": SceneEntityCfg(name="robot"),
       "field": "dof_damping",
       "operation": "scale",
-      "ranges": (0.5, 1.5),
+      "ranges": (0.2, 5.),
       "shared_random": False,
     },
   )
   # Randomize COM placement on all body segments (per-body, not shared).
   cfg.events["base_com"].params["asset_cfg"] = SceneEntityCfg(name="robot")
   cfg.events["base_com"].params["ranges"] = {
-    0: (-0.03, 0.03),
-    1: (-0.03, 0.03),
-    2: (-0.03, 0.03),
+    0: (-0.04, 0.04),
+    1: (-0.04, 0.04),
+    2: (-0.04, 0.04),
   }
   # Simulate encoder calibration mismatch up to +/-5 deg.
   if "encoder_bias" in cfg.events:
@@ -534,31 +534,31 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
 
   cfg.rewards["body_ang_vel"].weight = -0.05
   cfg.rewards["angular_momentum"].weight = -0.02
-  cfg.rewards["air_time"].weight = 0.0
+  # cfg.rewards["air_time"].weight = 0.0
 
   # Encourage lower overall effort, with an extra penalty on ankle torque demand.
   cfg.rewards["actuator_torque_l2"] = RewardTermCfg(
     func=_all_actuator_torque_l2,
-    weight=-2e-4,
+    weight=-200e-4,
   )
-  cfg.rewards["ankle_torque_l2"] = RewardTermCfg(
-    func=_ankle_actuator_torque_l2,
-    weight=-30e-4,
-  )
-  cfg.rewards["ankle_power_l1"] = RewardTermCfg(
-    func=_ankle_actuator_power_l1,
-    weight=-5e-4,
-  )
+  # cfg.rewards["ankle_torque_l2"] = RewardTermCfg(
+  #   func=_ankle_actuator_torque_l2,
+  #   weight=-30e-4,
+  # )
+  # cfg.rewards["ankle_power_l1"] = RewardTermCfg(
+  #   func=_ankle_actuator_power_l1,
+  #   weight=-5e-4,
+  # )
   cfg.rewards["ankle_torque_over_5nm_l2"] = RewardTermCfg(
     func=_ankle_torque_above_limit_l2,
-    weight=-200e-4,
+    weight=-2000e-4,
     params={"limit_nm": 4.0},
   )
   # Reward the fraction of action spectral energy within the <=3 Hz band.
   cfg.rewards["action_fft_band_le_3hz_ratio"] = RewardTermCfg(
     func=_ACTION_FFT_BAND_RATIO_REWARD,
     weight=3.0,
-    params={"history_len": 50, "min_history": 50, "cutoff_hz": 1.},
+    params={"history_len": 50, "min_history": 50, "cutoff_hz": 0.5},
   )
   # Keep the standard action-rate smoothing penalty in addition.
   cfg.rewards["action_rate_l2"].weight = -0.1
@@ -591,15 +591,17 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
     # Effectively infinite episode length.
     cfg.episode_length_s = int(1e9)
 
-    # Keep observation corruption enabled in play so logged observations reflect
-    # the same noisy pipeline used for sim-to-real tuning.
-    cfg.observations["policy"].enable_corruption = True
-    cfg.events.pop("push_robot", None)
-    cfg.events["randomize_terrain"] = EventTermCfg(
-      func=envs_mdp.randomize_terrain,
-      mode="reset",
-      params={},
-    )
+    # Disable observation corruption and domain randomization for play testing.
+    # cfg.observations["policy"].enable_corruption = False
+    # cfg.events.pop("push_robot", None)
+    # cfg.events.pop("encoder_bias", None)
+    for event_name in list(cfg.events.keys()):
+      event_cfg = cfg.events[event_name]
+      if bool(getattr(event_cfg, "domain_randomization", False)):
+        cfg.events.pop(event_name, None)
+    if "reset_base" in cfg.events:
+      cfg.events["reset_base"].params["pose_range"] = {}
+      cfg.events["reset_base"].params["velocity_range"] = {}
 
     if cfg.scene.terrain is not None:
       if cfg.scene.terrain.terrain_generator is not None:
