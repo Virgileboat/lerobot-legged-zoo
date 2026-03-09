@@ -450,7 +450,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
       "asset_cfg": SceneEntityCfg(name="robot"),
       "field": "body_mass",
       "operation": "scale",
-      "ranges": (0.8, 1.2),
+      "ranges": (0.9, 1.1),
       # Randomize each body independently (not a single global scale).
       "shared_random": False,
     },
@@ -484,9 +484,9 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   # Randomize COM placement on all body segments (per-body, not shared).
   cfg.events["base_com"].params["asset_cfg"] = SceneEntityCfg(name="robot")
   cfg.events["base_com"].params["ranges"] = {
-    0: (-0.025, 0.025),
-    1: (-0.025, 0.025),
-    2: (-0.025, 0.025),
+    0: (-0.015, 0.125),
+    1: (-0.015, 0.015),
+    2: (-0.015, 0.015),
   }
   # Simulate encoder calibration mismatch up to +/-5 deg.
   if "encoder_bias" in cfg.events:
