@@ -425,12 +425,12 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   projected_gravity_term.noise.n_max = 0.025
   joint_pos_term = policy_obs.terms.get("joint_pos")
   if joint_pos_term is not None and getattr(joint_pos_term, "noise", None) is not None:
-    joint_pos_noise_rad = math.radians(1.5)
+    joint_pos_noise_rad = math.radians(2.5)
     joint_pos_term.noise.n_min = -joint_pos_noise_rad
     joint_pos_term.noise.n_max = joint_pos_noise_rad
   joint_vel_term = policy_obs.terms.get("joint_vel")
-  joint_vel_term.noise.n_min = -math.radians(10.0)
-  joint_vel_term.noise.n_max = math.radians(10.0)
+  joint_vel_term.noise.n_min = -math.radians(15.0)
+  joint_vel_term.noise.n_max = math.radians(15.0)
 
   # Disable velocity/command curricula while keeping terrain_levels curriculum.
   for curriculum_name in list(cfg.curriculum.keys()):
@@ -464,7 +464,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
       "asset_cfg": SceneEntityCfg(name="robot"),
       "field": "dof_frictionloss",
       "operation": "scale",
-      "ranges": (0.2, 5.0),
+      "ranges": (0.5, 1.5),
       "shared_random": False,
     },
   )
@@ -477,7 +477,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
       "asset_cfg": SceneEntityCfg(name="robot"),
       "field": "dof_damping",
       "operation": "scale",
-      "ranges": (0.2, 5.),
+      "ranges": (0.5, 1.5),
       "shared_random": False,
     },
   )
@@ -490,7 +490,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   }
   # Simulate encoder calibration mismatch up to +/-5 deg.
   if "encoder_bias" in cfg.events:
-    encoder_bias_rad = math.radians(10.0)
+    encoder_bias_rad = math.radians(8.0)
     cfg.events["encoder_bias"].params["bias_range"] = (-encoder_bias_rad, encoder_bias_rad)
   # Add reset-time base attitude bias (e.g. IMU mounting / calibration mismatch proxy).
   if "reset_base" in cfg.events:
@@ -555,11 +555,11 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
     params={"limit_nm": 4.0},
   )
   # Reward the fraction of action spectral energy within the <=3 Hz band.
-  # cfg.rewards["action_fft_band_le_3hz_ratio"] = RewardTermCfg(
-  #   func=_ACTION_FFT_BAND_RATIO_REWARD,
-  #   weight=3.0,
-  #   params={"history_len": 50, "min_history": 50, "cutoff_hz": 0.8},
-  # )
+  cfg.rewards["action_fft_band_le_3hz_ratio"] = RewardTermCfg(
+    func=_ACTION_FFT_BAND_RATIO_REWARD,
+    weight=3.0,
+    params={"history_len": 50, "min_history": 50, "cutoff_hz": 2.5},
+  )
   # Keep the standard action-rate smoothing penalty in addition.
   cfg.rewards["action_rate_l2"].weight = -0.1
   cfg.curriculum["action_rate_weight"] = CurriculumTermCfg(
@@ -573,10 +573,10 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
         {"step": 5_000 * 24, "weight": -0.1},
         {"step": 10_000 * 24, "weight": -0.3},
         {"step": 15_000 * 24, "weight": -0.5},
-        {"step": 20_000 * 24, "weight": -0.8},
-        {"step": 25_000 * 24, "weight": -1.0},
-        {"step": 30_000 * 24, "weight": -1.5},
-        {"step": 35_000 * 24, "weight": -3.0},
+        {"step": 20_000 * 24, "weight": -1.0},
+        {"step": 25_000 * 24, "weight": -3.0},
+        {"step": 30_000 * 24, "weight": -6.0},
+        {"step": 35_000 * 24, "weight": -10.0},
       ],
     },
   )

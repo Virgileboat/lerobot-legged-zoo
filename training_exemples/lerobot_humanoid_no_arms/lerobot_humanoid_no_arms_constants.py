@@ -48,23 +48,22 @@ def get_spec() -> mujoco.MjSpec:
 # Adjust based on your actual motor specifications.
 ##
 
-# Conservative actuator parameters for humanoid locomotion.
-# These should be tuned based on actual motor specs.
-HIP_ARMATURE = 0.02  # Reflected inertia for hip joints.
-KNEE_ARMATURE = 0.015  # Reflected inertia for knee joints.
-ANKLE_ARMATURE = 0.01  # Reflected inertia for ankle joints.
+# Actuator gains (kp, kv):
+# hipz: kp=10, kv=0.5
+# hipx/hipy/knee: kp=20, kv=0.5
+# ankle pitch/roll: kp=30, kv=1.0
+HIPZ_STIFFNESS = 10.0
+HIP_STIFFNESS = 20.0
+KNEE_STIFFNESS = 20.0
+ANKLE_STIFFNESS = 30.0
 
-NATURAL_FREQ = 10 * 2.0 * 3.1415926535  # 10Hz
-DAMPING_RATIO = 2.0
+HIPZ_DAMPING = 0.5
+HIP_DAMPING = 0.5
+KNEE_DAMPING = 0.5
+ANKLE_DAMPING = 1.0
 
-# Stiffness and damping derived from armature.
-HIP_STIFFNESS = 110.0
-KNEE_STIFFNESS = 110.0
-ANKLE_STIFFNESS = 60.0
-
-HIP_DAMPING =1.
-KNEE_DAMPING = 1.
-ANKLE_DAMPING = 2.
+# Keep armature in actuator config at 0.0; per-joint armature is set in the MJCF.
+ACTUATOR_ARMATURE = 0.0
 
 # Effort limits (Nm) - adjust based on your motors.
 HIP_EFFORT_LIMIT = 88.0
@@ -76,10 +75,10 @@ LEROBOT_ACTUATOR_HIP1 = BuiltinPositionActuatorCfg(
   target_names_expr=(
     "hipz_.*",
   ),
-  stiffness=40.0,
-  damping=HIP_DAMPING,
+  stiffness=HIPZ_STIFFNESS,
+  damping=HIPZ_DAMPING,
   effort_limit=150.0,
-  armature=HIP_ARMATURE,
+  armature=ACTUATOR_ARMATURE,
 )
 
 
@@ -90,7 +89,7 @@ LEROBOT_ACTUATOR_HIP2 = BuiltinPositionActuatorCfg(
   stiffness=HIP_STIFFNESS,
   damping=HIP_DAMPING,
   effort_limit=88.0,
-  armature=HIP_ARMATURE,
+  armature=ACTUATOR_ARMATURE,
 )
 
 
@@ -101,14 +100,14 @@ LEROBOT_ACTUATOR_HIP3 = BuiltinPositionActuatorCfg(
   stiffness=HIP_STIFFNESS,
   damping=HIP_DAMPING,
   effort_limit=88.0,
-  armature=HIP_ARMATURE,
+  armature=ACTUATOR_ARMATURE,
 )
 LEROBOT_ACTUATOR_KNEE = BuiltinPositionActuatorCfg(
   target_names_expr=("knee_.*",),
   stiffness=KNEE_STIFFNESS,
   damping=KNEE_DAMPING,
   effort_limit=88.0,
-  armature=KNEE_ARMATURE,
+  armature=ACTUATOR_ARMATURE,
 )
 
 LEROBOT_ACTUATOR_ANKLE = BuiltinPositionActuatorCfg(
@@ -119,7 +118,7 @@ LEROBOT_ACTUATOR_ANKLE = BuiltinPositionActuatorCfg(
   stiffness=ANKLE_STIFFNESS,
   damping=ANKLE_DAMPING,
   effort_limit=44.0,
-  armature=ANKLE_ARMATURE,
+  armature=ACTUATOR_ARMATURE,
 )
 
 ##
