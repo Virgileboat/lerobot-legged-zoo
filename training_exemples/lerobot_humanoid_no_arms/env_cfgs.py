@@ -356,7 +356,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
 
   cfg.sim.mujoco.ccd_iterations = 500
   cfg.sim.contact_sensor_maxmatch = 500
-  cfg.sim.nconmax = 45
+  cfg.sim.nconmax = 70
 
   cfg.scene.entities = {"robot": get_lerobot_humanoid_no_arms_robot_cfg()}
 
@@ -450,7 +450,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
       "asset_cfg": SceneEntityCfg(name="robot"),
       "field": "body_mass",
       "operation": "scale",
-      "ranges": (0.8, 1.2),
+      "ranges": (0.9, 1.1),
       # Randomize each body independently (not a single global scale).
       "shared_random": False,
     },
@@ -464,7 +464,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
       "asset_cfg": SceneEntityCfg(name="robot"),
       "field": "dof_frictionloss",
       "operation": "scale",
-      "ranges": (0.7, 1.3),
+      "ranges": (0.9, 1.1),
       "shared_random": False,
     },
   )
@@ -477,7 +477,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
       "asset_cfg": SceneEntityCfg(name="robot"),
       "field": "dof_damping",
       "operation": "scale",
-      "ranges": (0.7, 1.3),
+      "ranges": (0.8, 1.2),
       "shared_random": False,
     },
   )
@@ -555,11 +555,11 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
     params={"limit_nm": 4.0},
   )
   # Reward the fraction of action spectral energy within the <=3 Hz band.
-  cfg.rewards["action_fft_band_le_3hz_ratio"] = RewardTermCfg(
-    func=_ACTION_FFT_BAND_RATIO_REWARD,
-    weight=3.0,
-    params={"history_len": 50, "min_history": 50, "cutoff_hz": 2.5},
-  )
+  # cfg.rewards["action_fft_band_le_3hz_ratio"] = RewardTermCfg(
+  #   func=_ACTION_FFT_BAND_RATIO_REWARD,
+  #   weight=3.0,
+  #   params={"history_len": 50, "min_history": 50, "cutoff_hz": 2.5},
+  # )
   # Keep the standard action-rate smoothing penalty in addition.
   cfg.rewards["action_rate_l2"].weight = -0.1
   cfg.curriculum["action_rate_weight"] = CurriculumTermCfg(
