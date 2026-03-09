@@ -2,6 +2,8 @@
 
 import csv
 import math
+import re
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -192,6 +194,117 @@ def _get_projected_gravity_from_policy_obs(
   return [float(vals[0]), float(vals[1]), float(vals[2])]
 
 
+def _get_robot_state_with_names(env, env_index: int) -> tuple[list[str], list[float]]:
+  """Extract available robot state tensors with stable CSV column names."""
+  try:
+    asset = env.scene["robot"]
+    data = getattr(asset, "data", None)
+    if data is None:
+      return ([], [])
+  except Exception:
+    return ([], [])
+
+  # Keep a fixed ordered list for stable CSV columns across runs.
+  candidate_fields = (
+    "root_pos_w",
+    "root_quat_w",
+    "root_lin_vel_w",
+    "root_ang_vel_w",
+    "joint_pos",
+    "joint_vel",
+    "actuator_force",
+  )
+
+  names: list[str] = []
+  values: list[float] = []
+  for field in candidate_fields:
+    tensor = getattr(data, field, None)
+    if not isinstance(tensor, torch.Tensor):
+      continue
+    try:
+      vals = tensor[env_index].detach().cpu().reshape(-1).tolist()
+    except Exception:
+      continue
+    names.extend(f"robot_state_{field}_{i}" for i in range(len(vals)))
+    values.extend(float(v) for v in vals)
+  return names, values
+
+
+def _slice_env_row(values, env_index: int, length: int | None = None) -> list[float]:
+  """Convert a tensor/array-like to one environment row and optional prefix length."""
+  if isinstance(values, torch.Tensor):
+    row = values[env_index].detach().cpu().reshape(-1).tolist()
+    if length is not None:
+      row = row[:length]
+    return [float(v) for v in row]
+  try:
+    row = values[env_index].reshape(-1).tolist()
+  except Exception:
+    return []
+  if length is not None:
+    row = row[:length]
+  return [float(v) for v in row]
+
+
+def _get_sim_base_state_with_names(env, env_index: int) -> tuple[list[str], list[float]]:
+  """Extract base qpos[0:7] and qvel[0:6] from sim state when available."""
+  sim = getattr(env, "sim", None)
+  if sim is None:
+    return ([], [])
+  data = getattr(sim, "data", None)
+  if data is None:
+    return ([], [])
+
+  names: list[str] = []
+  values: list[float] = []
+  qpos = getattr(data, "qpos", None)
+  if qpos is not None:
+    qpos_vals = _slice_env_row(qpos, env_index, length=7)
+    names.extend(f"sim_qpos_{i}" for i in range(len(qpos_vals)))
+    values.extend(qpos_vals)
+  qvel = getattr(data, "qvel", None)
+  if qvel is not None:
+    qvel_vals = _slice_env_row(qvel, env_index, length=6)
+    names.extend(f"sim_qvel_{i}" for i in range(len(qvel_vals)))
+    values.extend(qvel_vals)
+  return names, values
+
+
+def _get_sim_imu_raw_with_names(env, env_index: int) -> tuple[list[str], list[float]]:
+  """Extract raw IMU signals from Mujoco sensors when available."""
+  sim = getattr(env, "sim", None)
+  if sim is None:
+    return ([], [])
+  model = getattr(sim, "model", None)
+  data = getattr(sim, "data", None)
+  if model is None or data is None:
+    return ([], [])
+  sensordata = getattr(data, "sensordata", None)
+  if sensordata is None:
+    return ([], [])
+
+  names: list[str] = []
+  values: list[float] = []
+
+  def add_sensor(sensor_name: str, prefix: str) -> None:
+    try:
+      sensor = model.sensor(sensor_name)
+      adr = int(sensor.adr)
+      dim = int(sensor.dim)
+    except Exception:
+      return
+    row = _slice_env_row(sensordata, env_index)
+    if not row or adr + dim > len(row):
+      return
+    vals = row[adr : adr + dim]
+    names.extend(f"{prefix}_{i}" for i in range(len(vals)))
+    values.extend(vals)
+
+  add_sensor("robot/imu_ang_vel", "imu_ang_vel_raw")
+  add_sensor("robot/imu_lin_vel", "imu_lin_vel_raw")
+  return names, values
+
+
 def _log_obs_action_csv(
   env,
   env_ids=None,
@@ -209,6 +322,9 @@ def _log_obs_action_csv(
     return
 
   obs_names, obs_values = _flatten_obs_policy_with_names(obs_policy, env_index)
+  robot_state_names, robot_state_values = _get_robot_state_with_names(env, env_index)
+  sim_base_state_names, sim_base_state_values = _get_sim_base_state_with_names(env, env_index)
+  imu_raw_names, imu_raw_values = _get_sim_imu_raw_with_names(env, env_index)
   projected_gravity = _get_projected_gravity_from_policy_obs(obs_policy, env_index)
   action_values = (
     env.action_manager.action[env_index].detach().cpu().reshape(-1).tolist()
@@ -222,6 +338,61 @@ def _log_obs_action_csv(
         break
       except Exception:
         continue
+  action_sent_values = None
+  # Exact sent command for JointPositionAction:
+  # target = processed_action - encoder_bias
+  try:
+    joint_pos_term = env.action_manager.get_term("joint_pos")
+    processed = getattr(joint_pos_term, "_processed_actions", None)
+    entity = getattr(joint_pos_term, "_entity", None)
+    target_ids = getattr(joint_pos_term, "target_ids", None)
+    if (
+      isinstance(processed, torch.Tensor)
+      and entity is not None
+      and hasattr(entity, "data")
+      and isinstance(getattr(entity.data, "encoder_bias", None), torch.Tensor)
+      and isinstance(target_ids, torch.Tensor)
+    ):
+      encoder_bias = entity.data.encoder_bias[:, target_ids]
+      sent = processed - encoder_bias
+      action_sent_values = sent[env_index].detach().cpu().reshape(-1).tolist()
+  except Exception:
+    pass
+  action_scale_values = None
+  # First try direct action manager runtime attributes.
+  for attr_name in ("action_scale", "_action_scale", "scale", "_scale"):
+    attr = getattr(env.action_manager, attr_name, None)
+    if isinstance(attr, torch.Tensor):
+      try:
+        vals = attr[env_index].detach().cpu().reshape(-1).tolist()
+      except Exception:
+        vals = attr.detach().cpu().reshape(-1).tolist()
+      if len(vals) == len(action_values):
+        action_scale_values = vals
+        break
+    elif isinstance(attr, (list, tuple)) and len(attr) == len(action_values):
+      action_scale_values = [float(v) for v in attr]
+      break
+
+  # Fallback: resolve from config action scale mapping against actuator names.
+  if action_scale_values is None:
+    try:
+      joint_pos_cfg = env.cfg.actions.get("joint_pos")
+      scale_cfg = getattr(joint_pos_cfg, "scale", None)
+      actuator_names = getattr(env.scene["robot"], "actuator_names", None)
+      if isinstance(scale_cfg, dict) and actuator_names is not None:
+        resolved: list[float] = []
+        for actuator_name in actuator_names:
+          s = 1.0
+          for expr, val in scale_cfg.items():
+            if re.match(expr, actuator_name):
+              s = float(val)
+              break
+          resolved.append(s)
+        if len(resolved) == len(action_values):
+          action_scale_values = resolved
+    except Exception:
+      pass
 
   env_key = id(env)
   state = _CSV_LOG_STATE_BY_ENV.get(env_key)
@@ -244,19 +415,43 @@ def _log_obs_action_csv(
   header_written = bool(state["header_written"])
 
   if not header_written:
-    header = ["global_step", "episode_step", "env_index"]
+    header = [
+      "timestamp_wall_s",
+      "timestamp_sim_s",
+      "global_step",
+      "episode_step",
+      "env_index",
+    ]
     if projected_gravity is not None:
       header += ["projected_gravity_x", "projected_gravity_y", "projected_gravity_z"]
     header += [f"action_{i}" for i in range(len(action_values))]
     if action_applied_values is not None:
       header += [f"action_applied_{i}" for i in range(len(action_applied_values))]
+    if action_sent_values is not None:
+      header += [f"action_sent_{i}" for i in range(len(action_sent_values))]
+    if action_scale_values is not None:
+      header += [f"action_scale_{i}" for i in range(len(action_scale_values))]
+    header += robot_state_names
+    header += sim_base_state_names
+    header += imu_raw_names
     header += obs_names
     with csv_file.open("w", newline="") as f:
       writer = csv.writer(f)
       writer.writerow(header)
     state["header_written"] = True
 
+  sim_time_s = float("nan")
+  try:
+    sim_time_s = float(env.sim.data.time[env_index].item())
+  except Exception:
+    try:
+      sim_time_s = float(env.sim.data.time)
+    except Exception:
+      pass
+
   row = [
+    float(time.time()),
+    sim_time_s,
     int(env.common_step_counter),
     int(env.episode_length_buf[env_index].item()),
     env_index,
@@ -266,6 +461,13 @@ def _log_obs_action_csv(
   row += action_values
   if action_applied_values is not None:
     row += action_applied_values
+  if action_sent_values is not None:
+    row += action_sent_values
+  if action_scale_values is not None:
+    row += action_scale_values
+  row += robot_state_values
+  row += sim_base_state_values
+  row += imu_raw_values
   row += obs_values
   with csv_file.open("a", newline="") as f:
     writer = csv.writer(f)
@@ -450,7 +652,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
       "asset_cfg": SceneEntityCfg(name="robot"),
       "field": "body_mass",
       "operation": "scale",
-      "ranges": (0.9, 1.1),
+      "ranges": (0.8, 1.2),
       # Randomize each body independently (not a single global scale).
       "shared_random": False,
     },
@@ -464,7 +666,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
       "asset_cfg": SceneEntityCfg(name="robot"),
       "field": "dof_frictionloss",
       "operation": "scale",
-      "ranges": (0.8, 1.2),
+      "ranges": (0.7, 1.3),
       "shared_random": False,
     },
   )
@@ -477,7 +679,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
       "asset_cfg": SceneEntityCfg(name="robot"),
       "field": "dof_damping",
       "operation": "scale",
-      "ranges": (0.8, 1.2),
+      "ranges": (0.7, 1.3),
       "shared_random": False,
     },
   )
@@ -555,11 +757,11 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
     params={"limit_nm": 4.0},
   )
   # Reward the fraction of action spectral energy within the <=3 Hz band.
-  # cfg.rewards["action_fft_band_le_3hz_ratio"] = RewardTermCfg(
-  #   func=_ACTION_FFT_BAND_RATIO_REWARD,
-  #   weight=3.0,
-  #   params={"history_len": 50, "min_history": 50, "cutoff_hz": 2.5},
-  # )
+  cfg.rewards["action_fft_band_le_3hz_ratio"] = RewardTermCfg(
+    func=_ACTION_FFT_BAND_RATIO_REWARD,
+    weight=3.0,
+    params={"history_len": 50, "min_history": 50, "cutoff_hz": 2.5},
+  )
   # Keep the standard action-rate smoothing penalty in addition.
   cfg.rewards["action_rate_l2"].weight = -0.1
   cfg.curriculum["action_rate_weight"] = CurriculumTermCfg(
@@ -609,6 +811,12 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
         cfg.scene.terrain.terrain_generator.num_cols = 5
         cfg.scene.terrain.terrain_generator.num_rows = 5
         cfg.scene.terrain.terrain_generator.border_width = 10.0
+    # Zero commanded velocity during play tests.
+    # twist_cmd = cfg.commands["twist"]
+    # assert isinstance(twist_cmd, UniformVelocityCommandCfg)
+    # twist_cmd.ranges.lin_vel_x = (0.0, 0.0)
+    # twist_cmd.ranges.lin_vel_y = (0.0, 0.0)
+    # twist_cmd.ranges.ang_vel_z = (0.0, 0.0)
 
   return cfg
 
@@ -634,8 +842,9 @@ def lerobot_humanoid_no_arms_flat_env_cfg(play: bool = False) -> ManagerBasedRlE
   if play:
     twist_cmd = cfg.commands["twist"]
     assert isinstance(twist_cmd, UniformVelocityCommandCfg)
-    twist_cmd.ranges.lin_vel_x = (-0.6, 1.0)
-    twist_cmd.ranges.ang_vel_z = (-0.4, 0.4)
+    twist_cmd.ranges.lin_vel_x = (0.0, 0.0)
+    twist_cmd.ranges.lin_vel_y = (0.0, 0.0)
+    twist_cmd.ranges.ang_vel_z = (0.0, 0.0)
 
     cfg.events["log_obs_action_csv"] = EventTermCfg(
       func=_log_obs_action_csv,
