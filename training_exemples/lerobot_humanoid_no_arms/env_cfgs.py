@@ -429,8 +429,8 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
     joint_pos_term.noise.n_min = -joint_pos_noise_rad
     joint_pos_term.noise.n_max = joint_pos_noise_rad
   joint_vel_term = policy_obs.terms.get("joint_vel")
-  joint_vel_term.noise.n_min = -math.radians(15.0)
-  joint_vel_term.noise.n_max = math.radians(15.0)
+  joint_vel_term.noise.n_min = -math.radians(10.0)
+  joint_vel_term.noise.n_max = math.radians(10.0)
 
   # Disable velocity/command curricula while keeping terrain_levels curriculum.
   for curriculum_name in list(cfg.curriculum.keys()):
@@ -482,12 +482,12 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
     },
   )
   # Randomize COM placement on all body segments (per-body, not shared).
-  cfg.events["base_com"].params["asset_cfg"] = SceneEntityCfg(name="robot")
-  cfg.events["base_com"].params["ranges"] = {
-    0: (-0.01, 0.01),
-    1: (-0.01, 0.01),
-    2: (-0.01, 0.01),
-  }
+  # cfg.events["base_com"].params["asset_cfg"] = SceneEntityCfg(name="robot")
+  # cfg.events["base_com"].params["ranges"] = {
+  #   0: (-0.01, 0.01),
+  #   1: (-0.01, 0.01),
+  #   2: (-0.01, 0.01),
+  # }
   # Simulate encoder calibration mismatch up to +/-5 deg.
   if "encoder_bias" in cfg.events:
     encoder_bias_rad = math.radians(8.0)
