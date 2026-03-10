@@ -48,19 +48,32 @@ def get_spec() -> mujoco.MjSpec:
 # Adjust based on your actual motor specifications.
 ##
 
-# Actuator gains (kp, kv):
-# hipz: kp=10, kv=0.5
-# hipx/hipy/knee: kp=20, kv=0.5
-# ankle pitch/roll: kp=30, kv=1.0
-HIPZ_STIFFNESS = 10.0
-HIP_STIFFNESS = 20.0
-KNEE_STIFFNESS = 20.0
-ANKLE_STIFFNESS = 30.0
+# Base actuator gains (identified motor gains).
+BASE_KP_HIPZ = 10.0
+BASE_KV_HIPZ = 0.5
+BASE_KP_HIP = 20.0
+BASE_KV_HIP = 0.5
+BASE_KP_KNEE = 20.0
+BASE_KV_KNEE = 0.5
+BASE_KP_ANKLE = 30.0
+BASE_KV_ANKLE = 1.0
 
-HIPZ_DAMPING = 0.5
-HIP_DAMPING = 0.5
-KNEE_DAMPING = 0.5
-ANKLE_DAMPING = 1.0
+# Per-joint gain scale from identification.
+# Simulation gains are: kp_sim = kp_base * scale, kv_sim = kv_base * scale.
+GAIN_SCALE_BY_JOINT = {
+  "hipz_left": 2.7223749315102848,
+  "hipx_left": 2.597269289116872,
+  "hipy_left": 3.594425225020637,
+  "knee_left": 1.5065729066968843,
+  "ankley_left": 0.9899055404332747,
+  "anklex_left": 0.9934845924741857,
+  "hipz_right": 1.2676228773957705,
+  "hipx_right": 1.1571938624037024,
+  "hipy_right": 1.875574499341916,
+  "knee_right": 1.921946360916316,
+  "ankley_right": 0.994546012136922,
+  "anklex_right": 0.7898121330723573,
+}
 
 # Keep armature in actuator config at 0.0; per-joint armature is set in the MJCF.
 ACTUATOR_ARMATURE = 0.0
@@ -73,10 +86,21 @@ ANKLE_EFFORT_LIMIT = 44.
 
 LEROBOT_ACTUATOR_HIP1 = BuiltinPositionActuatorCfg(
   target_names_expr=(
-    "hipz_.*",
+    "hipz_left",
   ),
-  stiffness=HIPZ_STIFFNESS,
-  damping=HIPZ_DAMPING,
+  stiffness=BASE_KP_HIPZ * GAIN_SCALE_BY_JOINT["hipz_left"],
+  damping=BASE_KV_HIPZ * GAIN_SCALE_BY_JOINT["hipz_left"],
+  effort_limit=150.0,
+  armature=ACTUATOR_ARMATURE,
+)
+
+
+LEROBOT_ACTUATOR_HIP1_R = BuiltinPositionActuatorCfg(
+  target_names_expr=(
+    "hipz_right",
+  ),
+  stiffness=BASE_KP_HIPZ * GAIN_SCALE_BY_JOINT["hipz_right"],
+  damping=BASE_KV_HIPZ * GAIN_SCALE_BY_JOINT["hipz_right"],
   effort_limit=150.0,
   armature=ACTUATOR_ARMATURE,
 )
@@ -84,10 +108,21 @@ LEROBOT_ACTUATOR_HIP1 = BuiltinPositionActuatorCfg(
 
 LEROBOT_ACTUATOR_HIP2 = BuiltinPositionActuatorCfg(
   target_names_expr=(
-        "hipx_.*",
+    "hipx_left",
   ),
-  stiffness=HIP_STIFFNESS,
-  damping=HIP_DAMPING,
+  stiffness=BASE_KP_HIP * GAIN_SCALE_BY_JOINT["hipx_left"],
+  damping=BASE_KV_HIP * GAIN_SCALE_BY_JOINT["hipx_left"],
+  effort_limit=88.0,
+  armature=ACTUATOR_ARMATURE,
+)
+
+
+LEROBOT_ACTUATOR_HIP2_R = BuiltinPositionActuatorCfg(
+  target_names_expr=(
+    "hipx_right",
+  ),
+  stiffness=BASE_KP_HIP * GAIN_SCALE_BY_JOINT["hipx_right"],
+  damping=BASE_KV_HIP * GAIN_SCALE_BY_JOINT["hipx_right"],
   effort_limit=88.0,
   armature=ACTUATOR_ARMATURE,
 )
@@ -95,28 +130,71 @@ LEROBOT_ACTUATOR_HIP2 = BuiltinPositionActuatorCfg(
 
 LEROBOT_ACTUATOR_HIP3 = BuiltinPositionActuatorCfg(
   target_names_expr=(
-    "hipy_.*",
+    "hipy_left",
   ),
-  stiffness=HIP_STIFFNESS,
-  damping=HIP_DAMPING,
+  stiffness=BASE_KP_HIP * GAIN_SCALE_BY_JOINT["hipy_left"],
+  damping=BASE_KV_HIP * GAIN_SCALE_BY_JOINT["hipy_left"],
   effort_limit=88.0,
   armature=ACTUATOR_ARMATURE,
 )
+
+LEROBOT_ACTUATOR_HIP3_R = BuiltinPositionActuatorCfg(
+  target_names_expr=(
+    "hipy_right",
+  ),
+  stiffness=BASE_KP_HIP * GAIN_SCALE_BY_JOINT["hipy_right"],
+  damping=BASE_KV_HIP * GAIN_SCALE_BY_JOINT["hipy_right"],
+  effort_limit=88.0,
+  armature=ACTUATOR_ARMATURE,
+)
+
+
 LEROBOT_ACTUATOR_KNEE = BuiltinPositionActuatorCfg(
-  target_names_expr=("knee_.*",),
-  stiffness=KNEE_STIFFNESS,
-  damping=KNEE_DAMPING,
+  target_names_expr=("knee_left",),
+  stiffness=BASE_KP_KNEE * GAIN_SCALE_BY_JOINT["knee_left"],
+  damping=BASE_KV_KNEE * GAIN_SCALE_BY_JOINT["knee_left"],
+  effort_limit=88.0,
+  armature=ACTUATOR_ARMATURE,
+)
+
+LEROBOT_ACTUATOR_KNEE_R = BuiltinPositionActuatorCfg(
+  target_names_expr=("knee_right",),
+  stiffness=BASE_KP_KNEE * GAIN_SCALE_BY_JOINT["knee_right"],
+  damping=BASE_KV_KNEE * GAIN_SCALE_BY_JOINT["knee_right"],
   effort_limit=88.0,
   armature=ACTUATOR_ARMATURE,
 )
 
 LEROBOT_ACTUATOR_ANKLE = BuiltinPositionActuatorCfg(
   target_names_expr=(
-    "ankley_.*",
-    "anklex_.*",
+    "ankley_left",
   ),
-  stiffness=ANKLE_STIFFNESS,
-  damping=ANKLE_DAMPING,
+  stiffness=BASE_KP_ANKLE * GAIN_SCALE_BY_JOINT["ankley_left"],
+  damping=BASE_KV_ANKLE * GAIN_SCALE_BY_JOINT["ankley_left"],
+  effort_limit=44.0,
+  armature=ACTUATOR_ARMATURE,
+)
+
+LEROBOT_ACTUATOR_ANKLE_R = BuiltinPositionActuatorCfg(
+  target_names_expr=("ankley_right",),
+  stiffness=BASE_KP_ANKLE * GAIN_SCALE_BY_JOINT["ankley_right"],
+  damping=BASE_KV_ANKLE * GAIN_SCALE_BY_JOINT["ankley_right"],
+  effort_limit=44.0,
+  armature=ACTUATOR_ARMATURE,
+)
+
+LEROBOT_ACTUATOR_ANKLEX = BuiltinPositionActuatorCfg(
+  target_names_expr=("anklex_left",),
+  stiffness=BASE_KP_ANKLE * GAIN_SCALE_BY_JOINT["anklex_left"],
+  damping=BASE_KV_ANKLE * GAIN_SCALE_BY_JOINT["anklex_left"],
+  effort_limit=44.0,
+  armature=ACTUATOR_ARMATURE,
+)
+
+LEROBOT_ACTUATOR_ANKLEX_R = BuiltinPositionActuatorCfg(
+  target_names_expr=("anklex_right",),
+  stiffness=BASE_KP_ANKLE * GAIN_SCALE_BY_JOINT["anklex_right"],
+  damping=BASE_KV_ANKLE * GAIN_SCALE_BY_JOINT["anklex_right"],
   effort_limit=44.0,
   armature=ACTUATOR_ARMATURE,
 )
@@ -221,10 +299,17 @@ FULL_COLLISION = CollisionCfg(
 LEROBOT_HUMANOID_NO_ARMS_ARTICULATION = EntityArticulationInfoCfg(
   actuators=(
     LEROBOT_ACTUATOR_HIP1,
+    LEROBOT_ACTUATOR_HIP1_R,
     LEROBOT_ACTUATOR_HIP2,
+    LEROBOT_ACTUATOR_HIP2_R,
     LEROBOT_ACTUATOR_HIP3,
+    LEROBOT_ACTUATOR_HIP3_R,
     LEROBOT_ACTUATOR_KNEE,
+    LEROBOT_ACTUATOR_KNEE_R,
     LEROBOT_ACTUATOR_ANKLE,
+    LEROBOT_ACTUATOR_ANKLE_R,
+    LEROBOT_ACTUATOR_ANKLEX,
+    LEROBOT_ACTUATOR_ANKLEX_R,
   ),
   soft_joint_pos_limit_factor=0.9,
 )

@@ -477,7 +477,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
       "asset_cfg": SceneEntityCfg(name="robot"),
       "field": "dof_damping",
       "operation": "scale",
-      "ranges": (0.8, 1.2),
+      "ranges": (0.9, 1.1),
       "shared_random": False,
     },
   )
