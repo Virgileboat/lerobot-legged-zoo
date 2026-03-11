@@ -58,8 +58,21 @@ BASE_KV_KNEE = 0.5
 BASE_KP_ANKLE = 30.0
 BASE_KV_ANKLE = 1.0
 
-# Keep armature in actuator config at 0.0; per-joint armature is set in the MJCF.
-ACTUATOR_ARMATURE = 0.0
+# Joint armature/frictionloss applied through actuator config.
+# Keep these aligned with the robot MJCF values.
+HIPZ_ARMATURE = 0.00226871374002
+HIPX_ARMATURE = 0.0134012810769
+HIPY_ARMATURE = 0.0290071832044
+KNEE_ARMATURE = 0.0123305945439
+ANKLEY_ARMATURE = 0.0209776768142
+ANKLEX_ARMATURE = 0.00485638046015
+
+HIPZ_FRICTIONLOSS = 0.135520223994
+HIPX_FRICTIONLOSS = 0.116870607367
+HIPY_FRICTIONLOSS = 0.178104313494
+KNEE_FRICTIONLOSS = 0.11297747069
+ANKLEY_FRICTIONLOSS = 0.0171195170804
+ANKLEX_FRICTIONLOSS = 0.191719474184
 
 # Effort limits (Nm) - adjust based on your motors.
 HIP_EFFORT_LIMIT = 88.0
@@ -74,7 +87,8 @@ LEROBOT_ACTUATOR_HIP1 = BuiltinPositionActuatorCfg(
   stiffness=BASE_KP_HIPZ,
   damping=BASE_KV_HIPZ,
   effort_limit=150.0,
-  armature=ACTUATOR_ARMATURE,
+  armature=HIPZ_ARMATURE,
+  frictionloss=HIPZ_FRICTIONLOSS,
 )
 
 
@@ -85,7 +99,8 @@ LEROBOT_ACTUATOR_HIP2 = BuiltinPositionActuatorCfg(
   stiffness=BASE_KP_HIP,
   damping=BASE_KV_HIP,
   effort_limit=88.0,
-  armature=ACTUATOR_ARMATURE,
+  armature=HIPX_ARMATURE,
+  frictionloss=HIPX_FRICTIONLOSS,
 )
 
 
@@ -96,7 +111,8 @@ LEROBOT_ACTUATOR_HIP3 = BuiltinPositionActuatorCfg(
   stiffness=BASE_KP_HIP,
   damping=BASE_KV_HIP,
   effort_limit=88.0,
-  armature=ACTUATOR_ARMATURE,
+  armature=HIPY_ARMATURE,
+  frictionloss=HIPY_FRICTIONLOSS,
 )
 
 
@@ -105,18 +121,28 @@ LEROBOT_ACTUATOR_KNEE = BuiltinPositionActuatorCfg(
   stiffness=BASE_KP_KNEE,
   damping=BASE_KV_KNEE,
   effort_limit=88.0,
-  armature=ACTUATOR_ARMATURE,
+  armature=KNEE_ARMATURE,
+  frictionloss=KNEE_FRICTIONLOSS,
 )
 
-LEROBOT_ACTUATOR_ANKLE = BuiltinPositionActuatorCfg(
+LEROBOT_ACTUATOR_ANKLEY = BuiltinPositionActuatorCfg(
   target_names_expr=(
     "ankley_.*",
-    "anklex_.*",
   ),
   stiffness=BASE_KP_ANKLE,
   damping=BASE_KV_ANKLE,
   effort_limit=44.0,
-  armature=ACTUATOR_ARMATURE,
+  armature=ANKLEY_ARMATURE,
+  frictionloss=ANKLEY_FRICTIONLOSS,
+)
+
+LEROBOT_ACTUATOR_ANKLEX = BuiltinPositionActuatorCfg(
+  target_names_expr=("anklex_.*",),
+  stiffness=BASE_KP_ANKLE,
+  damping=BASE_KV_ANKLE,
+  effort_limit=44.0,
+  armature=ANKLEX_ARMATURE,
+  frictionloss=ANKLEX_FRICTIONLOSS,
 )
 
 ##
@@ -124,7 +150,7 @@ LEROBOT_ACTUATOR_ANKLE = BuiltinPositionActuatorCfg(
 ##
 
 HOME_KEYFRAME = EntityCfg.InitialStateCfg(
-  pos=(0, 0, 0.78),
+  pos=(0, 0, 0.72),
   joint_pos={
     # Slight crouch reference pose used as the robot default posture.
     # This becomes the target posture for the variable_posture reward
@@ -169,7 +195,7 @@ HOME_KEYFRAME = EntityCfg.InitialStateCfg(
 
 
 KNEES_BENT_KEYFRAME = EntityCfg.InitialStateCfg(
-  pos=(0, 0, 0.77),
+  pos=(0, 0, 0.72),
   joint_pos={
     # Slight crouch reference pose used as the robot default posture.
     # This becomes the target posture for the variable_posture reward
@@ -196,21 +222,27 @@ KNEES_BENT_KEYFRAME = EntityCfg.InitialStateCfg(
 
 # Enable foot collisions with appropriate friction.
 FEET_ONLY_COLLISION = CollisionCfg(
-  geom_names_expr=(r"^(left|right)_foot[1-4]_collision$",),
+  geom_names_expr=(r"^(left|right)_foot_collision$",),
   # contype=0 disables contacts entirely; keep it enabled for ground contact.
   contype=1,
   conaffinity=1,
   condim=3,
   priority=1,
   friction=(0.6,),
+  # Stiffer contact settings to reduce penetration.
+  solref=(0.005, 1.0),
+  solimp=(0.995, 0.9995, 0.001, 0.5, 2),
 )
 
 # Full collision including self-collisions.
 FULL_COLLISION = CollisionCfg(
   geom_names_expr=(".*_collision",),
-  condim={r"^(left|right)_foot[1-4]_collision$": 3, ".*_collision": 1},
-  priority={r"^(left|right)_foot[1-4]_collision$": 1},
-  friction={r"^(left|right)_foot[1-4]_collision$": (0.6,)},
+  condim={r"^(left|right)_foot_collision$": 3, ".*_collision": 1},
+  priority={r"^(left|right)_foot_collision$": 1},
+  friction={r"^(left|right)_foot_collision$": (0.6,)},
+  # Foot-specific stiff contact settings to reduce penetration.
+  solref={r"^(left|right)_foot_collision$": (0.005, 1.0)},
+  solimp={r"^(left|right)_foot_collision$": (0.995, 0.9995, 0.001, 0.5, 2)},
 )
 ##
 # Final config.
@@ -222,7 +254,8 @@ LEROBOT_HUMANOID_NO_ARMS_ARTICULATION = EntityArticulationInfoCfg(
     LEROBOT_ACTUATOR_HIP2,
     LEROBOT_ACTUATOR_HIP3,
     LEROBOT_ACTUATOR_KNEE,
-    LEROBOT_ACTUATOR_ANKLE,
+    LEROBOT_ACTUATOR_ANKLEY,
+    LEROBOT_ACTUATOR_ANKLEX,
   ),
   soft_joint_pos_limit_factor=0.9,
 )

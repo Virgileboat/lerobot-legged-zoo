@@ -354,18 +354,14 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   """Create LeRobot Humanoid rough terrain velocity configuration."""
   cfg = make_velocity_env_cfg()
 
-  cfg.sim.mujoco.ccd_iterations = 500
-  cfg.sim.contact_sensor_maxmatch = 500
+  cfg.sim.mujoco.ccd_iterations = 1000
+  cfg.sim.contact_sensor_maxmatch = 1000
   cfg.sim.nconmax = 70
 
   cfg.scene.entities = {"robot": get_lerobot_humanoid_no_arms_robot_cfg()}
 
   site_names = ("foot_right", "foot_left")
-  geom_names = tuple(
-    f"{side}_foot{i}_collision"
-    for side in ("left", "right")
-    for i in range(1, 5)
-  )
+  geom_names = ("left_foot_collision", "right_foot_collision")
 
   feet_ground_cfg = ContactSensorCfg(
     name="feet_ground_contact",
@@ -440,21 +436,22 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
     "asset_cfg"
   ].site_names = site_names
 
-  cfg.events["foot_friction"].params["asset_cfg"].geom_names = geom_names
+  # Disable foot-ground contact randomization for stability/debug.
+  cfg.events.pop("foot_friction", None)
   # Randomize total robot weight by scaling all body masses together (+/-10%).
-  cfg.events["robot_weight"] = EventTermCfg(
-    func=envs_mdp.randomize_field,
-    mode="startup",
-    domain_randomization=True,
-    params={
-      "asset_cfg": SceneEntityCfg(name="robot"),
-      "field": "body_mass",
-      "operation": "scale",
-      "ranges": (0.9, 1.1),
-      # Randomize each body independently (not a single global scale).
-      "shared_random": False,
-    },
-  )
+  # cfg.events["robot_weight"] = EventTermCfg(
+  #   func=envs_mdp.randomize_field,
+  #   mode="startup",
+  #   domain_randomization=True,
+  #   params={
+  #     "asset_cfg": SceneEntityCfg(name="robot"),
+  #     "field": "body_mass",
+  #     "operation": "scale",
+  #     "ranges": (0.9, 1.1),
+  #     # Randomize each body independently (not a single global scale).
+  #     "shared_random": False,
+  #   },
+  # )
   # Randomize joint Coulomb friction per-joint.
   cfg.events["joint_coulomb_friction"] = EventTermCfg(
     func=envs_mdp.randomize_field,
@@ -570,13 +567,13 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
         {"step": 0, "weight": -0.1},
         # Curriculum uses env.common_step_counter (env steps), while W&B "Step"
         # is PPO iterations. Here num_steps_per_env=24, so multiply by 24.
-        {"step": 5_000 * 24, "weight": -0.1},
-        {"step": 10_000 * 24, "weight": -0.3},
-        {"step": 15_000 * 24, "weight": -0.5},
-        {"step": 20_000 * 24, "weight": -1.0},
-        {"step": 25_000 * 24, "weight": -3.0},
-        {"step": 30_000 * 24, "weight": -6.0},
-        {"step": 35_000 * 24, "weight": -10.0},
+        {"step": 5_000 * 24, "weight": -0.01},
+        {"step": 10_000 * 24, "weight": -0.5},
+        {"step": 15_000 * 24, "weight": -1.5},
+        {"step": 20_000 * 24, "weight": -3.0},
+        {"step": 25_000 * 24, "weight": -5.0},
+        {"step": 30_000 * 24, "weight": -10.0},
+        {"step": 35_000 * 24, "weight": -20.0},
       ],
     },
   )
@@ -586,6 +583,12 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
     weight=-1.0,
     params={"sensor_name": self_collision_cfg.name},
   )
+  # Terrain-side stiff contact settings to limit foot penetration.
+  # Keep a fixed friction triplet to reduce contact jitter with mesh feet.
+  cfg.scene.terrain.friction = "1.0 0.005 0.0001"
+  cfg.scene.terrain.solref = "0.005 1"
+  cfg.scene.terrain.solimp = "0.995 0.9995 0.001 0.5 2"
+  cfg.scene.terrain.contact = "enable"
   # Apply play mode overrides.
   if play:
     # Effectively infinite episode length.
@@ -593,7 +596,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
 
     # Disable observation corruption and domain randomization for play testing.
     # cfg.observations["policy"].enable_corruption = False
-    # cfg.events.pop("push_robot", None)
+    cfg.events.pop("push_robot", None)
     # cfg.events.pop("encoder_bias", None)
     for event_name in list(cfg.events.keys()):
       event_cfg = cfg.events[event_name]

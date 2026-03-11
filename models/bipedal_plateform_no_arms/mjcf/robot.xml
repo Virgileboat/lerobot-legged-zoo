@@ -399,10 +399,7 @@
                   <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232_15 -->
                   <!-- Part foot -->
                   <geom type="mesh" class="visual" pos="1.11022e-16 -0.035 -0.0385" quat="0.5 -0.5 -0.5 -0.5" mesh="foot" material="foot_material"/>
-                  <geom name="right_foot1_collision" class="collision" type="capsule" size="0.015 0.05" fromto="-0.032 -0.02 0.005 0.032 -0.02 0.005"/>
-                  <geom name="right_foot2_collision" class="collision" type="capsule" size="0.015 0.05" fromto="-0.032 -0.02 -0.10 0.032 -0.02 -0.10"/>
-                  <geom name="right_foot3_collision" class="collision" type="capsule" size="0.015 0.05" fromto="-0.032 -0.02 0.005 -0.032 -0.02 -0.10"/>
-                  <geom name="right_foot4_collision" class="collision" type="capsule" size="0.015 0.05" fromto="0.032 -0.02 0.005 0.032 -0.02 -0.10"/>
+                  <geom name="right_foot_collision" class="collision" type="mesh" pos="1.11022e-16 -0.035 -0.0385" quat="0.5 -0.5 -0.5 -0.5" mesh="foot"/>
                   <!-- Frame foot_right -->
                   <site group="3" name="foot_right" pos="-6.35351e-08 -0.035 -0.0480606" quat="0.5 -0.5 0.5 0.5"/>
                 </body>
@@ -729,10 +726,7 @@
                   <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232_30 -->
                   <!-- Part foot_2 -->
                   <geom type="mesh" class="visual" pos="1.249e-16 -0.035 -0.0385" quat="0.5 -0.5 -0.5 -0.5" mesh="foot" material="foot_material"/>
-                  <geom name="left_foot1_collision" class="collision" type="capsule" size="0.015 0.05" fromto="-0.032 -0.02 0.005 0.032 -0.02 0.005"/>
-                  <geom name="left_foot2_collision" class="collision" type="capsule" size="0.015 0.05" fromto="-0.032 -0.02 -0.10 0.032 -0.02 -0.10"/>
-                  <geom name="left_foot3_collision" class="collision" type="capsule" size="0.015 0.05" fromto="-0.032 -0.02 0.005 -0.032 -0.02 -0.10"/>
-                  <geom name="left_foot4_collision" class="collision" type="capsule" size="0.015 0.05" fromto="0.032 -0.02 0.005 0.032 -0.02 -0.10"/>
+                  <geom name="left_foot_collision" class="collision" type="mesh" pos="1.249e-16 -0.035 -0.0385" quat="0.5 -0.5 -0.5 -0.5" mesh="foot"/>
                   <!-- Frame foot_left -->
                   <site group="3" name="foot_left" pos="-6.35351e-08 -0.035 -0.0480606" quat="0.5 -0.5 0.5 0.5"/>
                 </body>
