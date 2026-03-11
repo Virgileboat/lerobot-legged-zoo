@@ -22,7 +22,9 @@ def _find_repo_root() -> Path:
 
 
 LEROBOT_HUMANOID_NO_ARMS_MESH_DIR: Path = _find_repo_root() / "models" / "bipedal_plateform_no_arms" / "mjcf"
-LEROBOT_HUMANOID_NO_ARMS_XML: Path = LEROBOT_HUMANOID_NO_ARMS_MESH_DIR / "robot.xml"
+LEROBOT_HUMANOID_NO_ARMS_XML: Path = (
+  LEROBOT_HUMANOID_NO_ARMS_MESH_DIR / "ientified_lrotobot_humanoid_no_arms.xml"
+)
 
 assert LEROBOT_HUMANOID_NO_ARMS_XML.exists(), f"MJCF file not found: {LEROBOT_HUMANOID_NO_ARMS_XML}"
 
@@ -48,102 +50,122 @@ def get_spec() -> mujoco.MjSpec:
 # Adjust based on your actual motor specifications.
 ##
 
-# Base actuator gains (no additional scaling).
-BASE_KP_HIPZ = 10.0
-BASE_KV_HIPZ = 0.5
-BASE_KP_HIP = 20.0
-BASE_KV_HIP = 0.5
-BASE_KP_KNEE = 20.0
-BASE_KV_KNEE = 0.5
-BASE_KP_ANKLE = 30.0
-BASE_KV_ANKLE = 1.0
+# Identified joint-level actuator/joint parameters.
+# Note: BuiltinPositionActuatorCfg rewrites MuJoCo joint armature/frictionloss,
+# so these must match the identified MJCF values.
+IDENTIFIED_ACTUATOR_PARAMS: dict[str, dict[str, float]] = {
+  "hipz_right": {
+    "kp": 10.0,
+    "kv": 0.5,
+    "effort_limit": 150.0,
+    "armature": 0.03399100371098966,
+    "frictionloss": 0.3390972681587539,
+  },
+  "hipx_right": {
+    "kp": 20.0,
+    "kv": 0.5,
+    "effort_limit": 88.0,
+    "armature": 0.021821226609500758,
+    "frictionloss": 0.20146538999966387,
+  },
+  "hipy_right": {
+    "kp": 20.0,
+    "kv": 0.5,
+    "effort_limit": 88.0,
+    "armature": 0.2940956388058932,
+    "frictionloss": 0.3996136801880859,
+  },
+  "knee_right": {
+    "kp": 20.0,
+    "kv": 0.5,
+    "effort_limit": 88.0,
+    "armature": 0.4063800985351495,
+    "frictionloss": 0.20104603637816845,
+  },
+  "ankley_right": {
+    "kp": 30.0,
+    "kv": 1.0,
+    "effort_limit": 44.0,
+    "armature": 0.2106689119646011,
+    "frictionloss": 0.13500359482883856,
+  },
+  "anklex_right": {
+    "kp": 30.0,
+    "kv": 1.0,
+    "effort_limit": 44.0,
+    "armature": 0.14840707882276186,
+    "frictionloss": 0.4250925528502693,
+  },
+  "hipz_left": {
+    "kp": 10.0,
+    "kv": 0.5,
+    "effort_limit": 150.0,
+    "armature": 0.023188684778642967,
+    "frictionloss": 0.2537584343329908,
+  },
+  "hipx_left": {
+    "kp": 20.0,
+    "kv": 0.5,
+    "effort_limit": 88.0,
+    "armature": 0.030387147982065633,
+    "frictionloss": 0.6492191098255814,
+  },
+  "hipy_left": {
+    "kp": 20.0,
+    "kv": 0.5,
+    "effort_limit": 88.0,
+    "armature": 0.005084764344399466,
+    "frictionloss": 0.9692185316442714,
+  },
+  "knee_left": {
+    "kp": 20.0,
+    "kv": 0.5,
+    "effort_limit": 88.0,
+    "armature": 0.09622722581638446,
+    "frictionloss": 0.400036527536521,
+  },
+  "ankley_left": {
+    "kp": 30.0,
+    "kv": 1.0,
+    "effort_limit": 44.0,
+    "armature": 0.058959933130334555,
+    "frictionloss": 0.6458502425774141,
+  },
+  "anklex_left": {
+    "kp": 30.0,
+    "kv": 1.0,
+    "effort_limit": 44.0,
+    "armature": 0.060897965838140784,
+    "frictionloss": 0.3589253212548187,
+  },
+}
 
-# Joint armature/frictionloss applied through actuator config.
-# Keep these aligned with the robot MJCF values.
-HIPZ_ARMATURE = 0.00226871374002
-HIPX_ARMATURE = 0.0134012810769
-HIPY_ARMATURE = 0.0290071832044
-KNEE_ARMATURE = 0.0123305945439
-ANKLEY_ARMATURE = 0.0209776768142
-ANKLEX_ARMATURE = 0.00485638046015
-
-HIPZ_FRICTIONLOSS = 0.135520223994
-HIPX_FRICTIONLOSS = 0.116870607367
-HIPY_FRICTIONLOSS = 0.178104313494
-KNEE_FRICTIONLOSS = 0.11297747069
-ANKLEY_FRICTIONLOSS = 0.0171195170804
-ANKLEX_FRICTIONLOSS = 0.191719474184
-
-# Effort limits (Nm) - adjust based on your motors.
-HIP_EFFORT_LIMIT = 88.0
-KNEE_EFFORT_LIMIT = 88.
-ANKLE_EFFORT_LIMIT = 44.
-
-
-LEROBOT_ACTUATOR_HIP1 = BuiltinPositionActuatorCfg(
-  target_names_expr=(
-    "hipz_.*",
-  ),
-  stiffness=BASE_KP_HIPZ,
-  damping=BASE_KV_HIPZ,
-  effort_limit=150.0,
-  armature=HIPZ_ARMATURE,
-  frictionloss=HIPZ_FRICTIONLOSS,
+_ACTUATOR_ORDER = (
+  "hipz_right",
+  "hipx_right",
+  "hipy_right",
+  "knee_right",
+  "ankley_right",
+  "anklex_right",
+  "hipz_left",
+  "hipx_left",
+  "hipy_left",
+  "knee_left",
+  "ankley_left",
+  "anklex_left",
 )
 
 
-LEROBOT_ACTUATOR_HIP2 = BuiltinPositionActuatorCfg(
-  target_names_expr=(
-    "hipx_.*",
-  ),
-  stiffness=BASE_KP_HIP,
-  damping=BASE_KV_HIP,
-  effort_limit=88.0,
-  armature=HIPX_ARMATURE,
-  frictionloss=HIPX_FRICTIONLOSS,
-)
-
-
-LEROBOT_ACTUATOR_HIP3 = BuiltinPositionActuatorCfg(
-  target_names_expr=(
-    "hipy_.*",
-  ),
-  stiffness=BASE_KP_HIP,
-  damping=BASE_KV_HIP,
-  effort_limit=88.0,
-  armature=HIPY_ARMATURE,
-  frictionloss=HIPY_FRICTIONLOSS,
-)
-
-
-LEROBOT_ACTUATOR_KNEE = BuiltinPositionActuatorCfg(
-  target_names_expr=("knee_.*",),
-  stiffness=BASE_KP_KNEE,
-  damping=BASE_KV_KNEE,
-  effort_limit=88.0,
-  armature=KNEE_ARMATURE,
-  frictionloss=KNEE_FRICTIONLOSS,
-)
-
-LEROBOT_ACTUATOR_ANKLEY = BuiltinPositionActuatorCfg(
-  target_names_expr=(
-    "ankley_.*",
-  ),
-  stiffness=BASE_KP_ANKLE,
-  damping=BASE_KV_ANKLE,
-  effort_limit=44.0,
-  armature=ANKLEY_ARMATURE,
-  frictionloss=ANKLEY_FRICTIONLOSS,
-)
-
-LEROBOT_ACTUATOR_ANKLEX = BuiltinPositionActuatorCfg(
-  target_names_expr=("anklex_.*",),
-  stiffness=BASE_KP_ANKLE,
-  damping=BASE_KV_ANKLE,
-  effort_limit=44.0,
-  armature=ANKLEX_ARMATURE,
-  frictionloss=ANKLEX_FRICTIONLOSS,
-)
+def _make_identified_actuator(joint_name: str) -> BuiltinPositionActuatorCfg:
+  p = IDENTIFIED_ACTUATOR_PARAMS[joint_name]
+  return BuiltinPositionActuatorCfg(
+    target_names_expr=(joint_name,),
+    stiffness=p["kp"],
+    damping=p["kv"],
+    effort_limit=p["effort_limit"],
+    armature=p["armature"],
+    frictionloss=p["frictionloss"],
+  )
 
 ##
 # Keyframe config.
@@ -249,14 +271,7 @@ FULL_COLLISION = CollisionCfg(
 ##
 
 LEROBOT_HUMANOID_NO_ARMS_ARTICULATION = EntityArticulationInfoCfg(
-  actuators=(
-    LEROBOT_ACTUATOR_HIP1,
-    LEROBOT_ACTUATOR_HIP2,
-    LEROBOT_ACTUATOR_HIP3,
-    LEROBOT_ACTUATOR_KNEE,
-    LEROBOT_ACTUATOR_ANKLEY,
-    LEROBOT_ACTUATOR_ANKLEX,
-  ),
+  actuators=tuple(_make_identified_actuator(name) for name in _ACTUATOR_ORDER),
   soft_joint_pos_limit_factor=0.9,
 )
 
