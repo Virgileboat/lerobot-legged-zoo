@@ -531,12 +531,12 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
 
   cfg.rewards["body_ang_vel"].weight = -0.05
   cfg.rewards["angular_momentum"].weight = -0.02
-  # cfg.rewards["air_time"].weight = 0.0
+  cfg.rewards["air_time"].weight = 0.0
 
   # Encourage lower overall effort, with an extra penalty on ankle torque demand.
   cfg.rewards["actuator_torque_l2"] = RewardTermCfg(
     func=_all_actuator_torque_l2,
-    weight=-200e-4,
+    weight=-2e-4,
   )
   # cfg.rewards["ankle_torque_l2"] = RewardTermCfg(
   #   func=_ankle_actuator_torque_l2,
@@ -548,7 +548,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   # )
   cfg.rewards["ankle_torque_over_5nm_l2"] = RewardTermCfg(
     func=_ankle_torque_above_limit_l2,
-    weight=-2000e-4,
+    weight=-2e-4,
     params={"limit_nm": 4.0},
   )
   # Reward the fraction of action spectral energy within the <=3 Hz band.
