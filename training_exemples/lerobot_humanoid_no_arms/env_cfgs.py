@@ -520,11 +520,13 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
     r".*ankley.*": 0.2,
     r".*anklex.*": 0.1,
   }
-  # Increase posture tracking pressure toward the default (knee-bent) pose.
-  cfg.rewards["pose"].weight = 2.0
+  # Increase posture/upright shaping to keep the torso stable around the
+  # nominal standing configuration.
+  cfg.rewards["pose"].weight = 2.5
 
   cfg.rewards["upright"].params["asset_cfg"].body_names = ("torso_mesh",)
   cfg.rewards["body_ang_vel"].params["asset_cfg"].body_names = ("torso_mesh",)
+  cfg.rewards["upright"].weight = 1.5
 
   for reward_name in ["foot_clearance", "foot_swing_height", "foot_slip"]:
     cfg.rewards[reward_name].params["asset_cfg"].site_names = site_names
@@ -567,13 +569,11 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
         {"step": 0, "weight": -0.1},
         # Curriculum uses env.common_step_counter (env steps), while W&B "Step"
         # is PPO iterations. Here num_steps_per_env=24, so multiply by 24.
-        {"step": 5_000 * 24, "weight": -0.01},
+        {"step": 5_000 * 24, "weight": -0.2},
         {"step": 10_000 * 24, "weight": -0.5},
-        {"step": 15_000 * 24, "weight": -1.5},
-        {"step": 20_000 * 24, "weight": -3.0},
-        {"step": 25_000 * 24, "weight": -5.0},
-        {"step": 30_000 * 24, "weight": -10.0},
-        {"step": 35_000 * 24, "weight": -20.0},
+        {"step": 15_000 * 24, "weight": -1.0},
+        {"step": 20_000 * 24, "weight": -1.5},
+        {"step": 25_000 * 24, "weight": -10.0},
       ],
     },
   )
