@@ -13,8 +13,10 @@ from .lerobot_humanoid_no_arms_constants import (
 from mjlab.envs import ManagerBasedRlEnvCfg
 from mjlab.envs import mdp as envs_mdp
 from mjlab.envs.mdp.actions import JointPositionActionCfg
+from mjlab.managers.curriculum_manager import CurriculumTermCfg
 from mjlab.managers.event_manager import EventTermCfg
 from mjlab.managers.reward_manager import RewardTermCfg
+from mjlab.managers.scene_entity_config import SceneEntityCfg
 from mjlab.sensor import ContactMatch, ContactSensorCfg
 from mjlab.tasks.velocity import mdp
 from mjlab.tasks.velocity.mdp import UniformVelocityCommandCfg
@@ -26,29 +28,98 @@ import torch
 _CSV_LOG_STATE_BY_ENV: dict[int, dict[str, Any]] = {}
 
 
-class _ActionHighFrequencyPenalty:
-  """Penalty on action energy above a cutoff frequency via 1st-order HP filter."""
+class _ActionFftBandRatioReward:
+  """Reward the fraction of action spectral energy inside a low-frequency band."""
 
   def __init__(self) -> None:
-    self._state_by_env: dict[int, dict[str, torch.Tensor]] = {}
+    self._state_by_env: dict[int, dict[str, Any]] = {}
     self._last_env_key: int | None = None
+    self._freq_masks_cache: dict[tuple[int, float, float, str], tuple[torch.Tensor, torch.Tensor]] = {}
 
-  def __call__(self, env, cutoff_hz: float = 2.0) -> torch.Tensor:
+  def _get_freq_masks(
+    self,
+    history_len: int,
+    step_dt: float,
+    cutoff_hz: float,
+    device: torch.device,
+  ) -> tuple[torch.Tensor, torch.Tensor]:
+    key = (history_len, round(step_dt, 8), cutoff_hz, str(device))
+    masks = self._freq_masks_cache.get(key)
+    if masks is not None:
+      return masks
+    freqs = torch.fft.rfftfreq(history_len, d=step_dt, device=device)
+    valid_mask = freqs > 0.0
+    inband_mask = (freqs <= cutoff_hz) & valid_mask
+    masks = (inband_mask, valid_mask)
+    self._freq_masks_cache[key] = masks
+    return masks
+
+  def __call__(
+    self,
+    env,
+    history_len: int = 50,
+    min_history: int = 50,
+    cutoff_hz: float = 3.0,
+  ) -> torch.Tensor:
     actions = env.action_manager.action
+    if history_len < 4:
+      raise ValueError(f"history_len must be >= 4 for FFT reward, got {history_len}")
     env_key = id(env)
     self._last_env_key = env_key
 
     state = self._state_by_env.get(env_key)
-    if state is None or state["lp"].shape != actions.shape:
-      state = {"lp": torch.zeros_like(actions)}
+    needs_init = (
+      state is None
+      or state["buf"].shape[0] != actions.shape[0]
+      or state["buf"].shape[2] != actions.shape[1]
+      or state["buf"].shape[1] != history_len
+    )
+    if needs_init:
+      state = {
+        "buf": torch.zeros(
+          (actions.shape[0], history_len, actions.shape[1]),
+          device=actions.device,
+          dtype=actions.dtype,
+        ),
+        "pos": 0,
+        "count": torch.zeros(actions.shape[0], device=actions.device, dtype=torch.long),
+      }
       self._state_by_env[env_key] = state
 
-    dt = float(env.step_dt)
-    alpha = math.exp(-2.0 * math.pi * cutoff_hz * dt)
-    lp = state["lp"]
-    lp.mul_(alpha).add_(actions, alpha=1.0 - alpha)
-    high_pass = actions - lp
-    return torch.sum(torch.square(high_pass), dim=1)
+    buf = state["buf"]
+    pos = int(state["pos"])
+    count = state["count"]
+
+    buf[:, pos, :] = actions
+    state["pos"] = (pos + 1) % history_len
+    count.add_(1).clamp_(max=history_len)
+
+    idx = torch.tensor(
+      [((state["pos"] - history_len + i) % history_len) for i in range(history_len)],
+      device=actions.device,
+      dtype=torch.long,
+    )
+    hist = buf.index_select(1, idx)
+    hist = hist - hist.mean(dim=1, keepdim=True)
+    spec = torch.fft.rfft(hist, dim=1)
+    power = spec.real.square() + spec.imag.square()
+    inband_mask, valid_mask = self._get_freq_masks(history_len, float(env.step_dt), cutoff_hz, actions.device)
+    if not bool(valid_mask.any()):
+      reward = torch.ones(actions.shape[0], device=actions.device, dtype=actions.dtype)
+    else:
+      total_power = power[:, valid_mask, :].sum(dim=(1, 2))
+      inband_power = power[:, inband_mask, :].sum(dim=(1, 2))
+      reward = torch.where(
+        total_power > 1e-12,
+        inband_power / total_power,
+        torch.ones_like(total_power),
+      )
+
+    if min_history > 0:
+      ready = count >= min(min_history, history_len)
+      reward = torch.where(ready, reward, torch.zeros_like(reward))
+
+    return reward
 
   def reset(self, env_ids: torch.Tensor | slice | None = None) -> None:
     if self._last_env_key is None:
@@ -56,14 +127,18 @@ class _ActionHighFrequencyPenalty:
     state = self._state_by_env.get(self._last_env_key)
     if state is None:
       return
-    lp = state["lp"]
+    buf = state["buf"]
+    count = state["count"]
     if env_ids is None or isinstance(env_ids, slice):
-      lp[:] = 0.0
-    else:
-      lp[env_ids] = 0.0
+      buf.zero_()
+      count.zero_()
+      state["pos"] = 0
+      return
+    buf[env_ids] = 0.0
+    count[env_ids] = 0
 
 
-_ACTION_HIGH_FREQ_PENALTY = _ActionHighFrequencyPenalty()
+_ACTION_FFT_BAND_RATIO_REWARD = _ActionFftBandRatioReward()
 
 
 def _flatten_obs_policy(
@@ -283,7 +358,48 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   ].site_names = site_names
 
   cfg.events["foot_friction"].params["asset_cfg"].geom_names = geom_names
-  cfg.events["base_com"].params["asset_cfg"].body_names = ("torso_mesh",)
+  cfg.events["base_com"].params["asset_cfg"] = SceneEntityCfg(name="robot")
+  cfg.events["base_com"].params["ranges"] = {
+    0: (-0.01, 0.01),
+    1: (-0.01, 0.01),
+    2: (-0.01, 0.01),
+  }
+  cfg.events["robot_mass"] = EventTermCfg(
+    func=envs_mdp.randomize_field,
+    mode="startup",
+    domain_randomization=True,
+    params={
+      "asset_cfg": SceneEntityCfg(name="robot"),
+      "field": "body_mass",
+      "operation": "scale",
+      "ranges": (0.9, 1.1),
+      "shared_random": False,
+    },
+  )
+  cfg.events["joint_armature"] = EventTermCfg(
+    func=envs_mdp.randomize_field,
+    mode="startup",
+    domain_randomization=True,
+    params={
+      "asset_cfg": SceneEntityCfg(name="robot"),
+      "field": "dof_armature",
+      "operation": "scale",
+      "ranges": (0.9, 1.1),
+      "shared_random": False,
+    },
+  )
+  cfg.events["joint_friction"] = EventTermCfg(
+    func=envs_mdp.randomize_field,
+    mode="startup",
+    domain_randomization=True,
+    params={
+      "asset_cfg": SceneEntityCfg(name="robot"),
+      "field": "dof_frictionloss",
+      "operation": "scale",
+      "ranges": (0.9, 1.1),
+      "shared_random": False,
+    },
+  )
 
   # Pose reward std values for the 12-DOF humanoid.
   # Hip joints get more freedom, ankle roll is tight for balance.
@@ -336,10 +452,25 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
     weight=-200e-4,
     params={"limit_nm": 6.0},
   )
-  cfg.rewards["action_high_freq_l2"] = RewardTermCfg(
-    func=_ACTION_HIGH_FREQ_PENALTY,
-    weight=-5e-3,
-    params={"cutoff_hz": 2.0},
+  cfg.rewards["action_fft_band_le_3hz_ratio"] = RewardTermCfg(
+    func=_ACTION_FFT_BAND_RATIO_REWARD,
+    weight=3.0,
+    params={"history_len": 50, "min_history": 50, "cutoff_hz": 2.5},
+  )
+  cfg.rewards["action_rate_l2"].weight = -0.1
+  cfg.curriculum["action_rate_weight"] = CurriculumTermCfg(
+    func=mdp.reward_weight,
+    params={
+      "reward_name": "action_rate_l2",
+      "weight_stages": [
+        {"step": 0, "weight": -0.1},
+        {"step": 5_000 * 24, "weight": -0.2},
+        {"step": 10_000 * 24, "weight": -0.5},
+        {"step": 15_000 * 24, "weight": -1.0},
+        {"step": 20_000 * 24, "weight": -4.0},
+        {"step": 25_000 * 24, "weight": -10.0},
+      ],
+    },
   )
 
   cfg.rewards["self_collisions"] = RewardTermCfg(
