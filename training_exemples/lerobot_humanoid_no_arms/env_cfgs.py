@@ -350,19 +350,25 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   assert isinstance(twist_cmd, UniformVelocityCommandCfg)
   twist_cmd.viz.z_offset = 0.9  # Adjust based on robot height.
   # Lower velocity command ranges for training stability.
-  twist_cmd.ranges.lin_vel_x = (-0.5, 0.5)
+  twist_cmd.ranges.lin_vel_x = (-0.8, 0.8)
   twist_cmd.ranges.ang_vel_z = (-0.2, 0.2)
 
   cfg.observations["critic"].terms["foot_height"].params[
     "asset_cfg"
   ].site_names = site_names
 
+  # Remove default velocity/command curricula from base config.
+  # Keep only terrain progression and action-rate curriculum.
+  for curriculum_name in list(cfg.curriculum.keys()):
+    if curriculum_name not in {"terrain_levels", "action_rate_weight"}:
+      cfg.curriculum.pop(curriculum_name, None)
+
   cfg.events["foot_friction"].params["asset_cfg"].geom_names = geom_names
   cfg.events["base_com"].params["asset_cfg"] = SceneEntityCfg(name="robot")
   cfg.events["base_com"].params["ranges"] = {
-    0: (-0.01, 0.01),
-    1: (-0.01, 0.01),
-    2: (-0.01, 0.01),
+    0: (-0.015, 0.015),
+    1: (-0.015, 0.015),
+    2: (-0.015, 0.015),
   }
   cfg.events["robot_mass"] = EventTermCfg(
     func=envs_mdp.randomize_field,
@@ -372,7 +378,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
       "asset_cfg": SceneEntityCfg(name="robot"),
       "field": "body_mass",
       "operation": "scale",
-      "ranges": (0.9, 1.1),
+      "ranges": (0.85, 1.15),
       "shared_random": False,
     },
   )
@@ -384,7 +390,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
       "asset_cfg": SceneEntityCfg(name="robot"),
       "field": "dof_armature",
       "operation": "scale",
-      "ranges": (0.9, 1.1),
+      "ranges": (0.7, 1.3),
       "shared_random": False,
     },
   )
@@ -396,7 +402,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
       "asset_cfg": SceneEntityCfg(name="robot"),
       "field": "dof_frictionloss",
       "operation": "scale",
-      "ranges": (0.9, 1.1),
+      "ranges": (0.7, 1.3),
       "shared_random": False,
     },
   )

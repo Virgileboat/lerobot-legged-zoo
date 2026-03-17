@@ -12,6 +12,7 @@ def lerobot_humanoid_no_arms_ppo_runner_cfg() -> RslRlOnPolicyRunnerCfg:
   return RslRlOnPolicyRunnerCfg(
     policy=RslRlPpoActorCriticCfg(
       init_noise_std=1.0,
+      noise_std_type="log",
       actor_obs_normalization=True,
       critic_obs_normalization=True,
       actor_hidden_dims=(512, 256, 128),
@@ -35,6 +36,5 @@ def lerobot_humanoid_no_arms_ppo_runner_cfg() -> RslRlOnPolicyRunnerCfg:
     experiment_name="lerobot_humanoid_no_arms_velocity",
     save_interval=50,
     num_steps_per_env=24,
-    max_iterations=30_000,
+    max_iterations=50_000,
   )
-
