@@ -350,8 +350,11 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   assert isinstance(twist_cmd, UniformVelocityCommandCfg)
   twist_cmd.viz.z_offset = 0.9  # Adjust based on robot height.
   # Lower velocity command ranges for training stability.
-  twist_cmd.ranges.lin_vel_x = (-0.8, 0.8)
+  twist_cmd.ranges.lin_vel_x = (-0.7, 0.7)
   twist_cmd.ranges.ang_vel_z = (-0.2, 0.2)
+
+  # Match branch variant where actor does not observe base linear velocity.
+  cfg.observations["policy"].terms.pop("base_lin_vel", None)
 
   cfg.observations["critic"].terms["foot_height"].params[
     "asset_cfg"
@@ -449,15 +452,15 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
     func=_ankle_actuator_torque_l2,
     weight=-30e-4,
   )
-  cfg.rewards["ankle_power_l1"] = RewardTermCfg(
-    func=_ankle_actuator_power_l1,
-    weight=-5e-4,
-  )
-  cfg.rewards["ankle_torque_over_6nm_l2"] = RewardTermCfg(
-    func=_ankle_torque_above_limit_l2,
-    weight=-200e-4,
-    params={"limit_nm": 6.0},
-  )
+  # cfg.rewards["ankle_power_l1"] = RewardTermCfg(
+  #   func=_ankle_actuator_power_l1,
+  #   weight=-5e-4,
+  # )
+  # cfg.rewards["ankle_torque_over_5nm_l2"] = RewardTermCfg(
+  #   func=_ankle_torque_above_limit_l2,
+  #   weight=-200e-4,
+  #   params={"limit_nm": 5.0},
+  # )
   cfg.rewards["action_fft_band_le_3hz_ratio"] = RewardTermCfg(
     func=_ACTION_FFT_BAND_RATIO_REWARD,
     weight=3.0,
