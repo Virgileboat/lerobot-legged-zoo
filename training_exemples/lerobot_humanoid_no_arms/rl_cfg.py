@@ -36,5 +36,5 @@ def lerobot_humanoid_no_arms_ppo_runner_cfg() -> RslRlOnPolicyRunnerCfg:
     experiment_name="lerobot_humanoid_no_arms_velocity",
     save_interval=50,
     num_steps_per_env=24,
-    max_iterations=50_000,
+    max_iterations=40_000,
   )

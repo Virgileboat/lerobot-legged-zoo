@@ -437,21 +437,21 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   ].site_names = site_names
 
   # Disable foot-ground contact randomization for stability/debug.
-  cfg.events.pop("foot_friction", None)
+  # cfg.events.pop("foot_friction", None)
   # Randomize total robot weight by scaling all body masses together (+/-10%).
-  # cfg.events["robot_weight"] = EventTermCfg(
-  #   func=envs_mdp.randomize_field,
-  #   mode="startup",
-  #   domain_randomization=True,
-  #   params={
-  #     "asset_cfg": SceneEntityCfg(name="robot"),
-  #     "field": "body_mass",
-  #     "operation": "scale",
-  #     "ranges": (0.9, 1.1),
-  #     # Randomize each body independently (not a single global scale).
-  #     "shared_random": False,
-  #   },
-  # )
+  cfg.events["robot_weight"] = EventTermCfg(
+    func=envs_mdp.randomize_field,
+    mode="startup",
+    domain_randomization=True,
+    params={
+      "asset_cfg": SceneEntityCfg(name="robot"),
+      "field": "body_mass",
+      "operation": "scale",
+      "ranges": (0.7, 1.3),
+      # Randomize each body independently (not a single global scale).
+      "shared_random": False,
+    },
+  )
   # Randomize joint Coulomb friction per-joint.
   cfg.events["joint_coulomb_friction"] = EventTermCfg(
     func=envs_mdp.randomize_field,
@@ -461,7 +461,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
       "asset_cfg": SceneEntityCfg(name="robot"),
       "field": "dof_frictionloss",
       "operation": "scale",
-      "ranges": (0.9, 1.1),
+      "ranges": (0.5, 1.5),
       "shared_random": False,
     },
   )
@@ -474,17 +474,17 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
       "asset_cfg": SceneEntityCfg(name="robot"),
       "field": "dof_damping",
       "operation": "scale",
-      "ranges": (0.9, 1.1),
+      "ranges": (0.7, 1.3),
       "shared_random": False,
     },
   )
   # Randomize COM placement on all body segments (per-body, not shared).
-  # cfg.events["base_com"].params["asset_cfg"] = SceneEntityCfg(name="robot")
-  # cfg.events["base_com"].params["ranges"] = {
-  #   0: (-0.01, 0.01),
-  #   1: (-0.01, 0.01),
-  #   2: (-0.01, 0.01),
-  # }
+  cfg.events["base_com"].params["asset_cfg"] = SceneEntityCfg(name="robot")
+  cfg.events["base_com"].params["ranges"] = {
+    0: (-0.02, 0.02),
+    1: (-0.02, 0.02),
+    2: (-0.02, 0.02),
+  }
   # Simulate encoder calibration mismatch up to +/-5 deg.
   if "encoder_bias" in cfg.events:
     encoder_bias_rad = math.radians(8.0)
@@ -550,7 +550,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   # )
   cfg.rewards["ankle_torque_over_5nm_l2"] = RewardTermCfg(
     func=_ankle_torque_above_limit_l2,
-    weight=-200e-4,
+    weight=-20e-4,
     params={"limit_nm": 4.0},
   )
   # Reward the fraction of action spectral energy within the <=3 Hz band.
@@ -572,8 +572,8 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
         {"step": 5_000 * 24, "weight": -0.2},
         {"step": 10_000 * 24, "weight": -0.5},
         {"step": 15_000 * 24, "weight": -1.0},
-        {"step": 20_000 * 24, "weight": -1.5},
-        {"step": 25_000 * 24, "weight": -2.0},
+        {"step": 20_000 * 24, "weight": -4.0},
+        {"step": 25_000 * 24, "weight": -8.0},
       ],
     },
   )
