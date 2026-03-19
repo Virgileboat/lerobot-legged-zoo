@@ -51,6 +51,8 @@ def get_spec() -> mujoco.MjSpec:
 # Base actuator gains (no additional scaling).
 BASE_KP_HIPZ = 10.0
 BASE_KV_HIPZ = 0.5
+BASE_KP_HIPX = 20.0
+BASE_KV_HIPX = 1.0
 BASE_KP_HIP = 200.0
 BASE_KV_HIP = 10.0
 BASE_KP_KNEE = 200.0
@@ -96,8 +98,8 @@ LEROBOT_ACTUATOR_HIP2 = BuiltinPositionActuatorCfg(
   target_names_expr=(
     "hipx_.*",
   ),
-  stiffness=BASE_KP_HIPZ,
-  damping=BASE_KV_HIPZ,
+  stiffness=BASE_KP_HIPX,
+  damping=BASE_KV_HIPX,
   effort_limit=88.0,
   armature=HIPX_ARMATURE,
   frictionloss=HIPX_FRICTIONLOSS,
