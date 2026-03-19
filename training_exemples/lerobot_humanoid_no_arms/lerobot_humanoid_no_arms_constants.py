@@ -96,8 +96,8 @@ LEROBOT_ACTUATOR_HIP2 = BuiltinPositionActuatorCfg(
   target_names_expr=(
     "hipx_.*",
   ),
-  stiffness=BASE_KP_HIP,
-  damping=BASE_KV_HIP,
+  stiffness=BASE_KP_HIPZ,
+  damping=BASE_KV_HIPZ,
   effort_limit=88.0,
   armature=HIPX_ARMATURE,
   frictionloss=HIPX_FRICTIONLOSS,

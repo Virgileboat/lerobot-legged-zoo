@@ -354,9 +354,9 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   """Create LeRobot Humanoid rough terrain velocity configuration."""
   cfg = make_velocity_env_cfg()
 
-  cfg.sim.mujoco.ccd_iterations = 500
-  cfg.sim.contact_sensor_maxmatch = 500
-  cfg.sim.nconmax = 50
+  cfg.sim.mujoco.ccd_iterations = 1000
+  cfg.sim.contact_sensor_maxmatch = 1000
+  cfg.sim.nconmax = 100
 
   cfg.scene.entities = {"robot": get_lerobot_humanoid_no_arms_robot_cfg()}
 
@@ -402,8 +402,8 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   assert isinstance(twist_cmd, UniformVelocityCommandCfg)
   twist_cmd.viz.z_offset = 0.9  # Adjust based on robot height.
   # Lower velocity command ranges for training stability.
-  twist_cmd.ranges.lin_vel_x = (-0.7, 0.7)
-  twist_cmd.ranges.lin_vel_y = (-0.2, 0.2)
+  twist_cmd.ranges.lin_vel_x = (-0.8, 0.8)
+  twist_cmd.ranges.lin_vel_y = (-0.4, 0.4)
   twist_cmd.ranges.ang_vel_z = (-0.2, 0.2)
 
   # Stronger observation randomization for sim-to-real robustness.
@@ -569,10 +569,10 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
         {"step": 0, "weight": -0.1},
         # Curriculum uses env.common_step_counter (env steps), while W&B "Step"
         # is PPO iterations. Here num_steps_per_env=24, so multiply by 24.
-        {"step": 5_000 * 24, "weight": -0.2},
-        {"step": 10_000 * 24, "weight": -0.5},
-        {"step": 15_000 * 24, "weight": -1.0},
-        {"step": 20_000 * 24, "weight": -4.0},
+        {"step": 5_000 * 24, "weight": -0.5},
+        {"step": 10_000 * 24, "weight": -1.0},
+        {"step": 15_000 * 24, "weight": -3.0},
+        {"step": 20_000 * 24, "weight": -8.0},
         {"step": 25_000 * 24, "weight": -8.0},
       ],
     },
