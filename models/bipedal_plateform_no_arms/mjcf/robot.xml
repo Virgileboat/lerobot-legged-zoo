@@ -20,7 +20,7 @@
     <!-- Link torso_subassembly -->
     <body name="torso_subassembly" pos="0 0 0.72" quat="1 0 0 0" childclass="mjcf">
       <freejoint name="torso_subassembly_freejoint"/>
-      <inertial pos="-0.000668828 4.08197e-07 0.0384522" mass="1.68455" fullinertia="0.0196473 0.00141686 0.0199217 -3.02227e-10 9.19521e-07 1.31114e-10"/>
+      <inertial pos="-0.000697254 4.08729e-07 0.0361785" mass="0.127875822162" fullinertia="0.0196473 0.00141686 0.0199217 -3.02227e-10 9.19521e-07 1.31114e-10"/>
       <!-- Part robstrideo0 -->
       <geom type="mesh" class="visual" pos="-0.673363 0.0109625 0.061034" quat="0.707107 0.707107 1.77636e-15 -1.78468e-15" mesh="robstrideo0" material="robstrideo0_material"/>
       <!-- Part rs00 -->
@@ -85,7 +85,7 @@
       <body name="hipx_subassembly" pos="-0.000819037 -0.133159 0.04164" quat="0.821908 0.0571233 0.0414078 -0.565234">
         <!-- Joint from torso_subassembly to hipx_subassembly -->
         <joint axis="0 0 1" name="hipz_right" type="hinge" armature="0.00226871374002" frictionloss="0.135520223994" damping="0.0527472556959"/>
-        <inertial pos="-0.0179437 -0.0274254 -0.0837243" mass="0.794013" fullinertia="0.00093782 0.000903422 0.00100397 -4.40032e-05 -0.00011053 -0.000168643"/>
+        <inertial pos="-0.0179437 -0.0274254 -0.0837243" mass="1.022503375386" fullinertia="0.00093782 0.000903422 0.00100397 -4.40032e-05 -0.00011053 -0.000168643"/>
         <!-- Part rs02 -->
         <!-- Part hex_socket_head_cap_screw_m4x0_70_x_40__14321d45d56569246e7feb4574a6bae6 -->
         <!-- Part hex_socket_head_cap_screw_m3x0_50_x_8__d566997e1880d7fd3377c5b0ee12206c_13 -->
@@ -126,7 +126,7 @@
         <body name="hipy_subassembly" pos="-0.01897 -0.0289 -0.09689" quat="0.388859 0.13275 0.0879729 -0.907429">
           <!-- Joint from hipx_subassembly to hipy_subassembly -->
           <joint axis="0 0 1" name="hipx_right" type="hinge" armature="0.0134012810769" frictionloss="0.116870607367" damping="0.0741891831587"/>
-          <inertial pos="0.00476547 -0.00266343 -0.0607297" mass="0.241618" fullinertia="0.000504044 0.000455767 0.000428966 2.43362e-05 7.84949e-06 -3.61499e-05"/>
+          <inertial pos="0.00476547 -0.00266343 -0.0607297" mass="0.311147576367" fullinertia="0.000504044 0.000455767 0.000428966 2.43362e-05 7.84949e-06 -3.61499e-05"/>
           <!-- Part hex_socket_head_cap_screw_m4x0_70_x_20__832e47d784177ea3f1dabbaab534416e_17 -->
           <!-- Part hipxy -->
           <geom type="mesh" class="visual" pos="-2.1684e-18 0 0" quat="1 0 -2.77556e-17 -2.34188e-17" mesh="hipxy" material="hipxy_material"/>
@@ -145,7 +145,7 @@
           <body name="tigh_subassembly" pos="0.012638 -0.0276823 -0.112055" quat="0.289457 0.00726416 0.730479 -0.618516">
             <!-- Joint from hipy_subassembly to tigh_subassembly -->
             <joint axis="0 0 1" name="hipy_right" type="hinge" armature="0.0290071832044" frictionloss="0.178104313494" damping="0.161115392894"/>
-            <inertial pos="0.0501976 0.0785779 -0.0353813" mass="2.5804" fullinertia="0.0174359 0.00865749 0.0236145 -0.0081889 0.000938636 0.00155247"/>
+            <inertial pos="0.0501976 0.0785779 -0.0353813" mass="3.322952785213" fullinertia="0.0174359 0.00865749 0.0236145 -0.0081889 0.000938636 0.00155247"/>
             <!-- Part hex_socket_head_cap_screw_m3x0_50_x_10__9c80fcbba574884e63b580474e1ee150 -->
             <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232 -->
             <!-- Part hex_socket_head_cap_screw_m4x0_70_x_8__a416dc2a8d778a4ef6150c0739aa89d1 -->
@@ -231,7 +231,7 @@
             <body name="shin_subassembly" pos="0.17 0.294449 -0.0305" quat="1.16249e-13 0.963177 -0.26887 4.36995e-14">
               <!-- Joint from tigh_subassembly to shin_subassembly -->
               <joint axis="0 0 1" name="knee_right" type="hinge" armature="0.0123305945439" frictionloss="0.11297747069" damping="0.388410433779"/>
-              <inertial pos="-0.076547 -0.0486454 6.35117e-05" mass="0.593267" fullinertia="0.000600304 0.00138759 0.00176486 -0.000634649 -8.1197e-05 -4.81249e-05"/>
+              <inertial pos="-0.0765467 -0.0486737 6.35117e-05" mass="0.763989393127" fullinertia="0.000600304 0.00138759 0.00176486 -0.000634649 -8.1197e-05 -4.81249e-05"/>
               <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_8__dec2226ceabd7d7ca0bb403ec234d89b -->
               <!-- Part rmdx43 -->
               <geom type="mesh" class="visual" pos="-0.2967 0.369726 0.019" quat="0.616799 0.616799 -0.345773 -0.345773" mesh="rmdx43" material="rmdx43_material"/>
@@ -350,7 +350,7 @@
               <body name="ankle_subassembly" pos="-0.221803 -0.135659 0.02" quat="1.9255e-14 -0.835223 -0.549911 1.06625e-14">
                 <!-- Joint from shin_subassembly to ankle_subassembly -->
                 <joint axis="0 0 1" name="ankley_right" type="hinge" armature="0.0209776768142" frictionloss="0.0171195170804" damping="0.00286374498013"/>
-                <inertial pos="-1.62086e-08 -0.000727483 0.02" mass="0.0168168" fullinertia="5.19458e-06 4.86353e-06 8.35665e-07 2.61119e-12 4.35145e-12 -7.24871e-13"/>
+                <inertial pos="-1.62086e-08 -0.000727483 0.02" mass="0.021656112385" fullinertia="5.19458e-06 4.86353e-06 8.35665e-07 2.61119e-12 4.35145e-12 -7.24871e-13"/>
                 <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232_7 -->
                 <!-- Part 07534_05x40_catpart_2 -->
                 <geom type="mesh" class="visual" pos="1.66533e-15 0.0249999 0.02" quat="2.53512e-14 -0.707107 0.707107 5.19202e-16" mesh="07534_05x40_catpart" material="07534_05x40_catpart_material"/>
@@ -383,7 +383,7 @@
                 <body name="foot_subassembly" pos="-5.55112e-15 -0.01594 0.02" quat="0.5 0.5 0.5 -0.5">
                   <!-- Joint from ankle_subassembly to foot_subassembly -->
                   <joint axis="0 0 1" name="anklex_right" type="hinge" armature="0.00485638046015" frictionloss="0.191719474184" damping="0.0892234479752"/>
-                  <inertial pos="8.52312e-09 -0.0138418 -0.052232" mass="0.122498" fullinertia="0.000163413 0.000162266 7.07692e-05 -1.15065e-10 -2.96383e-11 1.11374e-05"/>
+                  <inertial pos="8.52312e-09 -0.0138418 -0.052232" mass="0.157748825873" fullinertia="0.000163413 0.000162266 7.07692e-05 -1.15065e-10 -2.96383e-11 1.11374e-05"/>
                   <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232_13 -->
                   <!-- Part 27628_01_050_catpart_3 -->
                   <geom type="mesh" class="visual" pos="0.021 3.53792e-08 -0.0660002" quat="3.72484e-16 0.707107 0.707107 -4.65708e-16" mesh="27628_01_050_catpart" material="27628_01_050_catpart_material"/>
@@ -412,7 +412,7 @@
       <body name="hipx_subassemby_sym" pos="-0.000819037 0.13316 0.04164" quat="0.826605 -0.0574675 0.0409288 0.558343">
         <!-- Joint from torso_subassembly to hipx_subassemby_sym -->
         <joint axis="0 0 1" name="hipz_left" type="hinge" armature="0.00226871374002" frictionloss="0.135520223994" damping="0.0527472556959"/>
-        <inertial pos="-0.0179432 0.0274245 -0.0837272" mass="0.794016" fullinertia="0.00093784 0.000903443 0.00100402 4.40289e-05 -0.000110464 0.000168604"/>
+        <inertial pos="-0.0179432 0.0274245 -0.0837272" mass="1.022507238685" fullinertia="0.00093784 0.000903443 0.00100402 4.40289e-05 -0.000110464 0.000168604"/>
         <!-- Part rs02_2 -->
         <!-- Part hex_socket_head_cap_screw_m4x0_70_x_40__14321d45d56569246e7feb4574a6bae6_15 -->
         <!-- Part robstride02_2 -->
@@ -453,7 +453,7 @@
         <body name="hipy_subassembly_sym" pos="-0.01897 0.0289 -0.09689" quat="0.378583 -0.131748 0.089467 0.911764">
           <!-- Joint from hipx_subassemby_sym to hipy_subassembly_sym -->
           <joint axis="0 0 1" name="hipx_left" type="hinge" armature="0.0134012810769" frictionloss="0.116870607367" damping="0.0741891831587"/>
-          <inertial pos="0.0047654 0.00266393 -0.0607296" mass="0.241619" fullinertia="0.000504046 0.000455768 0.000428972 -2.43365e-05 7.8493e-06 3.61482e-05"/>
+          <inertial pos="0.0047654 0.00266393 -0.0607296" mass="0.311148864134" fullinertia="0.000504046 0.000455768 0.000428972 -2.43365e-05 7.8493e-06 3.61482e-05"/>
           <!-- Part hex_socket_head_cap_screw_m4x0_70_x_12__c825518ee8edf1afced0eee1b019b750_11 -->
           <!-- Part hex_socket_head_cap_screw_m4x0_70_x_12__c825518ee8edf1afced0eee1b019b750_12 -->
           <!-- Part hex_socket_head_cap_screw_m4x0_70_x_12__c825518ee8edf1afced0eee1b019b750_13 -->
@@ -472,7 +472,7 @@
           <body name="tigh_subassembly_sym" pos="0.012638 0.0276823 -0.112055" quat="0.0583173 -0.358702 -0.636384 -0.680402">
             <!-- Joint from hipy_subassembly_sym to tigh_subassembly_sym -->
             <joint axis="0 0 1" name="hipy_left" type="hinge" armature="0.0290071832044" frictionloss="0.178104313494" damping="0.161115392894"/>
-            <inertial pos="-0.0431321 -0.0830741 -0.0353867" mass="2.5804" fullinertia="0.0180602 0.00826187 0.0238429 -0.00802639 -0.00087206 -0.00158484"/>
+            <inertial pos="-0.0431321 -0.0830741 -0.0353867" mass="3.322952785213" fullinertia="0.0180602 0.00826187 0.0238429 -0.00802639 -0.00087206 -0.00158484"/>
             <!-- Part knee_rod22_sym -->
             <geom type="mesh" class="visual" pos="-0.058 -0.280519 0.0295" quat="0.707107 -0.707107 3.77476e-15 2.17998e-15" mesh="knee_rod22_sym" material="knee_rod22_sym_material"/>
             <!-- Part hex_socket_head_cap_screw_m4x0_70_x_16__8d628c0d7a90368385b1c4c7479647eb_7 -->
@@ -558,7 +558,7 @@
             <body name="shin_subassembly_sym" pos="-0.17 -0.294449 -0.0305" quat="0.723237 3.88595e-16 -3.33067e-16 -0.6906">
               <!-- Joint from tigh_subassembly_sym to shin_subassembly_sym -->
               <joint axis="0 0 1" name="knee_left" type="hinge" armature="0.0123305945439" frictionloss="0.11297747069" damping="0.388410433779"/>
-              <inertial pos="0.00133174 -0.0908013 -1.51262e-05" mass="0.593266" fullinertia="0.00173882 0.000241815 0.00176032 -5.54293e-05 2.67934e-06 9.5357e-05"/>
+              <inertial pos="0.0013467 -0.0907957 -1.51262e-05" mass="0.763988105360" fullinertia="0.00173882 0.000241815 0.00176032 -5.54293e-05 2.67934e-06 9.5357e-05"/>
               <!-- Part hex_socket_head_cap_screw_m3x0_50_x_20__7252065e4445f5ec71347b53fcae11e4_13 -->
               <!-- Part xt_30_2x2_f_6 -->
               <geom type="mesh" class="visual" pos="0.0212074 -0.0322876 0.0147" quat="0.270598 0.653281 0.270598 -0.653281" mesh="xt_30_2x2_f" material="xt_30_2x2_f_material"/>
@@ -677,7 +677,7 @@
               <body name="ankle_subassembly_2" pos="-3.88578e-16 -0.26 -0.02" quat="0.888105 -5.59873e-16 0 -0.459641">
                 <!-- Joint from shin_subassembly_sym to ankle_subassembly_2 -->
                 <joint axis="0 0 1" name="ankley_left" type="hinge" armature="0.0209776768142" frictionloss="0.0171195170804" damping="0.00286374498013"/>
-                <inertial pos="1.62086e-08 -0.000727483 0.02" mass="0.0168168" fullinertia="5.19458e-06 4.86353e-06 8.35665e-07 -2.61119e-12 4.35145e-12 7.24871e-13"/>
+                <inertial pos="1.62086e-08 -0.000727483 0.02" mass="0.021656112385" fullinertia="5.19458e-06 4.86353e-06 8.35665e-07 -2.61119e-12 4.35145e-12 7.24871e-13"/>
                 <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232_22 -->
                 <!-- Part 07534_05x40_catpart_4 -->
                 <geom type="mesh" class="visual" pos="-4.77396e-15 0.0249999 0.02" quat="0.707107 8.4179e-14 -6.29496e-14 -0.707107" mesh="07534_05x40_catpart" material="07534_05x40_catpart_material"/>
@@ -710,7 +710,7 @@
                 <body name="foot_subassembly_2" pos="8.54872e-15 -0.01594 0.02" quat="0.501732 0.501732 -0.498262 0.498262">
                   <!-- Joint from ankle_subassembly_2 to foot_subassembly_2 -->
                   <joint axis="0 0 1" name="anklex_left" type="hinge" armature="0.00485638046015" frictionloss="0.191719474184" damping="0.0892234479752"/>
-                  <inertial pos="8.52312e-09 -0.0138418 -0.052232" mass="0.122498" fullinertia="0.000163413 0.000162266 7.07692e-05 -1.15065e-10 -2.96383e-11 1.11374e-05"/>
+                  <inertial pos="8.52312e-09 -0.0138418 -0.052232" mass="0.157748825873" fullinertia="0.000163413 0.000162266 7.07692e-05 -1.15065e-10 -2.96383e-11 1.11374e-05"/>
                   <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232_28 -->
                   <!-- Part 27628_01_050_catpart_7 -->
                   <geom type="mesh" class="visual" pos="0.021 3.53792e-08 -0.0660002" quat="7.40815e-17 -0.707107 -0.707107 -7.17817e-17" mesh="27628_01_050_catpart" material="27628_01_050_catpart_material"/>
@@ -739,7 +739,7 @@
       <body name="torso_mesh" pos="0 0 -0.1" quat="1.2038e-27 1 -2.16621e-27 -2.53152e-15">
         <!-- Joint from torso_subassembly to torso_mesh -->
         <!-- Joint is "fixed", skipping it -->
-        <inertial pos="-2.38855e-06 3.15368e-57 -0.229519" mass="4" fullinertia="0.0564008 0.0460323 0.0120348 6.54226e-46 -1.78695e-06 2.25397e-61"/>
+        <inertial pos="-2.38855e-06 -1.36057e-58 -0.229519" mass="0.372124177838" fullinertia="0.0564008 0.0460323 0.0120348 6.54226e-46 -1.78695e-06 2.25397e-61"/>
         <!-- Part torso_mesh -->
         <geom type="mesh" class="visual" pos="0.025 -0.503548 -0.15" quat="0 1 0 0" mesh="torso_mesh" material="torso_mesh_material"/>
       </body>
