@@ -871,9 +871,13 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   for reward_name in ["foot_clearance", "foot_swing_height", "foot_slip"]:
     cfg.rewards[reward_name].params["asset_cfg"].site_names = site_names
 
+  # Increase command tracking pressure.
+  cfg.rewards["track_linear_velocity"].weight = 6.0
+  # cfg.rewards["track_angular_velocity"].weight = 4.0
+
   cfg.rewards["body_ang_vel"].weight = -0.05
   cfg.rewards["angular_momentum"].weight = -0.02
-  cfg.rewards["air_time"].weight = 0.0
+  cfg.rewards["air_time"].weight = 0.1
   # cfg.rewards["single_foot_contact"] = RewardTermCfg(
   #   func=_single_foot_on_ground_reward,
   #   weight=0.3,
@@ -883,17 +887,17 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   #     "force_no_contact_threshold": 1.0,
   #   },
   # )
-  cfg.rewards["alternating_single_support"] = RewardTermCfg(
-    func=_ALTERNATING_SINGLE_SUPPORT_REWARD,
-    weight=0.4,
-    params={
-      "sensor_name": feet_ground_cfg.name,
-      "force_contact_threshold": 75.0,
-      "force_no_contact_threshold": 4.0,
-      "target_hz": 2.0,
-      "interval_sigma_s": 0.08,
-    },
-  )
+  # cfg.rewards["alternating_single_support"] = RewardTermCfg(
+  #   func=_ALTERNATING_SINGLE_SUPPORT_REWARD,
+  #   weight=0.4,
+  #   params={
+  #     "sensor_name": feet_ground_cfg.name,
+  #     "force_contact_threshold": 75.0,
+  #     "force_no_contact_threshold": 4.0,
+  #     "target_hz": 2.0,
+  #     "interval_sigma_s": 0.08,
+  #   },
+  # )
 
   # Encourage lower overall effort, with an extra penalty on ankle torque demand.
   cfg.rewards["actuator_torque_l2"] = RewardTermCfg(
