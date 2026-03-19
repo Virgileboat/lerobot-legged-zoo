@@ -564,7 +564,7 @@ def _single_foot_on_ground_reward(
 
 
 class _AlternatingSingleSupportReward:
-  """Reward single-support transitions that alternate the support foot."""
+  """Reward alternating single-support with switch timing near a target frequency."""
 
   def __init__(self) -> None:
     self._state_by_env: dict[int, dict[str, Any]] = {}
@@ -579,6 +579,8 @@ class _AlternatingSingleSupportReward:
     force_no_contact_threshold: float | None = None,
     force_threshold_min: float | None = None,
     force_threshold_max: float | None = None,
+    target_hz: float = 2.0,
+    interval_sigma_s: float = 0.08,
   ) -> torch.Tensor:
     contact_flat = _get_feet_contact_matrix(
       env=env,
@@ -592,6 +594,8 @@ class _AlternatingSingleSupportReward:
     device = env.action_manager.action.device
     if contact_flat is None:
       return torch.zeros(env.num_envs, device=device)
+    if target_hz <= 0.0:
+      raise ValueError(f"target_hz must be > 0, got {target_hz}")
 
     env_key = id(env)
     self._last_env_key = env_key
@@ -607,8 +611,14 @@ class _AlternatingSingleSupportReward:
       state = {
         "prev_support_idx": torch.full((num_envs,), -1, dtype=torch.long, device=device),
         "has_prev_support": torch.zeros((num_envs,), dtype=torch.bool, device=device),
+        "steps_since_switch": torch.zeros((num_envs,), dtype=torch.long, device=device),
+        "has_prev_switch": torch.zeros((num_envs,), dtype=torch.bool, device=device),
       }
       self._state_by_env[env_key] = state
+
+    steps_since_switch = state["steps_since_switch"]
+    has_prev_switch = state["has_prev_switch"]
+    steps_since_switch.add_(1)
 
     num_contacts = torch.sum(contact_flat, dim=1)
     single_support = num_contacts == 1
@@ -617,10 +627,22 @@ class _AlternatingSingleSupportReward:
     prev_support_idx = state["prev_support_idx"]
     has_prev_support = state["has_prev_support"]
     alternated = single_support & has_prev_support & (support_idx != prev_support_idx)
-    reward = alternated.to(dtype=torch.float32)
+
+    step_dt = float(env.step_dt)
+    target_interval_s = 1.0 / float(target_hz)
+    sigma_s = max(float(interval_sigma_s), 1e-6)
+    switch_interval_s = steps_since_switch.to(dtype=torch.float32) * step_dt
+    timing_score = torch.exp(-0.5 * torch.square((switch_interval_s - target_interval_s) / sigma_s))
+    reward = torch.where(
+      alternated & has_prev_switch,
+      timing_score,
+      torch.zeros_like(timing_score),
+    )
 
     prev_support_idx[single_support] = support_idx[single_support]
     has_prev_support[single_support] = True
+    has_prev_switch[alternated] = True
+    steps_since_switch[alternated] = 0
 
     return reward
 
@@ -632,12 +654,18 @@ class _AlternatingSingleSupportReward:
       return
     prev_support_idx = state["prev_support_idx"]
     has_prev_support = state["has_prev_support"]
+    steps_since_switch = state["steps_since_switch"]
+    has_prev_switch = state["has_prev_switch"]
     if env_ids is None or isinstance(env_ids, slice):
       prev_support_idx.fill_(-1)
       has_prev_support.zero_()
+      steps_since_switch.zero_()
+      has_prev_switch.zero_()
       return
     prev_support_idx[env_ids] = -1
     has_prev_support[env_ids] = False
+    steps_since_switch[env_ids] = 0
+    has_prev_switch[env_ids] = False
 
 
 _ALTERNATING_SINGLE_SUPPORT_REWARD = _AlternatingSingleSupportReward()
@@ -846,24 +874,26 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   cfg.rewards["body_ang_vel"].weight = -0.05
   cfg.rewards["angular_momentum"].weight = -0.02
   cfg.rewards["air_time"].weight = 0.0
-  cfg.rewards["single_foot_contact"] = RewardTermCfg(
-    func=_single_foot_on_ground_reward,
-    weight=0.3,
-    params={
-      "sensor_name": feet_ground_cfg.name,
-      "force_contact_threshold": 75.0,
-      "force_no_contact_threshold": 5.0,
-    },
-  )
-  # cfg.rewards["alternating_single_support"] = RewardTermCfg(
-  #   func=_ALTERNATING_SINGLE_SUPPORT_REWARD,
-  #   weight=0.4,
+  # cfg.rewards["single_foot_contact"] = RewardTermCfg(
+  #   func=_single_foot_on_ground_reward,
+  #   weight=0.3,
   #   params={
   #     "sensor_name": feet_ground_cfg.name,
   #     "force_contact_threshold": 75.0,
-  #     "force_no_contact_threshold": 40.0,
+  #     "force_no_contact_threshold": 1.0,
   #   },
   # )
+  cfg.rewards["alternating_single_support"] = RewardTermCfg(
+    func=_ALTERNATING_SINGLE_SUPPORT_REWARD,
+    weight=0.4,
+    params={
+      "sensor_name": feet_ground_cfg.name,
+      "force_contact_threshold": 75.0,
+      "force_no_contact_threshold": 4.0,
+      "target_hz": 2.0,
+      "interval_sigma_s": 0.08,
+    },
+  )
 
   # Encourage lower overall effort, with an extra penalty on ankle torque demand.
   cfg.rewards["actuator_torque_l2"] = RewardTermCfg(
@@ -906,9 +936,9 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
         # is PPO iterations. Here num_steps_per_env=24, so multiply by 24.
         {"step": 5_000 * 24, "weight": -0.5},
         {"step": 10_000 * 24, "weight": -1.0},
-        {"step": 15_000 * 24, "weight": -3.0},
-        {"step": 20_000 * 24, "weight": -8.0},
-        {"step": 25_000 * 24, "weight": -8.0},
+        {"step": 15_000 * 24, "weight": -2.0},
+        {"step": 20_000 * 24, "weight": -4.0},
+        {"step": 25_000 * 24, "weight": -4.0},
       ],
     },
   )
