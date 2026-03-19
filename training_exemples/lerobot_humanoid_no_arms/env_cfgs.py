@@ -27,6 +27,7 @@ import torch
 
 
 _CSV_LOG_STATE_BY_ENV: dict[int, dict[str, Any]] = {}
+_FOOT_CONTACT_STATE_BY_ENV: dict[int, dict[str, torch.Tensor]] = {}
 
 
 class _SelectiveActionRateL2Penalty:
@@ -441,7 +442,11 @@ def _ankle_torque_above_limit_l2(env, limit_nm: float = 5.0) -> torch.Tensor:
 def _get_feet_contact_matrix(
   env,
   sensor_name: str = "feet_ground_contact",
-  force_threshold: float = 5.0,
+  force_threshold: float | None = 5.0,
+  force_contact_threshold: float | None = None,
+  force_no_contact_threshold: float | None = None,
+  force_threshold_min: float | None = None,
+  force_threshold_max: float | None = None,
 ) -> torch.Tensor | None:
   """Return per-foot contact matrix [num_envs, num_feet] as float32 (0/1)."""
   sensor = None
@@ -457,18 +462,78 @@ def _get_feet_contact_matrix(
     except Exception:
       return None
 
-  found = getattr(sensor.data, "found", None)
-  if isinstance(found, torch.Tensor):
-    contact = found.to(dtype=torch.float32)
-  else:
-    forces = getattr(sensor.data, "force", None)
-    if not isinstance(forces, torch.Tensor):
-      return None
+  forces = getattr(sensor.data, "force", None)
+  if isinstance(forces, torch.Tensor):
+    # Hysteresis thresholds:
+    # - force_contact_threshold: switch to contact when force >= threshold.
+    # - force_no_contact_threshold: switch to no-contact when force <= threshold.
+    # Values in-between keep previous contact state.
+    contact_threshold = force_contact_threshold
+    if contact_threshold is None:
+      contact_threshold = force_threshold_min
+    if contact_threshold is None:
+      contact_threshold = 0.0 if force_threshold is None else float(force_threshold)
+
+    no_contact_threshold = force_no_contact_threshold
+    if no_contact_threshold is None and force_threshold_max is not None and force_threshold_min is None:
+      # Backward-compat fallback when only max is provided.
+      no_contact_threshold = float(force_threshold_max)
+    if no_contact_threshold is None:
+      no_contact_threshold = float(contact_threshold)
+
+    contact_threshold = float(contact_threshold)
+    no_contact_threshold = float(no_contact_threshold)
+    if no_contact_threshold > contact_threshold:
+      raise ValueError(
+        f"force_no_contact_threshold ({no_contact_threshold}) must be <= "
+        f"force_contact_threshold ({contact_threshold}) for hysteresis."
+      )
+
     if forces.ndim >= 3:
       force_mag = torch.linalg.norm(forces, dim=-1)
     else:
       force_mag = torch.abs(forces)
-    contact = (force_mag > force_threshold).to(dtype=torch.float32)
+    force_flat = force_mag.reshape(force_mag.shape[0], -1)
+
+    env_key = id(env)
+    state_by_sensor = _FOOT_CONTACT_STATE_BY_ENV.get(env_key)
+    if state_by_sensor is None:
+      state_by_sensor = {}
+      _FOOT_CONTACT_STATE_BY_ENV[env_key] = state_by_sensor
+
+    contact_state = state_by_sensor.get(sensor_name)
+    needs_init = (
+      contact_state is None
+      or contact_state.shape != force_flat.shape
+      or contact_state.device != force_flat.device
+    )
+    if needs_init:
+      contact_state = torch.zeros(force_flat.shape, dtype=torch.bool, device=force_flat.device)
+      state_by_sensor[sensor_name] = contact_state
+
+    # Reset hysteresis memory for just-reset envs.
+    episode_length_buf = getattr(env, "episode_length_buf", None)
+    if isinstance(episode_length_buf, torch.Tensor) and episode_length_buf.shape[0] == force_flat.shape[0]:
+      just_reset = episode_length_buf == 0
+      if bool(just_reset.any()):
+        contact_state[just_reset] = False
+
+    contact_state = torch.where(
+      force_flat >= contact_threshold,
+      torch.ones_like(contact_state),
+      torch.where(
+        force_flat <= no_contact_threshold,
+        torch.zeros_like(contact_state),
+        contact_state,
+      ),
+    )
+    state_by_sensor[sensor_name] = contact_state
+    contact = contact_state.to(dtype=torch.float32)
+  else:
+    found = getattr(sensor.data, "found", None)
+    if not isinstance(found, torch.Tensor):
+      return None
+    contact = found.to(dtype=torch.float32)
 
   return contact.reshape(contact.shape[0], -1)
 
@@ -476,13 +541,21 @@ def _get_feet_contact_matrix(
 def _single_foot_on_ground_reward(
   env,
   sensor_name: str = "feet_ground_contact",
-  force_threshold: float = 5.0,
+  force_threshold: float | None = 5.0,
+  force_contact_threshold: float | None = None,
+  force_no_contact_threshold: float | None = None,
+  force_threshold_min: float | None = None,
+  force_threshold_max: float | None = None,
 ) -> torch.Tensor:
   """Reward single-support stance: exactly one foot in contact."""
   contact_flat = _get_feet_contact_matrix(
     env=env,
     sensor_name=sensor_name,
     force_threshold=force_threshold,
+    force_contact_threshold=force_contact_threshold,
+    force_no_contact_threshold=force_no_contact_threshold,
+    force_threshold_min=force_threshold_min,
+    force_threshold_max=force_threshold_max,
   )
   if contact_flat is None:
     return torch.zeros(env.num_envs, device=env.action_manager.action.device)
@@ -501,12 +574,20 @@ class _AlternatingSingleSupportReward:
     self,
     env,
     sensor_name: str = "feet_ground_contact",
-    force_threshold: float = 5.0,
+    force_threshold: float | None = 5.0,
+    force_contact_threshold: float | None = None,
+    force_no_contact_threshold: float | None = None,
+    force_threshold_min: float | None = None,
+    force_threshold_max: float | None = None,
   ) -> torch.Tensor:
     contact_flat = _get_feet_contact_matrix(
       env=env,
       sensor_name=sensor_name,
       force_threshold=force_threshold,
+      force_contact_threshold=force_contact_threshold,
+      force_no_contact_threshold=force_no_contact_threshold,
+      force_threshold_min=force_threshold_min,
+      force_threshold_max=force_threshold_max,
     )
     device = env.action_manager.action.device
     if contact_flat is None:
@@ -768,12 +849,20 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   cfg.rewards["single_foot_contact"] = RewardTermCfg(
     func=_single_foot_on_ground_reward,
     weight=0.3,
-    params={"sensor_name": feet_ground_cfg.name, "force_threshold": 5.0},
+    params={
+      "sensor_name": feet_ground_cfg.name,
+      "force_contact_threshold": 75.0,
+      "force_no_contact_threshold": 5.0,
+    },
   )
   # cfg.rewards["alternating_single_support"] = RewardTermCfg(
   #   func=_ALTERNATING_SINGLE_SUPPORT_REWARD,
   #   weight=0.4,
-  #   params={"sensor_name": feet_ground_cfg.name, "force_threshold": 5.0},
+  #   params={
+  #     "sensor_name": feet_ground_cfg.name,
+  #     "force_contact_threshold": 75.0,
+  #     "force_no_contact_threshold": 40.0,
+  #   },
   # )
 
   # Encourage lower overall effort, with an extra penalty on ankle torque demand.
