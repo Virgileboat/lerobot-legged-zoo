@@ -438,6 +438,130 @@ def _ankle_torque_above_limit_l2(env, limit_nm: float = 5.0) -> torch.Tensor:
   return torch.sum(torch.square(over), dim=1)
 
 
+def _get_feet_contact_matrix(
+  env,
+  sensor_name: str = "feet_ground_contact",
+  force_threshold: float = 5.0,
+) -> torch.Tensor | None:
+  """Return per-foot contact matrix [num_envs, num_feet] as float32 (0/1)."""
+  sensor = None
+  sensors = getattr(env.scene, "sensors", None)
+  if sensors is not None:
+    try:
+      sensor = sensors[sensor_name]
+    except Exception:
+      pass
+  if sensor is None:
+    try:
+      sensor = env.scene[sensor_name]
+    except Exception:
+      return None
+
+  found = getattr(sensor.data, "found", None)
+  if isinstance(found, torch.Tensor):
+    contact = found.to(dtype=torch.float32)
+  else:
+    forces = getattr(sensor.data, "force", None)
+    if not isinstance(forces, torch.Tensor):
+      return None
+    if forces.ndim >= 3:
+      force_mag = torch.linalg.norm(forces, dim=-1)
+    else:
+      force_mag = torch.abs(forces)
+    contact = (force_mag > force_threshold).to(dtype=torch.float32)
+
+  return contact.reshape(contact.shape[0], -1)
+
+
+def _single_foot_on_ground_reward(
+  env,
+  sensor_name: str = "feet_ground_contact",
+  force_threshold: float = 5.0,
+) -> torch.Tensor:
+  """Reward single-support stance: exactly one foot in contact."""
+  contact_flat = _get_feet_contact_matrix(
+    env=env,
+    sensor_name=sensor_name,
+    force_threshold=force_threshold,
+  )
+  if contact_flat is None:
+    return torch.zeros(env.num_envs, device=env.action_manager.action.device)
+  num_contacts = torch.sum(contact_flat, dim=1)
+  return (num_contacts == 1).to(dtype=torch.float32)
+
+
+class _AlternatingSingleSupportReward:
+  """Reward single-support transitions that alternate the support foot."""
+
+  def __init__(self) -> None:
+    self._state_by_env: dict[int, dict[str, Any]] = {}
+    self._last_env_key: int | None = None
+
+  def __call__(
+    self,
+    env,
+    sensor_name: str = "feet_ground_contact",
+    force_threshold: float = 5.0,
+  ) -> torch.Tensor:
+    contact_flat = _get_feet_contact_matrix(
+      env=env,
+      sensor_name=sensor_name,
+      force_threshold=force_threshold,
+    )
+    device = env.action_manager.action.device
+    if contact_flat is None:
+      return torch.zeros(env.num_envs, device=device)
+
+    env_key = id(env)
+    self._last_env_key = env_key
+    num_envs = contact_flat.shape[0]
+
+    state = self._state_by_env.get(env_key)
+    needs_init = (
+      state is None
+      or state["prev_support_idx"].shape[0] != num_envs
+      or state["prev_support_idx"].device != device
+    )
+    if needs_init:
+      state = {
+        "prev_support_idx": torch.full((num_envs,), -1, dtype=torch.long, device=device),
+        "has_prev_support": torch.zeros((num_envs,), dtype=torch.bool, device=device),
+      }
+      self._state_by_env[env_key] = state
+
+    num_contacts = torch.sum(contact_flat, dim=1)
+    single_support = num_contacts == 1
+    support_idx = torch.argmax(contact_flat, dim=1)
+
+    prev_support_idx = state["prev_support_idx"]
+    has_prev_support = state["has_prev_support"]
+    alternated = single_support & has_prev_support & (support_idx != prev_support_idx)
+    reward = alternated.to(dtype=torch.float32)
+
+    prev_support_idx[single_support] = support_idx[single_support]
+    has_prev_support[single_support] = True
+
+    return reward
+
+  def reset(self, env_ids: torch.Tensor | slice | None = None) -> None:
+    if self._last_env_key is None:
+      return
+    state = self._state_by_env.get(self._last_env_key)
+    if state is None:
+      return
+    prev_support_idx = state["prev_support_idx"]
+    has_prev_support = state["has_prev_support"]
+    if env_ids is None or isinstance(env_ids, slice):
+      prev_support_idx.fill_(-1)
+      has_prev_support.zero_()
+      return
+    prev_support_idx[env_ids] = -1
+    has_prev_support[env_ids] = False
+
+
+_ALTERNATING_SINGLE_SUPPORT_REWARD = _AlternatingSingleSupportReward()
+
+
 def _print_actuator_torques(env, env_ids=None) -> None:
   """Print mean/max actuator torque (absolute) for quick debugging during play."""
   asset = env.scene["robot"]
@@ -641,6 +765,16 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   cfg.rewards["body_ang_vel"].weight = -0.05
   cfg.rewards["angular_momentum"].weight = -0.02
   cfg.rewards["air_time"].weight = 0.0
+  cfg.rewards["single_foot_contact"] = RewardTermCfg(
+    func=_single_foot_on_ground_reward,
+    weight=0.3,
+    params={"sensor_name": feet_ground_cfg.name, "force_threshold": 5.0},
+  )
+  # cfg.rewards["alternating_single_support"] = RewardTermCfg(
+  #   func=_ALTERNATING_SINGLE_SUPPORT_REWARD,
+  #   weight=0.4,
+  #   params={"sensor_name": feet_ground_cfg.name, "force_threshold": 5.0},
+  # )
 
   # Encourage lower overall effort, with an extra penalty on ankle torque demand.
   cfg.rewards["actuator_torque_l2"] = RewardTermCfg(
@@ -749,7 +883,7 @@ def lerobot_humanoid_no_arms_flat_env_cfg(play: bool = False) -> ManagerBasedRlE
   if play:
     twist_cmd = cfg.commands["twist"]
     assert isinstance(twist_cmd, UniformVelocityCommandCfg)
-    twist_cmd.ranges.lin_vel_x = (-0.6, 1.0)
+    twist_cmd.ranges.lin_vel_x = (-0.8, -0.6)
     twist_cmd.ranges.ang_vel_z = (-0.4, 0.4)
 
     cfg.events["log_obs_action_csv"] = EventTermCfg(
