@@ -918,7 +918,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   cfg.rewards["action_rate_l2"].weight = -0.1
   cfg.rewards["action_rate_hipz_hipx_l2"] = RewardTermCfg(
     func=_SELECTIVE_ACTION_RATE_L2_PENALTY,
-    weight=-80.0,
+    weight=-60.0,
     params={"joint_name_patterns": (r".*hipz.*", r".*hipx.*")},
   )
   cfg.curriculum["action_rate_weight"] = CurriculumTermCfg(
