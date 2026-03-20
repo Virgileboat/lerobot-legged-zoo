@@ -750,7 +750,11 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
 
   # Disable velocity/command curricula while keeping terrain_levels curriculum.
   for curriculum_name in list(cfg.curriculum.keys()):
-    if curriculum_name not in {"terrain_levels", "action_rate_weight"}:
+    if curriculum_name not in {
+      "terrain_levels",
+      "action_rate_weight",
+      "action_rate_hipz_hipx_weight",
+    }:
       cfg.curriculum.pop(curriculum_name, None)
   cfg.observations["critic"].terms["foot_height"].params[
     "asset_cfg"
@@ -918,7 +922,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   cfg.rewards["action_rate_l2"].weight = -0.1
   cfg.rewards["action_rate_hipz_hipx_l2"] = RewardTermCfg(
     func=_SELECTIVE_ACTION_RATE_L2_PENALTY,
-    weight=-60.0,
+    weight=-5.0,
     params={"joint_name_patterns": (r".*hipz.*", r".*hipx.*")},
   )
   cfg.curriculum["action_rate_weight"] = CurriculumTermCfg(
@@ -934,6 +938,22 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
         {"step": 15_000 * 24, "weight": -2.0},
         {"step": 20_000 * 24, "weight": -4.0},
         {"step": 25_000 * 24, "weight": -4.0},
+      ],
+    },
+  )
+  cfg.curriculum["action_rate_hipz_hipx_weight"] = CurriculumTermCfg(
+    func=mdp.reward_weight,
+    params={
+      "reward_name": "action_rate_hipz_hipx_l2",
+      "weight_stages": [
+        {"step": 0, "weight": -5.0},
+        # Curriculum uses env.common_step_counter (env steps), while W&B "Step"
+        # is PPO iterations. Here num_steps_per_env=24, so multiply by 24.
+        {"step": 5_000 * 24, "weight": -10.0},
+        {"step": 10_000 * 24, "weight": -20.0},
+        {"step": 15_000 * 24, "weight": -35.0},
+        {"step": 20_000 * 24, "weight": -50.0},
+        {"step": 25_000 * 24, "weight": -60.0},
       ],
     },
   )
