@@ -35,7 +35,6 @@ class _SelectiveActionRateL2Penalty:
 
   def __init__(self) -> None:
     self._state_by_env: dict[int, dict[str, Any]] = {}
-    self._last_env_key: int | None = None
 
   def _resolve_joint_indices(
     self,
@@ -49,15 +48,19 @@ class _SelectiveActionRateL2Penalty:
 
     asset = env.scene["robot"]
     candidate_name_lists = [
-      getattr(asset, "actuator_names", None),
-      getattr(asset, "joint_names", None),
-      getattr(asset, "dof_names", None),
+      ("actuator_names", getattr(asset, "actuator_names", None)),
+      ("joint_names", getattr(asset, "joint_names", None)),
+      ("dof_names", getattr(asset, "dof_names", None)),
     ]
     compiled_patterns = [re.compile(p) for p in joint_name_patterns]
 
-    for names in candidate_name_lists:
+    checked_sources: list[str] = []
+    for source_name, names in candidate_name_lists:
       if names is None or len(names) != num_actions:
+        size = "None" if names is None else str(len(names))
+        checked_sources.append(f"{source_name}={size}")
         continue
+      checked_sources.append(f"{source_name}={len(names)}")
       ids = [
         i
         for i, name in enumerate(names)
@@ -65,13 +68,11 @@ class _SelectiveActionRateL2Penalty:
       ]
       if ids:
         return torch.tensor(ids, dtype=torch.long, device=device)
-
-    # Fallback for the 12-DOF LeRobot humanoid action ordering:
-    # [hipz_r, hipx_r, hipy_r, knee_r, ankley_r, anklex_r, hipz_l, hipx_l, ...]
-    if num_actions >= 8:
-      return torch.tensor((0, 1, 6, 7), dtype=torch.long, device=device)
-
-    return torch.arange(num_actions, dtype=torch.long, device=device)
+    raise ValueError(
+      "No action dimensions matched joint_name_patterns="
+      f"{joint_name_patterns} with num_actions={num_actions}. "
+      f"Checked sources: {', '.join(checked_sources)}."
+    )
 
   def __call__(
     self,
@@ -79,58 +80,37 @@ class _SelectiveActionRateL2Penalty:
     joint_name_patterns: tuple[str, ...] = (r".*hipz.*", r".*hipx.*"),
   ) -> torch.Tensor:
     actions = env.action_manager.action
+    prev_actions = env.action_manager.prev_action
     env_key = id(env)
-    self._last_env_key = env_key
 
     state = self._state_by_env.get(env_key)
     needs_init = (
       state is None
-      or state["prev_action"].shape != actions.shape
       or state["joint_ids"].device != actions.device
+      or state["num_actions"] != actions.shape[1]
+      or state["joint_name_patterns"] != joint_name_patterns
     )
     if needs_init:
       state = {
-        "prev_action": torch.zeros_like(actions),
-        "ready": torch.zeros(actions.shape[0], dtype=torch.bool, device=actions.device),
         "joint_ids": self._resolve_joint_indices(
           env=env,
           num_actions=actions.shape[1],
           joint_name_patterns=joint_name_patterns,
           device=actions.device,
         ),
+        "num_actions": actions.shape[1],
+        "joint_name_patterns": joint_name_patterns,
       }
       self._state_by_env[env_key] = state
 
     joint_ids = state["joint_ids"]
-    prev_action = state["prev_action"]
-    ready = state["ready"]
 
     if joint_ids.numel() == 0:
-      penalty = torch.zeros(actions.shape[0], device=actions.device, dtype=actions.dtype)
-    else:
-      delta = actions[:, joint_ids] - prev_action[:, joint_ids]
-      penalty = torch.sum(torch.square(delta), dim=1)
-      penalty = torch.where(ready, penalty, torch.zeros_like(penalty))
-
-    prev_action.copy_(actions)
-    ready.fill_(True)
-
-    return penalty
+      return torch.zeros(actions.shape[0], device=actions.device, dtype=actions.dtype)
+    return torch.sum(torch.square(actions[:, joint_ids] - prev_actions[:, joint_ids]), dim=1)
 
   def reset(self, env_ids: torch.Tensor | slice | None = None) -> None:
-    if self._last_env_key is None:
-      return
-    state = self._state_by_env.get(self._last_env_key)
-    if state is None:
-      return
-    prev_action = state["prev_action"]
-    ready = state["ready"]
-    if env_ids is None or isinstance(env_ids, slice):
-      prev_action.zero_()
-      ready.zero_()
-      return
-    prev_action[env_ids] = 0.0
-    ready[env_ids] = False
+    del env_ids
 
 
 class _ActionFftBandRatioReward:
@@ -938,7 +918,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   cfg.rewards["action_rate_l2"].weight = -0.1
   cfg.rewards["action_rate_hipz_hipx_l2"] = RewardTermCfg(
     func=_SELECTIVE_ACTION_RATE_L2_PENALTY,
-    weight=-20.0,
+    weight=-80.0,
     params={"joint_name_patterns": (r".*hipz.*", r".*hipx.*")},
   )
   cfg.curriculum["action_rate_weight"] = CurriculumTermCfg(
