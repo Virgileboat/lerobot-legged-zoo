@@ -76,7 +76,7 @@ class _SelectiveActionRateL2Penalty:
   def __call__(
     self,
     env,
-    joint_name_patterns: tuple[str, ...] = ("hipz_.*", "hipx_.*"),
+    joint_name_patterns: tuple[str, ...] = (r".*hipz.*", r".*hipx.*"),
   ) -> torch.Tensor:
     actions = env.action_manager.action
     env_key = id(env)
@@ -840,13 +840,24 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   # The variable_posture reward targets the robot default joint pose
   # (asset.data.default_joint_pos), which comes from KNEES_BENT_KEYFRAME.
   # Hip joints get more freedom, ankle roll is tight for balance.
-  cfg.rewards["pose"].params["std_standing"] = {".*": 0.05}
+  cfg.rewards["pose"].params["std_standing"] = {
+    # Lower body - 12 DOF.
+    r".*hipy.*": 0.6,
+    r".*hipx.*": 0.1,
+    r".*hipz.*": 0.1,
+    r".*knee.*": 0.6,
+    r".*ankley.*": 0.35,
+    r".*anklex.*": 0.2,
+  }
+
+
+
   cfg.rewards["pose"].params["std_walking"] = {
     # Lower body - 12 DOF.
-    r".*hipy.*": 0.3,
-    r".*hipx.*": 0.15,
-    r".*hipz.*": 0.15,
-    r".*knee.*": 0.35,
+    r".*hipy.*": 0.6,
+    r".*hipx.*": 0.1,
+    r".*hipz.*": 0.1,
+    r".*knee.*": 0.6,
     r".*ankley.*": 0.35,
     r".*anklex.*": 0.2,
   }
@@ -854,8 +865,8 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   cfg.rewards["pose"].params["std_running"] = {
     # Lower body - 12 DOF.
     r".*hipy.*": 0.5,
-    r".*hipx.*": 0.2,
-    r".*hipz.*": 0.2,
+    r".*hipx.*": 0.1,
+    r".*hipz.*": 0.1,
     r".*knee.*": 0.6,
     r".*ankley.*": 0.2,
     r".*anklex.*": 0.1,
@@ -927,8 +938,8 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   cfg.rewards["action_rate_l2"].weight = -0.1
   cfg.rewards["action_rate_hipz_hipx_l2"] = RewardTermCfg(
     func=_SELECTIVE_ACTION_RATE_L2_PENALTY,
-    weight=-10.0,
-    params={"joint_name_patterns": ("hipz_.*", "hipx_.*")},
+    weight=-20.0,
+    params={"joint_name_patterns": (r".*hipz.*", r".*hipx.*")},
   )
   cfg.curriculum["action_rate_weight"] = CurriculumTermCfg(
     func=mdp.reward_weight,
@@ -1006,7 +1017,7 @@ def lerobot_humanoid_no_arms_flat_env_cfg(play: bool = False) -> ManagerBasedRlE
   if play:
     twist_cmd = cfg.commands["twist"]
     assert isinstance(twist_cmd, UniformVelocityCommandCfg)
-    twist_cmd.ranges.lin_vel_x = (-0.8, -0.6)
+    twist_cmd.ranges.lin_vel_x = (-0.8, 0.8)
     twist_cmd.ranges.ang_vel_z = (-0.4, 0.4)
 
     cfg.events["log_obs_action_csv"] = EventTermCfg(
