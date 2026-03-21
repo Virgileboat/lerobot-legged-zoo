@@ -1,17 +1,1 @@
-<sensor>
-    <gyro site="imu" name="gyro"/>
-    <velocimeter site="imu" name="local_linvel"/>
-    <accelerometer site="imu" name="accelerometer"/>
-    <framezaxis objtype="site" objname="imu" name="upvector"/>
-    <framexaxis objtype="site" objname="imu" name="forwardvector"/>
-    <framelinvel objtype="site" objname="imu" name="global_linvel"/>
-    <frameangvel objtype="site" objname="imu" name="global_angvel"/>
-    <framepos objtype="site" objname="imu" name="position"/>
-    <framequat objtype="site" objname="imu" name="orientation"/>
-    <framelinvel objtype="site" objname="right_foot" name="right_foot_global_linvel"/>
-    <framelinvel objtype="site" objname="left_foot" name="left_foot_global_linvel"/>
-    <framexaxis objtype="site" objname="left_foot" name="left_foot_upvector"/>
-    <framexaxis objtype="site" objname="right_foot" name="right_foot_upvector"/>
-    <framepos objtype="site" objname="left_foot" name="left_foot_pos"/>
-    <framepos objtype="site" objname="right_foot" name="right_foot_pos"/>
-</sensor>
+<sensor>    <framequat name="orientation" objtype="site" noise="0.001" objname="imu"/>    <gyro name="angular-velocity" site="imu" noise="0.005"/>    <gyro name="imu_ang_vel" site="imu"/>    <velocimeter name="imu_lin_vel" site="imu"/>    <accelerometer name="imu_accel" site="imu"/>    <subtreeangmom name="root_angmom" body="trunk_assembly"/></sensor>

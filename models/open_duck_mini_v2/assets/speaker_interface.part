@@ -1,0 +1,13 @@
+{
+    "configuration": "default",
+    "documentId": "64074dfcfa379b37d8a47762",
+    "documentMicroversion": "76479d84ac588c9dcb9c264e",
+    "elementId": "560456e30aa4a28c1f2fba59",
+    "fullConfiguration": "default",
+    "id": "Mox51PKRQsBPp6r4h",
+    "isStandardContent": false,
+    "name": "speaker_interface <1>",
+    "partId": "RWSD",
+    "suppressed": false,
+    "type": "Part"
+}
