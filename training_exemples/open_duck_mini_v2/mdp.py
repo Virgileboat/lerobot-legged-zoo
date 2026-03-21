@@ -470,3 +470,49 @@ def randomize_base_orientation(
     # Apply to qpos (freejoint quaternion starts at index 3)
     root_quat_idx = 3
     env.sim.data.qpos[env_ids, root_quat_idx:root_quat_idx+4] = new_quat
+
+
+def stillness_at_zero_command(
+    env: ManagerBasedRlEnv,
+    asset_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
+    command_name: str = "twist",
+    command_threshold: float = 0.01,
+    vel_std: float = 0.1,
+) -> torch.Tensor:
+    """Reward staying still when velocity command is near zero.
+
+    Returns exp(-body_vel² / vel_std²) when command < threshold, else 0.
+    """
+    asset: Entity = env.scene[asset_cfg.name]
+
+    command = env.command_manager.get_command(command_name)
+    total_speed = torch.norm(command[:, :2], dim=1) + torch.abs(command[:, 2])
+    is_standing_cmd = (total_speed < command_threshold).float()
+
+    body_vel = torch.norm(asset.data.root_link_vel_w[:, :2], dim=1)
+    stillness = torch.exp(-body_vel ** 2 / vel_std ** 2)
+
+    return is_standing_cmd * stillness
+
+
+def standing_envs_curriculum(
+    env: ManagerBasedRlEnv,
+    env_ids: torch.Tensor,
+    command_name: str,
+    standing_stages: list[dict],
+) -> torch.Tensor:
+    """Update the fraction of standing environments based on training progress."""
+    from mjlab.tasks.velocity.mdp import UniformVelocityCommandCfg
+    from typing import cast
+
+    del env_ids
+
+    command_term = env.command_manager.get_term(command_name)
+    assert command_term is not None, f"Command term '{command_name}' not found"
+    cfg = cast(UniformVelocityCommandCfg, command_term.cfg)
+
+    for stage in standing_stages:
+        if env.common_step_counter > stage["step"]:
+            cfg.rel_standing_envs = stage["rel_standing_envs"]
+
+    return torch.tensor([cfg.rel_standing_envs])

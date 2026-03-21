@@ -22,14 +22,14 @@ def _find_repo_root() -> Path:
 
 
 OPEN_DUCK_MINI_V2_MESH_DIR: Path = _find_repo_root() / "models" / "open_duck_mini_v2"
-OPEN_DUCK_MINI_V2_XML: Path = OPEN_DUCK_MINI_V2_MESH_DIR / "open_duck_mini_v2_backlash.xml"
+OPEN_DUCK_MINI_V2_XML: Path = OPEN_DUCK_MINI_V2_MESH_DIR / "open_duck_mini_v2.xml"
 
 assert OPEN_DUCK_MINI_V2_XML.exists(), f"MJCF file not found: {OPEN_DUCK_V2_MINI_XML}"
 
 
 def get_assets(meshdir: str) -> dict[str, bytes]:
   assets: dict[str, bytes] = {}
-  update_assets(assets, OPEN_DUCK_MINI_V2_MESH_DIR, meshdir)
+  update_assets(assets, OPEN_DUCK_MINI_V2_MESH_DIR / meshdir, meshdir)
   return assets
 
 
@@ -69,40 +69,28 @@ KNEES_BENT_KEYFRAME = EntityCfg.InitialStateCfg(
 
 FULL_COLLISION = CollisionCfg(
   geom_names_expr=(
-    "left_foot1_collision",
-    "left_foot2_collision",
-    "right_foot1_collision",
-    "right_foot2_collision",
+    "left_foot_collision",
+    "right_foot_collision",
   ),
   condim={
-    "left_foot1_collision": 3,
-    "left_foot2_collision": 3,
-    "right_foot1_collision": 3,
-    "right_foot2_collision": 3,
+    "left_foot_collision": 3,
+    "right_foot_collision": 3,
   },
   priority={
-    "left_foot1_collision": 1,
-    "left_foot2_collision": 1,
-    "right_foot1_collision": 1,
-    "right_foot2_collision": 1,
+    "left_foot_collision": 1,
+    "right_foot_collision": 1,
   },
   friction={
-    "left_foot1_collision": (1.2, 0.005, 0.0001),
-    "left_foot2_collision": (1.2, 0.005, 0.0001),
-    "right_foot1_collision": (1.2, 0.005, 0.0001),
-    "right_foot2_collision": (1.2, 0.005, 0.0001),
+    "left_foot_collision": (1.2, 0.005, 0.0001),
+    "right_foot_collision": (1.2, 0.005, 0.0001),
   },
   solref={
-    "left_foot1_collision": (0.01, 1.0),
-    "left_foot2_collision": (0.01, 1.0),
-    "right_foot1_collision": (0.01, 1.0),
-    "right_foot2_collision": (0.01, 1.0),
+    "left_foot_collision": (0.01, 1.0),
+    "right_foot_collision": (0.01, 1.0),
   },
   solimp={
-    "left_foot1_collision": (0.99, 0.999, 0.001, 0.5, 2),
-    "left_foot2_collision": (0.99, 0.999, 0.001, 0.5, 2),
-    "right_foot1_collision": (0.99, 0.999, 0.001, 0.5, 2),
-    "right_foot2_collision": (0.99, 0.999, 0.001, 0.5, 2),
+    "left_foot_collision": (0.99, 0.999, 0.001, 0.5, 2),
+    "right_foot_collision": (0.99, 0.999, 0.001, 0.5, 2),
   },
 )
 

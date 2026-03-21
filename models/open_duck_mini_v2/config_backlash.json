@@ -1,4 +1,29 @@
-{    "url": "https://cad.onshape.com/documents/64074dfcfa379b37d8a47762/w/3650ab4221e215a4f65eb7fe/e/0505c262d882183a25049d05",    "outputFormat": "mujoco",    "robot_name": "open_duck_mini_v2_backlash",    "output_filename": "open_duck_mini_v2_backlash",    "simplify_stls": true,    "max_stl_size": 1.0,    "ignore": {        "*": "collision",        "!foot_bottom_tpu": "collision"    },    "additional_xml": [        "joints_properties.xml",        "sensors.xml",        "additional.xml"    ],    "post_import_commands": [
+{    "url": "https://cad.onshape.com/documents/64074dfcfa379b37d8a47762/w/3650ab4221e215a4f65eb7fe/e/0505c262d882183a25049d05",    "outputFormat": "mujoco",    "robot_name": "open_duck_mini_v2_backlash",    "output_filename": "open_duck_mini_v2_backlash",    "simplify_stls": true,    "max_stl_size": 1.0,    "ignore": {        "wj*": "visual",
+        "drive_palonier": "visual",
+        "passive_palonier": "visual",
+        "bulb": "visual",
+        "cam": "visual",
+        "sg90": "visual",
+        "head_roll_mount": "visual",
+        "raspberrypizerow": "visual",
+        "speaker_stand": "visual",
+        "speaker_interface": "visual",
+        "holder": "visual",
+        "cell": "visual",
+        "bms": "visual",
+        "usb_c_charger": "visual",
+        "battery_pack_lid": "visual",
+        "right_eye": "visual",
+        "left_eye": "visual",
+        "glass": "visual",
+        "full_speaker": "visual",
+        "roll_bearing": "visual",
+        "power_switch": "visual",
+        "board": "visual",
+        "bno055": "visual",
+        "*": "collision",
+        "!foot_bottom_tpu": "collision"
+    },    "additional_xml": [        "joints_properties.xml",        "sensors.xml",        "additional.xml"    ],    "post_import_commands": [
         "sed -i 's/body name=\"trunk_assembly\" pos=\"[^\"]*\"/body name=\"trunk_assembly\" pos=\"0 0 0.22\"/' open_duck_mini_v2_backlash.xml",        "sed -i '/<!-- Part foot_bottom_tpu -->/{n; n; s/class=\"collision\"/name=\"left_foot_collision\" class=\"collision\"/}' open_duck_mini_v2_backlash.xml",        "sed -i '/<!-- Part foot_bottom_tpu_2 -->/{n; n; s/class=\"collision\"/name=\"right_foot_collision\" class=\"collision\"/}' open_duck_mini_v2_backlash.xml",        "sed -i 's/ inheritrange=\"1\"//g' open_duck_mini_v2_backlash.xml",
         "sed -i '/name=\"left_hip_yaw\" type=/a\\        <joint name=\"left_hip_yaw_backlash\" pos=\"0 0 0\" axis=\"0 0 1\" class=\"backlash\"/>' open_duck_mini_v2_backlash.xml",
         "sed -i '/name=\"left_hip_roll\" type=/a\\          <joint name=\"left_hip_roll_backlash\" pos=\"0 0 0\" axis=\"0 0 1\" class=\"backlash\"/>' open_duck_mini_v2_backlash.xml",

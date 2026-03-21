@@ -50,67 +50,41 @@
       <!-- Part body_front -->
       <geom type="mesh" class="visual" pos="-0.019 0 0.0648909" quat="1 0 0 0" mesh="body_front" material="body_front_material"/>
       <!-- Part usb_c_charger -->
-      <geom type="mesh" class="visual" pos="-0.1263 -0.0257 0.0576079" quat="0.5 0.5 -0.5 0.5" mesh="usb_c_charger" material="usb_c_charger_material"/>
       <!-- Part body_back -->
       <geom type="mesh" class="visual" pos="-0.019 3.46945e-18 0.0648909" quat="1 0 0 0" mesh="body_back" material="body_back_material"/>
       <!-- Part body_middle_bottom -->
       <geom type="mesh" class="visual" pos="-0.019 -3.46945e-18 0.0648909" quat="1 0 0 0" mesh="body_middle_bottom" material="body_middle_bottom_material"/>
       <!-- Part power_switch -->
-      <geom type="mesh" class="visual" pos="-0.12034 -2.77556e-17 0.0899126" quat="0.901303 1.98433e-16 -0.433189 -3.51054e-17" mesh="power_switch" material="power_switch_material"/>
       <!-- Part bms -->
-      <geom type="mesh" class="visual" pos="-0.0752028 -0.0249 0.0294899" quat="0.5 0.5 0.5 -0.5" mesh="bms" material="bms_material"/>
       <!-- Part battery_pack_lid -->
-      <geom type="mesh" class="visual" pos="-0.019 0 0.0648909" quat="1 -1.69241e-16 0 0" mesh="battery_pack_lid" material="battery_pack_lid_material"/>
       <!-- Part body_middle_top -->
       <geom type="mesh" class="visual" pos="-0.019 0 0.0648909" quat="1 0 0 0" mesh="body_middle_top" material="body_middle_top_material"/>
       <!-- Part bno055 -->
-      <geom type="mesh" class="visual" pos="-0.08711 1.30104e-16 0.0417909" quat="1 -0 -0 -0" mesh="bno055" material="bno055_material"/>
       <!-- Part roll_bearing -->
-      <geom type="mesh" class="visual" pos="-0.019 -6.93889e-18 0.0648909" quat="1 0 0 0" mesh="roll_bearing" material="roll_bearing_material"/>
       <!-- Part trunk_bottom -->
       <geom type="mesh" class="visual" pos="-0.019 9.1073e-18 0.0648909" quat="1 -0 -0 5.42101e-20" mesh="trunk_bottom" material="trunk_bottom_material"/>
       <!-- Part trunk_top -->
       <geom type="mesh" class="visual" pos="-0.019 -2.42428e-16 0.0648909" quat="1 -4.76391e-17 -5.20244e-15 2.01008e-17" mesh="trunk_top" material="trunk_top_material"/>
       <!-- Part board -->
-      <geom type="mesh" class="visual" pos="-0.06349 0.0165 0.0603909" quat="2.17767e-17 -1.11022e-14 0 1" mesh="board" material="board_material"/>
       <!-- Part roll_bearing_2 -->
-      <geom type="mesh" class="visual" pos="-0.019 -0.07 0.0648909" quat="1 0 0 0" mesh="roll_bearing" material="roll_bearing_material"/>
       <!-- Part cell -->
-      <geom type="mesh" class="visual" pos="-0.129625 -0.0105 0.0650134" quat="2.12636e-17 -0.457466 -0.889227 1.60556e-16" mesh="cell" material="cell_material"/>
       <!-- Part holder -->
-      <geom type="mesh" class="visual" pos="-0.139625 -0.0635245 0.031455" quat="0.707107 -1.45717e-16 0.707107 -5.55112e-17" mesh="holder" material="holder_material"/>
       <!-- Part cell_2 -->
-      <geom type="mesh" class="visual" pos="-0.129625 0.0105 1.34322e-05" quat="0.930459 -6.90259e-17 1.11022e-16 0.366396" mesh="cell" material="cell_material"/>
       <!-- Part wj_wk00_0123middlecase_56 -->
-      <geom type="mesh" class="visual" pos="0.001 0.0097 0.0645009" quat="0.707107 -0 0.707107 -0" mesh="wj_wk00_0123middlecase_56" material="wj_wk00_0123middlecase_56_material"/>
       <!-- Part drive_palonier -->
-      <geom type="mesh" class="visual" pos="0.001 0.0097 0.0645009" quat="0.707107 -0 0.707107 -0" mesh="drive_palonier" material="drive_palonier_material"/>
       <!-- Part wj_wk00_0124bottomcase_45 -->
-      <geom type="mesh" class="visual" pos="0.001 0.0097 0.0645009" quat="0.707107 -0 0.707107 -0" mesh="wj_wk00_0124bottomcase_45" material="wj_wk00_0124bottomcase_45_material"/>
       <!-- Part wj_wk00_0122topcabinetcase_95 -->
-      <geom type="mesh" class="visual" pos="0.001 0.0097 0.0645009" quat="0.707107 -0 0.707107 -0" mesh="wj_wk00_0122topcabinetcase_95" material="wj_wk00_0122topcabinetcase_95_material"/>
       <!-- Part passive_palonier -->
-      <geom type="mesh" class="visual" pos="0.001 0.0126 0.0645009" quat="0.707107 -0 0.707107 -0" mesh="passive_palonier" material="passive_palonier_material"/>
       <!-- Part wj_wk00_0123middlecase_56_2 -->
-      <geom type="mesh" class="visual" pos="-0.0445 -0.035 0.0553909" quat="7.48243e-15 7.98742e-15 0.707107 -0.707107" mesh="wj_wk00_0123middlecase_56" material="wj_wk00_0123middlecase_56_material"/>
       <!-- Part drive_palonier_2 -->
-      <geom type="mesh" class="visual" pos="-0.0445 -0.035 0.0553909" quat="7.48243e-15 7.98742e-15 0.707107 -0.707107" mesh="drive_palonier" material="drive_palonier_material"/>
       <!-- Part wj_wk00_0124bottomcase_45_2 -->
-      <geom type="mesh" class="visual" pos="-0.0445 -0.035 0.0553909" quat="7.48243e-15 7.98742e-15 0.707107 -0.707107" mesh="wj_wk00_0124bottomcase_45" material="wj_wk00_0124bottomcase_45_material"/>
       <!-- Part wj_wk00_0122topcabinetcase_95_2 -->
-      <geom type="mesh" class="visual" pos="-0.0445 -0.035 0.0553909" quat="7.48243e-15 7.98742e-15 0.707107 -0.707107" mesh="wj_wk00_0122topcabinetcase_95" material="wj_wk00_0122topcabinetcase_95_material"/>
       <!-- Part passive_palonier_2 -->
-      <geom type="mesh" class="visual" pos="-0.0445 -0.035 0.0524909" quat="7.48243e-15 7.98742e-15 0.707107 -0.707107" mesh="passive_palonier" material="passive_palonier_material"/>
       <!-- Part wj_wk00_0123middlecase_56_3 -->
-      <geom type="mesh" class="visual" pos="-0.0445 0.035 0.0553909" quat="8.12017e-15 7.72282e-15 0.707107 -0.707107" mesh="wj_wk00_0123middlecase_56" material="wj_wk00_0123middlecase_56_material"/>
       <!-- Part drive_palonier_3 -->
-      <geom type="mesh" class="visual" pos="-0.0445 0.035 0.0553909" quat="8.12017e-15 7.72282e-15 0.707107 -0.707107" mesh="drive_palonier" material="drive_palonier_material"/>
       <!-- Part wj_wk00_0124bottomcase_45_3 -->
-      <geom type="mesh" class="visual" pos="-0.0445 0.035 0.0553909" quat="8.12017e-15 7.72282e-15 0.707107 -0.707107" mesh="wj_wk00_0124bottomcase_45" material="wj_wk00_0124bottomcase_45_material"/>
       <!-- Part wj_wk00_0122topcabinetcase_95_3 -->
-      <geom type="mesh" class="visual" pos="-0.0445 0.035 0.0553909" quat="8.12017e-15 7.72282e-15 0.707107 -0.707107" mesh="wj_wk00_0122topcabinetcase_95" material="wj_wk00_0122topcabinetcase_95_material"/>
       <!-- Part passive_palonier_3 -->
-      <geom type="mesh" class="visual" pos="-0.0445 0.035 0.0524909" quat="8.12017e-15 7.72282e-15 0.707107 -0.707107" mesh="passive_palonier" material="passive_palonier_material"/>
       <!-- Frame trunk -->
       <site group="3" name="trunk" pos="-0.024 -2.41127e-16 0.0881909" quat="1 -2.77556e-17 -0 -0"/>
       <!-- Frame imu -->
@@ -126,15 +100,10 @@
         <!-- Part roll_motor_top -->
         <geom type="mesh" class="visual" pos="0 -0.035 0.01905" quat="1 0 0 0" mesh="roll_motor_top" material="roll_motor_top_material"/>
         <!-- Part wj_wk00_0123middlecase_56_4 -->
-        <geom type="mesh" class="visual" pos="0.0096 1.92624e-14 -0.020515" quat="0.5 -0.5 -0.5 -0.5" mesh="wj_wk00_0123middlecase_56" material="wj_wk00_0123middlecase_56_material"/>
         <!-- Part drive_palonier_4 -->
-        <geom type="mesh" class="visual" pos="0.0096 1.92624e-14 -0.020515" quat="0.5 -0.5 -0.5 -0.5" mesh="drive_palonier" material="drive_palonier_material"/>
         <!-- Part wj_wk00_0124bottomcase_45_4 -->
-        <geom type="mesh" class="visual" pos="0.0096 1.92624e-14 -0.020515" quat="0.5 -0.5 -0.5 -0.5" mesh="wj_wk00_0124bottomcase_45" material="wj_wk00_0124bottomcase_45_material"/>
         <!-- Part wj_wk00_0122topcabinetcase_95_4 -->
-        <geom type="mesh" class="visual" pos="0.0096 1.92624e-14 -0.020515" quat="0.5 -0.5 -0.5 -0.5" mesh="wj_wk00_0122topcabinetcase_95" material="wj_wk00_0122topcabinetcase_95_material"/>
         <!-- Part passive_palonier_4 -->
-        <geom type="mesh" class="visual" pos="0.0125 1.78399e-14 -0.020515" quat="0.5 -0.5 -0.5 -0.5" mesh="passive_palonier" material="passive_palonier_material"/>
         <!-- Link left_roll_to_pitch_assembly -->
         <body name="left_roll_to_pitch_assembly" pos="0.01905 1.54113e-14 -0.046015" quat="0.5 -0.5 -0.5 0.5">
           <!-- Joint from hip_roll_assembly to left_roll_to_pitch_assembly -->
@@ -144,15 +113,10 @@
           <!-- Part left_roll_to_pitch -->
           <geom type="mesh" class="visual" pos="-0.035 -0.065 0.01905" quat="0.5 0.5 0.5 -0.5" mesh="left_roll_to_pitch" material="left_roll_to_pitch_material"/>
           <!-- Part wj_wk00_0123middlecase_56_5 -->
-          <geom type="mesh" class="visual" pos="0.0647 -4.01155e-18 0.00961" quat="0.5 0.5 0.5 -0.5" mesh="wj_wk00_0123middlecase_56" material="wj_wk00_0123middlecase_56_material"/>
           <!-- Part drive_palonier_5 -->
-          <geom type="mesh" class="visual" pos="0.0647 -4.01155e-18 0.00961" quat="0.5 0.5 0.5 -0.5" mesh="drive_palonier" material="drive_palonier_material"/>
           <!-- Part wj_wk00_0124bottomcase_45_5 -->
-          <geom type="mesh" class="visual" pos="0.0647 -4.01155e-18 0.00961" quat="0.5 0.5 0.5 -0.5" mesh="wj_wk00_0124bottomcase_45" material="wj_wk00_0124bottomcase_45_material"/>
           <!-- Part wj_wk00_0122topcabinetcase_95_5 -->
-          <geom type="mesh" class="visual" pos="0.0647 -4.01155e-18 0.00961" quat="0.5 0.5 0.5 -0.5" mesh="wj_wk00_0122topcabinetcase_95" material="wj_wk00_0122topcabinetcase_95_material"/>
           <!-- Part passive_palonier_5 -->
-          <geom type="mesh" class="visual" pos="0.0676 5.73407e-16 0.00961" quat="0.5 0.5 0.5 -0.5" mesh="passive_palonier" material="passive_palonier_material"/>
           <!-- Link knee_and_ankle_assembly -->
           <body name="knee_and_ankle_assembly" pos="0.07415 -5.99022e-18 0.03511" quat="1.83719e-15 -0.707107 -2.33147e-15 0.707107">
             <!-- Joint from left_roll_to_pitch_assembly to knee_and_ankle_assembly -->
@@ -168,15 +132,10 @@
             <!-- Part left_knee_to_ankle_left_sheet -->
             <geom type="mesh" class="visual" pos="0.01606 0.14365 0.10915" quat="0.707107 -0.707107 0 9.30422e-31" mesh="left_knee_to_ankle_left_sheet" material="left_knee_to_ankle_left_sheet_material"/>
             <!-- Part wj_wk00_0123middlecase_56_6 -->
-            <geom type="mesh" class="visual" pos="-4.16334e-17 -0.05315 0.00955" quat="0.5 -0.5 -0.5 0.5" mesh="wj_wk00_0123middlecase_56" material="wj_wk00_0123middlecase_56_material"/>
             <!-- Part drive_palonier_6 -->
-            <geom type="mesh" class="visual" pos="-4.16334e-17 -0.05315 0.00955" quat="0.5 -0.5 -0.5 0.5" mesh="drive_palonier" material="drive_palonier_material"/>
             <!-- Part wj_wk00_0124bottomcase_45_6 -->
-            <geom type="mesh" class="visual" pos="-4.16334e-17 -0.05315 0.00955" quat="0.5 -0.5 -0.5 0.5" mesh="wj_wk00_0124bottomcase_45" material="wj_wk00_0124bottomcase_45_material"/>
             <!-- Part wj_wk00_0122topcabinetcase_95_6 -->
-            <geom type="mesh" class="visual" pos="-4.16334e-17 -0.05315 0.00955" quat="0.5 -0.5 -0.5 0.5" mesh="wj_wk00_0122topcabinetcase_95" material="wj_wk00_0122topcabinetcase_95_material"/>
             <!-- Part passive_palonier_6 -->
-            <geom type="mesh" class="visual" pos="2.15106e-16 -0.05315 0.00665" quat="0.5 -0.5 -0.5 0.5" mesh="passive_palonier" material="passive_palonier_material"/>
             <!-- Link knee_and_ankle_assembly_2 -->
             <body name="knee_and_ankle_assembly_2" pos="-3.46945e-17 -0.07865 0.0001" quat="1 0 -3.747e-16 2.90444e-15">
               <!-- Joint from knee_and_ankle_assembly to knee_and_ankle_assembly_2 -->
@@ -190,15 +149,10 @@
               <!-- Part left_knee_to_ankle_left_sheet_2 -->
               <geom type="mesh" class="visual" pos="0.01606 0.14365 0.10915" quat="0.707107 -0.707107 0 6.20998e-31" mesh="left_knee_to_ankle_left_sheet" material="left_knee_to_ankle_left_sheet_material"/>
               <!-- Part wj_wk00_0123middlecase_56_7 -->
-              <geom type="mesh" class="visual" pos="-1.38778e-17 -0.05315 0.00955" quat="0.5 -0.5 -0.5 0.5" mesh="wj_wk00_0123middlecase_56" material="wj_wk00_0123middlecase_56_material"/>
               <!-- Part drive_palonier_7 -->
-              <geom type="mesh" class="visual" pos="-1.38778e-17 -0.05315 0.00955" quat="0.5 -0.5 -0.5 0.5" mesh="drive_palonier" material="drive_palonier_material"/>
               <!-- Part wj_wk00_0124bottomcase_45_7 -->
-              <geom type="mesh" class="visual" pos="-1.38778e-17 -0.05315 0.00955" quat="0.5 -0.5 -0.5 0.5" mesh="wj_wk00_0124bottomcase_45" material="wj_wk00_0124bottomcase_45_material"/>
               <!-- Part wj_wk00_0122topcabinetcase_95_7 -->
-              <geom type="mesh" class="visual" pos="-1.38778e-17 -0.05315 0.00955" quat="0.5 -0.5 -0.5 0.5" mesh="wj_wk00_0122topcabinetcase_95" material="wj_wk00_0122topcabinetcase_95_material"/>
               <!-- Part passive_palonier_7 -->
-              <geom type="mesh" class="visual" pos="-6.8695e-16 -0.05315 0.00665" quat="0.5 -0.5 -0.5 0.5" mesh="passive_palonier" material="passive_palonier_material"/>
               <!-- Link foot_assembly -->
               <body name="foot_assembly" pos="-2.08167e-17 -0.07865 0.0001" quat="1 0 -3.46945e-18 -1.57431e-16">
                 <!-- Joint from knee_and_ankle_assembly_2 to foot_assembly -->
@@ -231,15 +185,10 @@
         <!-- Part neck_right_sheet -->
         <geom type="mesh" class="visual" pos="-0.02 -0.02511 0.01905" quat="0.707107 -0.707107 0 -5.09063e-17" mesh="neck_right_sheet" material="neck_right_sheet_material"/>
         <!-- Part wj_wk00_0123middlecase_56_8 -->
-        <geom type="mesh" class="visual" pos="1.06252e-17 0.0405 0.00945" quat="0.5 -0.5 0.5 -0.5" mesh="wj_wk00_0123middlecase_56" material="wj_wk00_0123middlecase_56_material"/>
         <!-- Part drive_palonier_8 -->
-        <geom type="mesh" class="visual" pos="1.06252e-17 0.0405 0.00945" quat="0.5 -0.5 0.5 -0.5" mesh="drive_palonier" material="drive_palonier_material"/>
         <!-- Part wj_wk00_0124bottomcase_45_8 -->
-        <geom type="mesh" class="visual" pos="1.06252e-17 0.0405 0.00945" quat="0.5 -0.5 0.5 -0.5" mesh="wj_wk00_0124bottomcase_45" material="wj_wk00_0124bottomcase_45_material"/>
         <!-- Part wj_wk00_0122topcabinetcase_95_8 -->
-        <geom type="mesh" class="visual" pos="1.06252e-17 0.0405 0.00945" quat="0.5 -0.5 0.5 -0.5" mesh="wj_wk00_0122topcabinetcase_95" material="wj_wk00_0122topcabinetcase_95_material"/>
         <!-- Part passive_palonier_8 -->
-        <geom type="mesh" class="visual" pos="-3.07913e-17 0.0405 0.00655" quat="0.5 -0.5 0.5 -0.5" mesh="passive_palonier" material="passive_palonier_material"/>
         <!-- Link head_pitch_to_yaw -->
         <body name="head_pitch_to_yaw" pos="-1.95156e-17 0.066 -3.46945e-18" quat="1 -9.36626e-17 -0 2.77556e-17">
           <!-- Joint from neck_pitch_assembly to head_pitch_to_yaw -->
@@ -255,15 +204,10 @@
             <!-- Part head_yaw_to_roll -->
             <geom type="mesh" class="visual" pos="-0.02 6.13929e-18 -0.14821" quat="1 -0 -6.245e-17 1.98488e-16" mesh="head_yaw_to_roll" material="head_yaw_to_roll_material"/>
             <!-- Part wj_wk00_0123middlecase_56_9 -->
-            <geom type="mesh" class="visual" pos="0.0255 7.18284e-19 -0.00945" quat="0.707107 0.707107 -0 -1.84776e-33" mesh="wj_wk00_0123middlecase_56" material="wj_wk00_0123middlecase_56_material"/>
             <!-- Part drive_palonier_9 -->
-            <geom type="mesh" class="visual" pos="0.0255 7.18284e-19 -0.00945" quat="0.707107 0.707107 -0 -1.84776e-33" mesh="drive_palonier" material="drive_palonier_material"/>
             <!-- Part wj_wk00_0124bottomcase_45_9 -->
-            <geom type="mesh" class="visual" pos="0.0255 7.18284e-19 -0.00945" quat="0.707107 0.707107 -0 -1.84776e-33" mesh="wj_wk00_0124bottomcase_45" material="wj_wk00_0124bottomcase_45_material"/>
             <!-- Part wj_wk00_0122topcabinetcase_95_9 -->
-            <geom type="mesh" class="visual" pos="0.0255 7.18284e-19 -0.00945" quat="0.707107 0.707107 -0 -1.84776e-33" mesh="wj_wk00_0122topcabinetcase_95" material="wj_wk00_0122topcabinetcase_95_material"/>
             <!-- Part passive_palonier_9 -->
-            <geom type="mesh" class="visual" pos="0.0255 3.86667e-16 -0.00655" quat="0.707107 0.707107 -0 -1.84776e-33" mesh="passive_palonier" material="passive_palonier_material"/>
             <!-- Link head_assembly -->
             <body name="head_assembly" pos="0.04095 6.13929e-18 -0.01915" quat="0.707107 6.77626e-21 -0.707107 -1.11022e-16">
               <!-- Joint from neck_yaw_assembly to head_assembly -->
@@ -278,7 +222,6 @@
               <!-- Part left_antenna_holder -->
               <geom type="mesh" class="visual" pos="-0.12906 -6.43036e-15 0.06095" quat="0.707107 -1.65484e-14 0.707107 1.92481e-14" mesh="left_antenna_holder" material="left_antenna_holder_material"/>
               <!-- Part cam -->
-              <geom type="mesh" class="visual" pos="0.02405 -0.0025 -0.0518501" quat="4.57253e-14 0.707107 6.4504e-14 -0.707107" mesh="cam" material="cam_material"/>
               <!-- Part head_bot_sheet -->
               <geom type="mesh" class="visual" pos="-0.12906 -2.6941e-14 0.06095" quat="0.707107 -4.64269e-14 0.707107 6.20469e-14" mesh="head_bot_sheet" material="head_bot_sheet_material"/>
               <!-- Part head_2 -->
@@ -286,49 +229,28 @@
               <!-- Part flash_reflector_interface -->
               <geom type="mesh" class="visual" pos="-0.12906 -3.05007e-14 0.06095" quat="0.707107 -4.68973e-14 0.707107 5.78918e-14" mesh="flash_reflector_interface" material="flash_reflector_interface_material"/>
               <!-- Part bulb -->
-              <geom type="mesh" class="visual" pos="-0.12906 -2.70173e-14 0.06095" quat="0.707107 -4.71592e-14 0.707107 6.17171e-14" mesh="bulb" material="bulb_material"/>
               <!-- Part glass -->
-              <geom type="mesh" class="visual" pos="-0.12906 -2.72607e-14 0.06115" quat="0.707107 -4.62122e-14 0.707107 6.24971e-14" mesh="glass" material="glass_material"/>
               <!-- Part head_roll_mount -->
-              <geom type="mesh" class="visual" pos="-0.12906 -2.69549e-14 0.06095" quat="0.707107 -4.64876e-14 0.707107 6.20892e-14" mesh="head_roll_mount" material="head_roll_mount_material"/>
               <!-- Part raspberrypizerow -->
-              <geom type="mesh" class="visual" pos="0.03205 0.048 0.00595" quat="0.5 0.5 -0.5 0.5" mesh="raspberrypizerow" material="raspberrypizerow_material"/>
               <!-- Part left_eye -->
-              <geom type="mesh" class="visual" pos="-0.12906 -2.72775e-14 0.06095" quat="0.707107 -4.62122e-14 0.707107 6.24971e-14" mesh="left_eye" material="left_eye_material"/>
               <!-- Part flash_light_module -->
               <geom type="mesh" class="visual" pos="-0.12906 -3.04798e-14 0.06095" quat="0.707107 -4.68973e-14 0.707107 5.78918e-14" mesh="flash_light_module" material="flash_light_module_material"/>
               <!-- Part full_speaker -->
-              <geom type="mesh" class="visual" pos="0.00522415 -0.0588802 0.0190505" quat="0.626964 0.372991 0.47889 -0.488321" mesh="full_speaker" material="full_speaker_material"/>
               <!-- Part roll_bearing_3 -->
-              <geom type="mesh" class="visual" pos="-2.94209e-15 -0.035 0.167325" quat="1 3.37165e-14 -1.29674e-13 1.07767e-13" mesh="roll_bearing" material="roll_bearing_material"/>
               <!-- Part sg90 -->
-              <geom type="mesh" class="visual" pos="-0.00624594 0.0331408 0.102812" quat="0.488321 -0.47889 -0.372991 -0.626964" mesh="sg90" material="sg90_material"/>
               <!-- Part glass_2 -->
-              <geom type="mesh" class="visual" pos="-0.12906 -2.70693e-14 0.063" quat="0.707107 -4.62122e-14 0.707107 6.24971e-14" mesh="glass" material="glass_material"/>
               <!-- Part sg90_2 -->
-              <geom type="mesh" class="visual" pos="-0.00624594 -0.0331408 0.102812" quat="0.488321 0.47889 -0.372991 0.626964" mesh="sg90" material="sg90_material"/>
               <!-- Part bulb_2 -->
-              <geom type="mesh" class="visual" pos="-0.12906 0.08 0.06095" quat="0.707107 -4.71592e-14 0.707107 6.17171e-14" mesh="bulb" material="bulb_material"/>
               <!-- Part speaker_interface -->
-              <geom type="mesh" class="visual" pos="-0.12906 -2.69132e-14 0.06095" quat="0.707107 -4.67624e-14 0.707107 6.17849e-14" mesh="speaker_interface" material="speaker_interface_material"/>
               <!-- Part speaker_stand -->
-              <geom type="mesh" class="visual" pos="-0.12906 -2.70104e-14 0.06095" quat="0.707107 -4.67624e-14 0.707107 6.17849e-14" mesh="speaker_stand" material="speaker_stand_material"/>
               <!-- Part right_eye -->
-              <geom type="mesh" class="visual" pos="-0.12906 -2.72463e-14 0.06095" quat="0.707107 -4.62122e-14 0.707107 6.24971e-14" mesh="right_eye" material="right_eye_material"/>
               <!-- Part glass_3 -->
-              <geom type="mesh" class="visual" pos="-0.12906 0.08 0.06515" quat="0.707107 -4.62122e-14 0.707107 6.24971e-14" mesh="glass" material="glass_material"/>
               <!-- Part glass_4 -->
-              <geom type="mesh" class="visual" pos="-0.12906 0.08 0.067" quat="0.707107 -4.62122e-14 0.707107 6.24971e-14" mesh="glass" material="glass_material"/>
               <!-- Part wj_wk00_0123middlecase_56_10 -->
-              <geom type="mesh" class="visual" pos="0.0255 7.04731e-19 -0.00945" quat="0.707107 0.707107 -0 -0" mesh="wj_wk00_0123middlecase_56" material="wj_wk00_0123middlecase_56_material"/>
               <!-- Part drive_palonier_10 -->
-              <geom type="mesh" class="visual" pos="0.0255 7.04731e-19 -0.00945" quat="0.707107 0.707107 -0 -0" mesh="drive_palonier" material="drive_palonier_material"/>
               <!-- Part wj_wk00_0124bottomcase_45_10 -->
-              <geom type="mesh" class="visual" pos="0.0255 7.04731e-19 -0.00945" quat="0.707107 0.707107 -0 -0" mesh="wj_wk00_0124bottomcase_45" material="wj_wk00_0124bottomcase_45_material"/>
               <!-- Part wj_wk00_0122topcabinetcase_95_10 -->
-              <geom type="mesh" class="visual" pos="0.0255 7.04731e-19 -0.00945" quat="0.707107 0.707107 -0 -0" mesh="wj_wk00_0122topcabinetcase_95" material="wj_wk00_0122topcabinetcase_95_material"/>
               <!-- Part passive_palonier_10 -->
-              <geom type="mesh" class="visual" pos="0.0255 3.2999e-16 -0.00655" quat="0.707107 0.707107 -0 -0" mesh="passive_palonier" material="passive_palonier_material"/>
               <!-- Frame head -->
               <site group="3" name="head" pos="0.04245 -7.9079e-17 0.03595" quat="0.707107 -4.64871e-14 0.707107 6.20892e-14"/>
             </body>
@@ -346,15 +268,10 @@
         <!-- Part roll_motor_top_2 -->
         <geom type="mesh" class="visual" pos="-3.46945e-18 -0.035 0.01905" quat="1 0 0 0" mesh="roll_motor_top" material="roll_motor_top_material"/>
         <!-- Part wj_wk00_0123middlecase_56_11 -->
-        <geom type="mesh" class="visual" pos="0.0096 6.20684e-14 -0.020515" quat="0.5 -0.5 -0.5 -0.5" mesh="wj_wk00_0123middlecase_56" material="wj_wk00_0123middlecase_56_material"/>
         <!-- Part drive_palonier_11 -->
-        <geom type="mesh" class="visual" pos="0.0096 6.20684e-14 -0.020515" quat="0.5 -0.5 -0.5 -0.5" mesh="drive_palonier" material="drive_palonier_material"/>
         <!-- Part wj_wk00_0124bottomcase_45_11 -->
-        <geom type="mesh" class="visual" pos="0.0096 6.20684e-14 -0.020515" quat="0.5 -0.5 -0.5 -0.5" mesh="wj_wk00_0124bottomcase_45" material="wj_wk00_0124bottomcase_45_material"/>
         <!-- Part wj_wk00_0122topcabinetcase_95_11 -->
-        <geom type="mesh" class="visual" pos="0.0096 6.20684e-14 -0.020515" quat="0.5 -0.5 -0.5 -0.5" mesh="wj_wk00_0122topcabinetcase_95" material="wj_wk00_0122topcabinetcase_95_material"/>
         <!-- Part passive_palonier_11 -->
-        <geom type="mesh" class="visual" pos="0.0125 6.25819e-14 -0.020515" quat="0.5 -0.5 -0.5 -0.5" mesh="passive_palonier" material="passive_palonier_material"/>
         <!-- Link right_roll_to_pitch_assembly -->
         <body name="right_roll_to_pitch_assembly" pos="0.01905 6.31856e-14 -0.046015" quat="0.5 -0.5 -0.5 0.5">
           <!-- Joint from hip_roll_assembly_2 to right_roll_to_pitch_assembly -->
@@ -364,15 +281,10 @@
           <!-- Part right_roll_to_pitch -->
           <geom type="mesh" class="visual" pos="0.035 -0.065 0.01905" quat="0.5 0.5 0.5 -0.5" mesh="right_roll_to_pitch" material="right_roll_to_pitch_material"/>
           <!-- Part wj_wk00_0123middlecase_56_12 -->
-          <geom type="mesh" class="visual" pos="-0.0647 6.47811e-18 0.00961" quat="0.5 -0.5 0.5 0.5" mesh="wj_wk00_0123middlecase_56" material="wj_wk00_0123middlecase_56_material"/>
           <!-- Part drive_palonier_12 -->
-          <geom type="mesh" class="visual" pos="-0.0647 6.47811e-18 0.00961" quat="0.5 -0.5 0.5 0.5" mesh="drive_palonier" material="drive_palonier_material"/>
           <!-- Part wj_wk00_0124bottomcase_45_12 -->
-          <geom type="mesh" class="visual" pos="-0.0647 6.47811e-18 0.00961" quat="0.5 -0.5 0.5 0.5" mesh="wj_wk00_0124bottomcase_45" material="wj_wk00_0124bottomcase_45_material"/>
           <!-- Part wj_wk00_0122topcabinetcase_95_12 -->
-          <geom type="mesh" class="visual" pos="-0.0647 6.47811e-18 0.00961" quat="0.5 -0.5 0.5 0.5" mesh="wj_wk00_0122topcabinetcase_95" material="wj_wk00_0122topcabinetcase_95_material"/>
           <!-- Part passive_palonier_12 -->
-          <geom type="mesh" class="visual" pos="-0.0676 9.45695e-17 0.00961" quat="0.5 -0.5 0.5 0.5" mesh="passive_palonier" material="passive_palonier_material"/>
           <!-- Link knee_and_ankle_assembly_3 -->
           <body name="knee_and_ankle_assembly_3" pos="-0.07415 -7.39968e-18 0.03511" quat="0.707107 1.28191e-14 0.707107 1.2746e-14">
             <!-- Joint from right_roll_to_pitch_assembly to knee_and_ankle_assembly_3 -->
@@ -388,15 +300,10 @@
             <!-- Part left_knee_to_ankle_left_sheet_3 -->
             <geom type="mesh" class="visual" pos="0.01606 -0.14365 -0.07205" quat="0.707107 0.707107 -0 9.92876e-18" mesh="left_knee_to_ankle_left_sheet" material="left_knee_to_ankle_left_sheet_material"/>
             <!-- Part wj_wk00_0123middlecase_56_13 -->
-            <geom type="mesh" class="visual" pos="-2.77556e-17 0.05315 0.02755" quat="0.5 0.5 -0.5 -0.5" mesh="wj_wk00_0123middlecase_56" material="wj_wk00_0123middlecase_56_material"/>
             <!-- Part drive_palonier_13 -->
-            <geom type="mesh" class="visual" pos="-2.77556e-17 0.05315 0.02755" quat="0.5 0.5 -0.5 -0.5" mesh="drive_palonier" material="drive_palonier_material"/>
             <!-- Part wj_wk00_0124bottomcase_45_13 -->
-            <geom type="mesh" class="visual" pos="-2.77556e-17 0.05315 0.02755" quat="0.5 0.5 -0.5 -0.5" mesh="wj_wk00_0124bottomcase_45" material="wj_wk00_0124bottomcase_45_material"/>
             <!-- Part wj_wk00_0122topcabinetcase_95_13 -->
-            <geom type="mesh" class="visual" pos="-2.77556e-17 0.05315 0.02755" quat="0.5 0.5 -0.5 -0.5" mesh="wj_wk00_0122topcabinetcase_95" material="wj_wk00_0122topcabinetcase_95_material"/>
             <!-- Part passive_palonier_13 -->
-            <geom type="mesh" class="visual" pos="-4.57967e-16 0.05315 0.03045" quat="0.5 0.5 -0.5 -0.5" mesh="passive_palonier" material="passive_palonier_material"/>
             <!-- Link knee_and_ankle_assembly_4 -->
             <body name="knee_and_ankle_assembly_4" pos="-3.46945e-17 0.07865 0.037" quat="1.58159e-27 -1 2.75501e-14 -4.86756e-29">
               <!-- Joint from knee_and_ankle_assembly_3 to knee_and_ankle_assembly_4 -->
@@ -410,15 +317,10 @@
               <!-- Part left_knee_to_ankle_left_sheet_4 -->
               <geom type="mesh" class="visual" pos="0.01606 0.14365 0.10915" quat="0.707107 -0.707107 0 1.32367e-30" mesh="left_knee_to_ankle_left_sheet" material="left_knee_to_ankle_left_sheet_material"/>
               <!-- Part wj_wk00_0123middlecase_56_14 -->
-              <geom type="mesh" class="visual" pos="-6.93889e-18 -0.05315 0.00955" quat="0.5 -0.5 -0.5 0.5" mesh="wj_wk00_0123middlecase_56" material="wj_wk00_0123middlecase_56_material"/>
               <!-- Part drive_palonier_14 -->
-              <geom type="mesh" class="visual" pos="-6.93889e-18 -0.05315 0.00955" quat="0.5 -0.5 -0.5 0.5" mesh="drive_palonier" material="drive_palonier_material"/>
               <!-- Part wj_wk00_0124bottomcase_45_14 -->
-              <geom type="mesh" class="visual" pos="-6.93889e-18 -0.05315 0.00955" quat="0.5 -0.5 -0.5 0.5" mesh="wj_wk00_0124bottomcase_45" material="wj_wk00_0124bottomcase_45_material"/>
               <!-- Part wj_wk00_0122topcabinetcase_95_14 -->
-              <geom type="mesh" class="visual" pos="-6.93889e-18 -0.05315 0.00955" quat="0.5 -0.5 -0.5 0.5" mesh="wj_wk00_0122topcabinetcase_95" material="wj_wk00_0122topcabinetcase_95_material"/>
               <!-- Part passive_palonier_14 -->
-              <geom type="mesh" class="visual" pos="1.66533e-16 -0.05315 0.00665" quat="0.5 -0.5 -0.5 0.5" mesh="passive_palonier" material="passive_palonier_material"/>
               <!-- Link foot_assembly_2 -->
               <body name="foot_assembly_2" pos="6.93889e-18 -0.07865 0.0001" quat="1 0 3.33067e-16 -9.4208e-15">
                 <!-- Joint from knee_and_ankle_assembly_4 to foot_assembly_2 -->
@@ -444,81 +346,42 @@
     </body>
   </worldbody>
   <asset>
-    <mesh file="body_middle_bottom.stl"/>
-    <mesh file="foot_top.stl"/>
-    <mesh file="foot_bottom_pla.stl"/>
-    <mesh file="neck_right_sheet.stl"/>
-    <mesh file="right_roll_to_pitch.stl"/>
-    <mesh file="head_yaw_to_roll.stl"/>
-    <mesh file="left_eye.stl"/>
-    <mesh file="glass.stl"/>
-    <mesh file="raspberrypizerow.stl"/>
-    <mesh file="right_antenna_holder.stl"/>
-    <mesh file="head.stl"/>
-    <mesh file="passive_palonier.stl"/>
-    <mesh file="flash_light_module.stl"/>
-    <mesh file="trunk_bottom.stl"/>
-    <mesh file="speaker_stand.stl"/>
-    <mesh file="left_knee_to_ankle_left_sheet.stl"/>
-    <mesh file="foot_side.stl"/>
-    <mesh file="leg_spacer.stl"/>
-    <mesh file="full_speaker.stl"/>
-    <mesh file="right_cache.stl"/>
-    <mesh file="left_antenna_holder.stl"/>
-    <mesh file="bno055.stl"/>
-    <mesh file="bms.stl"/>
-    <mesh file="trunk_top.stl"/>
-    <mesh file="roll_bearing.stl"/>
-    <mesh file="sg90.stl"/>
-    <mesh file="neck_left_sheet.stl"/>
-    <mesh file="wj_wk00_0122topcabinetcase_95.stl"/>
-    <mesh file="drive_palonier.stl"/>
-    <mesh file="body_front.stl"/>
     <mesh file="foot_bottom_tpu.stl"/>
-    <mesh file="holder.stl"/>
-    <mesh file="cell.stl"/>
-    <mesh file="left_roll_to_pitch.stl"/>
-    <mesh file="right_eye.stl"/>
-    <mesh file="board.stl"/>
-    <mesh file="bulb.stl"/>
-    <mesh file="head_pitch_to_yaw.stl"/>
-    <mesh file="wj_wk00_0124bottomcase_45.stl"/>
-    <mesh file="speaker_interface.stl"/>
-    <mesh file="cam.stl"/>
-    <mesh file="roll_motor_top.stl"/>
-    <mesh file="body_back.stl"/>
-    <mesh file="wj_wk00_0123middlecase_56.stl"/>
-    <mesh file="flash_reflector_interface.stl"/>
-    <mesh file="head_roll_mount.stl"/>
-    <mesh file="left_cache.stl"/>
-    <mesh file="left_knee_to_ankle_right_sheet.stl"/>
-    <mesh file="battery_pack_lid.stl"/>
-    <mesh file="body_middle_top.stl"/>
-    <mesh file="power_switch.stl"/>
     <mesh file="roll_motor_bottom.stl"/>
+    <mesh file="right_cache.stl"/>
+    <mesh file="left_cache.stl"/>
     <mesh file="antenna.stl"/>
-    <mesh file="usb_c_charger.stl"/>
+    <mesh file="left_antenna_holder.stl"/>
+    <mesh file="foot_bottom_pla.stl"/>
+    <mesh file="flash_reflector_interface.stl"/>
+    <mesh file="left_knee_to_ankle_right_sheet.stl"/>
+    <mesh file="trunk_top.stl"/>
+    <mesh file="body_back.stl"/>
+    <mesh file="right_antenna_holder.stl"/>
+    <mesh file="head_yaw_to_roll.stl"/>
     <mesh file="head_bot_sheet.stl"/>
+    <mesh file="head.stl"/>
+    <mesh file="body_middle_top.stl"/>
+    <mesh file="flash_light_module.stl"/>
+    <mesh file="neck_right_sheet.stl"/>
+    <mesh file="body_front.stl"/>
+    <mesh file="leg_spacer.stl"/>
+    <mesh file="right_roll_to_pitch.stl"/>
+    <mesh file="trunk_bottom.stl"/>
+    <mesh file="foot_top.stl"/>
+    <mesh file="neck_left_sheet.stl"/>
+    <mesh file="left_knee_to_ankle_left_sheet.stl"/>
+    <mesh file="roll_motor_top.stl"/>
+    <mesh file="body_middle_bottom.stl"/>
+    <mesh file="left_roll_to_pitch.stl"/>
+    <mesh file="foot_side.stl"/>
+    <mesh file="head_pitch_to_yaw.stl"/>
     <material name="body_front_material" rgba="0.917647 0.917647 0.917647 1"/>
-    <material name="usb_c_charger_material" rgba="0.615686 0.811765 0.929412 1"/>
     <material name="body_back_material" rgba="0.917647 0.917647 0.917647 1"/>
     <material name="body_middle_bottom_material" rgba="0.917647 0.917647 0.917647 1"/>
-    <material name="power_switch_material" rgba="0.901961 0.901961 0.901961 1"/>
-    <material name="bms_material" rgba="0.231373 0.380392 0.705882 1"/>
-    <material name="battery_pack_lid_material" rgba="0.231373 0.380392 0.705882 1"/>
     <material name="body_middle_top_material" rgba="0.917647 0.917647 0.917647 1"/>
-    <material name="bno055_material" rgba="0.615686 0.811765 0.929412 1"/>
-    <material name="roll_bearing_material" rgba="0.6 0.6 0.6 1"/>
     <material name="trunk_bottom_material" rgba="0.180392 0.180392 0.180392 1"/>
     <material name="trunk_top_material" rgba="0.180392 0.180392 0.180392 1"/>
-    <material name="board_material" rgba="0 0.501961 0 1"/>
-    <material name="cell_material" rgba="0.615686 0.811765 0.929412 1"/>
-    <material name="holder_material" rgba="0.647059 0.647059 0.647059 1"/>
-    <material name="wj_wk00_0123middlecase_56_material" rgba="0.247059 0.243137 0.243137 1"/>
-    <material name="drive_palonier_material" rgba="0.623529 0.666667 0.701961 1"/>
-    <material name="wj_wk00_0124bottomcase_45_material" rgba="0.247059 0.243137 0.243137 1"/>
-    <material name="wj_wk00_0122topcabinetcase_95_material" rgba="0.247059 0.243137 0.243137 1"/>
-    <material name="passive_palonier_material" rgba="0.623529 0.666667 0.701961 1"/>
     <material name="roll_motor_bottom_material" rgba="0.647059 0.647059 0.647059 1"/>
     <material name="roll_motor_top_material" rgba="0.901961 0.901961 0.901961 1"/>
     <material name="left_roll_to_pitch_material" rgba="0.909804 0.572549 0.164706 1"/>
@@ -537,21 +400,10 @@
     <material name="right_antenna_holder_material" rgba="0.980392 0.713725 0.00392157 1"/>
     <material name="antenna_material" rgba="0.647059 0.647059 0.647059 1"/>
     <material name="left_antenna_holder_material" rgba="0.980392 0.713725 0.00392157 1"/>
-    <material name="cam_material" rgba="0.627451 0.627451 0.627451 1"/>
     <material name="head_bot_sheet_material" rgba="0.411765 0.411765 0.411765 1"/>
     <material name="head_material" rgba="0.917647 0.917647 0.917647 1"/>
     <material name="flash_reflector_interface_material" rgba="0.647059 0.647059 0.647059 1"/>
-    <material name="bulb_material" rgba="0.972549 0.529412 0.00392157 1"/>
-    <material name="glass_material" rgba="0.760784 0.839216 0.92549 0.909804"/>
-    <material name="head_roll_mount_material" rgba="0.501961 0.501961 0.501961 1"/>
-    <material name="raspberrypizerow_material" rgba="0.231373 0.380392 0.705882 1"/>
-    <material name="left_eye_material" rgba="0.498039 0.498039 0.498039 1"/>
     <material name="flash_light_module_material" rgba="0.34902 0.376471 0.4 1"/>
-    <material name="full_speaker_material" rgba="0.647059 0.647059 0.647059 1"/>
-    <material name="sg90_material" rgba="0.435294 0.670588 0.976471 0.827451"/>
-    <material name="speaker_interface_material" rgba="0.615686 0.811765 0.929412 1"/>
-    <material name="speaker_stand_material" rgba="0.980392 0.713725 0.00392157 1"/>
-    <material name="right_eye_material" rgba="0.34902 0.376471 0.4 1"/>
     <material name="right_roll_to_pitch_material" rgba="0.909804 0.572549 0.164706 1"/>
     <material name="right_cache_material" rgba="0.917647 0.917647 0.917647 1"/>
   </asset>
