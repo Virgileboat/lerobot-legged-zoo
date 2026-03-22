@@ -47,11 +47,11 @@ def open_duck_mini_v2_velocity_env_cfg(play: bool = False) -> ManagerBasedRlEnvC
     """Create Open Duck Mini v2 velocity tracking environment configuration."""
 
     std_standing = {
-        r".*hip_yaw.*": 0.05,
-        r".*hip_roll.*": 0.05,
-        r".*hip_pitch.*": 0.05,
-        r".*knee.*": 0.05,
-        r".*ankle.*": 0.05,
+        r".*hip_yaw.*": 0.1,
+        r".*hip_roll.*": 0.1,
+        r".*hip_pitch.*": 0.1,
+        r".*knee.*": 0.1,
+        r".*ankle.*": 0.1,
         r".*neck.*": 0.05,
         r".*head.*": 0.05,
     }
@@ -195,6 +195,16 @@ def open_duck_mini_v2_velocity_env_cfg(play: bool = False) -> ManagerBasedRlEnvC
 
     cfg.rewards["joint_torques_l2"] = RewardTermCfg(
         func=open_duck_mdp.joint_torques_l2, weight=-1e-3
+    )
+
+    cfg.rewards["standing_pose"] = RewardTermCfg(
+        func=open_duck_mdp.standing_pose,
+        weight=3.0,
+        params={
+            "command_name": "twist",
+            "command_threshold": 0.01,
+            "std": 0.15,
+        },
     )
 
     # === EVENTS ===

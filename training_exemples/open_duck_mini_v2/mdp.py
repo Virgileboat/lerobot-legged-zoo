@@ -495,6 +495,32 @@ def stillness_at_zero_command(
     return is_standing_cmd * stillness
 
 
+def standing_pose(
+    env: ManagerBasedRlEnv,
+    asset_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
+    command_name: str = "twist",
+    command_threshold: float = 0.01,
+    std: float = 0.15,
+) -> torch.Tensor:
+    """Extra pose reward active only when command is near zero.
+
+    Returns exp(-mean_squared_error / std²) gated on standing command,
+    encouraging the robot to hold the default pose during standing.
+    """
+    asset: Entity = env.scene[asset_cfg.name]
+
+    command = env.command_manager.get_command(command_name)
+    total_speed = torch.norm(command[:, :2], dim=1) + torch.abs(command[:, 2])
+    is_standing = (total_speed < command_threshold).float()
+
+    joint_pos = asset.data.joint_pos[:, asset_cfg.joint_ids]
+    default_pos = asset.data.default_joint_pos[:, asset_cfg.joint_ids]
+    error = joint_pos - default_pos
+    pose_reward = torch.exp(-torch.mean(error ** 2, dim=1) / std ** 2)
+
+    return is_standing * pose_reward
+
+
 def standing_envs_curriculum(
     env: ManagerBasedRlEnv,
     env_ids: torch.Tensor,
