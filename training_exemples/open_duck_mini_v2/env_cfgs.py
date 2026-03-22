@@ -319,7 +319,8 @@ def open_duck_mini_v2_velocity_env_cfg(play: bool = False) -> ManagerBasedRlEnvC
     cfg.observations["policy"].terms["base_ang_vel"].noise = Unoise(n_min=-0.024, n_max=0.024)
     cfg.observations["policy"].terms[gravity_term_name].noise = Unoise(n_min=-0.007, n_max=0.007)
     cfg.observations["policy"].terms["joint_pos"].noise = Unoise(n_min=-0.0006, n_max=0.0006)
-    cfg.observations["policy"].terms["joint_vel"].noise = Unoise(n_min=-0.024, n_max=0.024)
+    # cfg.observations["policy"].terms["joint_vel"].noise = Unoise(n_min=-0.024, n_max=0.024)
+    cfg.observations["policy"].terms["joint_vel"].noise = Unoise(n_min=-0.1, n_max=0.1)
 
     # === COMMANDS ===
     command: UniformVelocityCommandCfg = cfg.commands["twist"]
