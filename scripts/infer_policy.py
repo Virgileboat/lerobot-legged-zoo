@@ -11,7 +11,7 @@ import mujoco.viewer
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-SCENE_XML = str(REPO_ROOT / "models" / "open_duck_mini_v2" / "scene_flat_terrain.xml")
+SCENE_XML = str(REPO_ROOT / "models" / "open_duck_mini_v2" / "scene.xml")
 
 # Default pose matches KNEES_BENT_KEYFRAME from training constants
 DEFAULT_POSE = np.array([
@@ -52,12 +52,12 @@ class PolicyInference:
         print(f"  Output: {self.output_name}, shape: {self.session.get_outputs()[0].shape}")
 
         # Sensor IDs
-        self.gyro_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SENSOR, "gyro")
-        self.accel_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SENSOR, "accelerometer")
+        self.gyro_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SENSOR, "imu_ang_vel")
+        self.accel_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SENSOR, "imu_accel")
         self.trunk_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "trunk_assembly")
 
         if self.gyro_id < 0:
-            raise RuntimeError("Sensor 'gyro' not found in model")
+            raise RuntimeError("Sensor 'imu_ang_vel' not found in model")
 
         self.n_joints = model.nu
         self.default_pose = DEFAULT_POSE[:self.n_joints]
@@ -177,7 +177,7 @@ def main():
     policy.set_vel_cmd(args.lin_vel_x, args.lin_vel_y, args.ang_vel_z)
 
     # Set initial state to default pose
-    freejoint_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, "floating_base")
+    freejoint_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, "trunk_assembly_freejoint")
     qpos_adr = model.jnt_qposadr[freejoint_id]
     data.qpos[qpos_adr:qpos_adr + 3] = [0.0, 0.0, 0.22]
     data.qpos[qpos_adr + 3:qpos_adr + 7] = [1, 0, 0, 0]
