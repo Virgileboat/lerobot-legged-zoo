@@ -191,40 +191,35 @@ def main():
     if obs_size != expected:
         print("WARNING: size mismatch — check DEFAULT_POSE and joint count")
 
-    # Keyboard controls
-    try:
-        from pynput import keyboard as kb
+    # GLFW key codes
+    GLFW_KEY_SPACE = 32
+    GLFW_KEY_A = 65
+    GLFW_KEY_E = 69
+    GLFW_KEY_RIGHT = 262
+    GLFW_KEY_LEFT = 263
+    GLFW_KEY_DOWN = 264
+    GLFW_KEY_UP = 265
+    def key_callback(key):
+        if key == GLFW_KEY_UP:
+            policy.set_vel_cmd(0.3, policy.vel_cmd[1], policy.vel_cmd[2])
+        elif key == GLFW_KEY_DOWN:
+            policy.set_vel_cmd(-0.3, policy.vel_cmd[1], policy.vel_cmd[2])
+        elif key == GLFW_KEY_RIGHT:
+            policy.set_vel_cmd(policy.vel_cmd[0], -0.3, policy.vel_cmd[2])
+        elif key == GLFW_KEY_LEFT:
+            policy.set_vel_cmd(policy.vel_cmd[0], 0.3, policy.vel_cmd[2])
+        elif key == GLFW_KEY_SPACE:
+            policy.set_vel_cmd(0.0, 0.0, 0.0)
+        elif key == GLFW_KEY_A:
+            policy.set_vel_cmd(policy.vel_cmd[0], policy.vel_cmd[1], 1.0)
+        elif key == GLFW_KEY_E:
+            policy.set_vel_cmd(policy.vel_cmd[0], policy.vel_cmd[1], -1.0)
 
-        def on_press(key):
-            try:
-                if key == kb.Key.up:
-                    policy.set_vel_cmd(0.3, policy.vel_cmd[1], policy.vel_cmd[2])
-                elif key == kb.Key.down:
-                    policy.set_vel_cmd(-0.3, policy.vel_cmd[1], policy.vel_cmd[2])
-                elif key == kb.Key.right:
-                    policy.set_vel_cmd(policy.vel_cmd[0], -0.3, policy.vel_cmd[2])
-                elif key == kb.Key.left:
-                    policy.set_vel_cmd(policy.vel_cmd[0], 0.3, policy.vel_cmd[2])
-                elif key == kb.Key.space:
-                    policy.set_vel_cmd(0.0, 0.0, 0.0)
-                elif hasattr(key, "char"):
-                    if key.char in ("a", "A"):
-                        policy.set_vel_cmd(policy.vel_cmd[0], policy.vel_cmd[1], 1.0)
-                    elif key.char in ("e", "E"):
-                        policy.set_vel_cmd(policy.vel_cmd[0], policy.vel_cmd[1], -1.0)
-            except Exception as exc:
-                print(f"Key error: {exc}")
-
-        listener = kb.Listener(on_press=on_press)
-        listener.start()
-
-        print("\nKeyboard controls:")
-        print("  UP / DOWN:    lin_vel_x  ±0.3 m/s")
-        print("  LEFT / RIGHT: lin_vel_y  ±0.3 m/s")
-        print("  A / E:        ang_vel_z  ±1.0 rad/s")
-        print("  SPACE:        stop")
-    except ImportError:
-        print("\nKeyboard control unavailable: install pynput")
+    print("\nKeyboard controls (click the viewer window first):")
+    print("  UP / DOWN:    lin_vel_x  ±0.3 m/s")
+    print("  LEFT / RIGHT: lin_vel_y  ±0.3 m/s")
+    print("  A / E:        ang_vel_z  ±1.0 rad/s")
+    print("  SPACE:        stop")
 
     decimation = 4
     control_dt = decimation * model.opt.timestep
@@ -232,7 +227,7 @@ def main():
 
     print("\nOpen Duck Mini v2 Policy Inference — close viewer to exit\n")
 
-    with mujoco.viewer.launch_passive(model, data, show_left_ui=False, show_right_ui=False) as viewer:
+    with mujoco.viewer.launch_passive(model, data, show_left_ui=False, show_right_ui=False, key_callback=key_callback) as viewer:
         viewer.sync()
         while viewer.is_running():
             t0 = time.time()

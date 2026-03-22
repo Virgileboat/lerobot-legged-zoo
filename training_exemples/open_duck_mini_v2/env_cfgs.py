@@ -47,11 +47,11 @@ def open_duck_mini_v2_velocity_env_cfg(play: bool = False) -> ManagerBasedRlEnvC
     """Create Open Duck Mini v2 velocity tracking environment configuration."""
 
     std_standing = {
-        r".*hip_yaw.*": 0.1,
-        r".*hip_roll.*": 0.1,
-        r".*hip_pitch.*": 0.1,
-        r".*knee.*": 0.1,
-        r".*ankle.*": 0.1,
+        r".*hip_yaw.*": 0.05,
+        r".*hip_roll.*": 0.05,
+        r".*hip_pitch.*": 0.05,
+        r".*knee.*": 0.05,
+        r".*ankle.*": 0.05,
         r".*neck.*": 0.05,
         r".*head.*": 0.05,
     }
