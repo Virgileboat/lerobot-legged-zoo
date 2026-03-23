@@ -951,9 +951,9 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
         # is PPO iterations. Here num_steps_per_env=24, so multiply by 24.
         {"step": 5_000 * 24, "weight": -10.0},
         {"step": 10_000 * 24, "weight": -20.0},
-        {"step": 15_000 * 24, "weight": -35.0},
-        {"step": 20_000 * 24, "weight": -50.0},
-        {"step": 25_000 * 24, "weight": -60.0},
+        {"step": 15_000 * 24, "weight": -40.0},
+        {"step": 20_000 * 24, "weight": -60.0},
+        {"step": 25_000 * 24, "weight": -70.0},
       ],
     },
   )
