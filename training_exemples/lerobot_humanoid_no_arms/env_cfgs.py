@@ -925,6 +925,20 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
     weight=-5.0,
     params={"joint_name_patterns": (r".*hipz.*", r".*hipx.*")},
   )
+  cfg.curriculum["pose_weight"] = CurriculumTermCfg(
+    func=mdp.reward_weight,
+    params={
+      "reward_name": "pose",
+      "weight_stages": [
+        {"step": 0, "weight": 2.5},
+        # Curriculum uses env.common_step_counter (env steps), while W&B "Step"
+        # is PPO iterations. Here num_steps_per_env=24, so multiply by 24.
+        {"step": 2_000 * 24, "weight": 2.0},
+        {"step": 4_000 * 24, "weight": 1.0},
+        {"step": 5_000 * 24, "weight": 0.3},
+      ],
+    },
+  )
   cfg.curriculum["action_rate_weight"] = CurriculumTermCfg(
     func=mdp.reward_weight,
     params={
@@ -937,7 +951,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
         {"step": 10_000 * 24, "weight": -1.0},
         {"step": 15_000 * 24, "weight": -2.0},
         {"step": 20_000 * 24, "weight": -4.0},
-        {"step": 25_000 * 24, "weight": -4.0},
+        {"step": 25_000 * 24, "weight": -6.0},
       ],
     },
   )
