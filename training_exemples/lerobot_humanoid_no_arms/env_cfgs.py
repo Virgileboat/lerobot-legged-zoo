@@ -826,10 +826,10 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   # Hip joints get more freedom, ankle roll is tight for balance.
   cfg.rewards["pose"].params["std_standing"] = {
     # Lower body - 12 DOF.
-    r".*hipy.*": 0.6,
+    r".*hipy.*": 0.8,
     r".*hipx.*": 0.1,
     r".*hipz.*": 0.1,
-    r".*knee.*": 0.6,
+    r".*knee.*": 0.8,
     r".*ankley.*": 0.35,
     r".*anklex.*": 0.2,
   }
@@ -838,20 +838,20 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
 
   cfg.rewards["pose"].params["std_walking"] = {
     # Lower body - 12 DOF.
-    r".*hipy.*": 0.6,
+    r".*hipy.*": 0.8,
     r".*hipx.*": 0.1,
     r".*hipz.*": 0.1,
-    r".*knee.*": 0.6,
+    r".*knee.*": 0.8,
     r".*ankley.*": 0.35,
     r".*anklex.*": 0.2,
   }
   
   cfg.rewards["pose"].params["std_running"] = {
     # Lower body - 12 DOF.
-    r".*hipy.*": 0.5,
+    r".*hipy.*": 0.8,
     r".*hipx.*": 0.1,
     r".*hipz.*": 0.1,
-    r".*knee.*": 0.6,
+    r".*knee.*": 0.8,
     r".*ankley.*": 0.2,
     r".*anklex.*": 0.1,
   }
@@ -872,7 +872,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
 
   cfg.rewards["body_ang_vel"].weight = -0.05
   cfg.rewards["angular_momentum"].weight = -0.02
-  cfg.rewards["air_time"].weight = 0.1
+  cfg.rewards["air_time"].weight = 0.0
   # cfg.rewards["single_foot_contact"] = RewardTermCfg(
   #   func=_single_foot_on_ground_reward,
   #   weight=0.3,
