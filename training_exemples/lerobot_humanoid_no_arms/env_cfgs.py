@@ -802,6 +802,19 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
       "shared_random": False,
     },
   )
+  # Randomize joint armature per-joint.
+  cfg.events["joint_armature"] = EventTermCfg(
+    func=envs_mdp.randomize_field,
+    mode="startup",
+    domain_randomization=True,
+    params={
+      "asset_cfg": SceneEntityCfg(name="robot"),
+      "field": "dof_armature",
+      "operation": "scale",
+      "ranges": (0.7, 1.3),
+      "shared_random": False,
+    },
+  )
   # Randomize COM placement on all body segments (per-body, not shared).
   cfg.events["base_com"].params["asset_cfg"] = SceneEntityCfg(name="robot")
   cfg.events["base_com"].params["ranges"] = {
@@ -871,6 +884,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   # cfg.rewards["track_angular_velocity"].weight = 4.0
 
   cfg.rewards["body_ang_vel"].weight = -0.05
+  cfg.rewards["dof_pos_limits"].weight = 0.0
   cfg.rewards["angular_momentum"].weight = -0.02
   cfg.rewards["air_time"].weight = 0.0
   # cfg.rewards["single_foot_contact"] = RewardTermCfg(
