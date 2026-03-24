@@ -884,7 +884,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   # cfg.rewards["track_angular_velocity"].weight = 4.0
 
   cfg.rewards["body_ang_vel"].weight = -0.05
-  cfg.rewards["dof_pos_limits"].weight = 0.0
+  cfg.rewards["dof_pos_limits"].weight = -1.0
   cfg.rewards["angular_momentum"].weight = -0.02
   cfg.rewards["air_time"].weight = 0.0
   # cfg.rewards["single_foot_contact"] = RewardTermCfg(

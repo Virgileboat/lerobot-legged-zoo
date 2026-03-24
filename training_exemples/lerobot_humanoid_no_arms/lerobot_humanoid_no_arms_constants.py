@@ -1,5 +1,6 @@
 """LeRobot Humanoid (12-DOF bipedal) constants."""
 
+import math
 from pathlib import Path
 
 import mujoco
@@ -36,6 +37,28 @@ def get_assets(meshdir: str) -> dict[str, bytes]:
 def get_spec() -> mujoco.MjSpec:
   spec = mujoco.MjSpec.from_file(str(LEROBOT_HUMANOID_NO_ARMS_XML))
   spec.assets = get_assets(spec.meshdir)
+  # Set symmetric hinge limits (in radians) so joint-limit rewards and reset
+  # logic use meaningful bounds instead of the MJCF default [0, 0] ranges.
+  joint_limit_deg_by_name = {
+    # Hip yaw / roll.
+    "hipz_right": 10.0,
+    "hipz_left": 10.0,
+    "hipx_right": 10.0,
+    "hipx_left": 10.0,
+    # Hip pitch and knee.
+    "hipy_right": 45.0,
+    "hipy_left": 45.0,
+    "knee_right": 45.0,
+    "knee_left": 45.0,
+    # Ankle pitch / roll.
+    "ankley_right": 10.0,
+    "ankley_left": 10.0,
+    "anklex_right": 5.0,
+    "anklex_left": 5.0,
+  }
+  for joint_name, half_range_deg in joint_limit_deg_by_name.items():
+    half_range_rad = math.radians(half_range_deg)
+    spec.joint(joint_name).range = [-half_range_rad, half_range_rad]
 
   return spec
 
