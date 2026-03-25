@@ -28,6 +28,7 @@ import torch
 
 _CSV_LOG_STATE_BY_ENV: dict[int, dict[str, Any]] = {}
 _FOOT_CONTACT_STATE_BY_ENV: dict[int, dict[str, torch.Tensor]] = {}
+_ANKLE_JOINT_IDS_BY_ENV: dict[int, tuple[int, int, int, int]] = {}
 
 
 class _SelectiveActionRateL2Penalty:
@@ -887,6 +888,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   cfg.rewards["dof_pos_limits"].weight = -1.0
   cfg.rewards["angular_momentum"].weight = -0.02
   cfg.rewards["air_time"].weight = 0.0
+
   # cfg.rewards["single_foot_contact"] = RewardTermCfg(
   #   func=_single_foot_on_ground_reward,
   #   weight=0.3,
@@ -966,6 +968,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
         {"step": 15_000 * 24, "weight": -2.0},
         {"step": 20_000 * 24, "weight": -4.0},
         {"step": 25_000 * 24, "weight": -10.0},
+        {"step": 30_000 * 24, "weight": -15.0},
       ],
     },
   )
@@ -980,8 +983,8 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
         {"step": 5_000 * 24, "weight": -10.0},
         {"step": 10_000 * 24, "weight": -20.0},
         {"step": 15_000 * 24, "weight": -40.0},
-        {"step": 20_000 * 24, "weight": -60.0},
-        {"step": 25_000 * 24, "weight": -70.0},
+        {"step": 20_000 * 24, "weight": -80.0},
+        {"step": 25_000 * 24, "weight": -100.0},
       ],
     },
   )

@@ -20,7 +20,7 @@
     <!-- Link torso_subassembly -->
     <body name="torso_subassembly" pos="0 0 0.72" quat="1 0 0 0" childclass="mjcf">
       <freejoint name="torso_subassembly_freejoint"/>
-      <inertial pos="-0.000697254 4.08729e-07 0.0361785" mass="1.9" fullinertia="0.0196473 0.00141686 0.0199217 -3.02227e-10 9.19521e-07 1.31114e-10"/>
+      <inertial pos="-0.000668828 4.08197e-07 0.0384522" mass="1.9" fullinertia="0.0196473 0.00141686 0.0199217 -3.02227e-10 9.19521e-07 1.31114e-10"/>
       <!-- Part robstrideo0 -->
       <geom type="mesh" class="visual" pos="-0.673363 0.0109625 0.061034" quat="0.707107 0.707107 1.77636e-15 -1.78468e-15" mesh="robstrideo0" material="robstrideo0_material"/>
       <!-- Part rs00 -->
@@ -231,7 +231,7 @@
             <body name="shin_subassembly" pos="0.17 0.294449 -0.0305" quat="1.16249e-13 0.963177 -0.26887 4.36995e-14">
               <!-- Joint from tigh_subassembly to shin_subassembly -->
               <joint axis="0 0 1" name="knee_right" type="hinge" range="-0.5235987756 0.5235987756" actuatorfrcrange="-139 139" armature="0.0123305945439" frictionloss="0.11297747069" damping="0.388410433779"/>
-              <inertial pos="-0.0765467 -0.0486737 6.35117e-05" mass="0.7" fullinertia="0.000600304 0.00138759 0.00176486 -0.000634649 -8.1197e-05 -4.81249e-05"/>
+              <inertial pos="-0.076547 -0.0486454 6.35117e-05" mass="0.7" fullinertia="0.000600304 0.00138759 0.00176486 -0.000634649 -8.1197e-05 -4.81249e-05"/>
               <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_8__dec2226ceabd7d7ca0bb403ec234d89b -->
               <!-- Part rmdx43 -->
               <geom type="mesh" class="visual" pos="-0.2967 0.369726 0.019" quat="0.616799 0.616799 -0.345773 -0.345773" mesh="rmdx43" material="rmdx43_material"/>
@@ -349,7 +349,7 @@
               <!-- Link ankle_subassembly -->
               <body name="ankle_subassembly" pos="-0.221803 -0.135659 0.02" quat="1.9255e-14 -0.835223 -0.549911 1.06625e-14">
                 <!-- Joint from shin_subassembly to ankle_subassembly -->
-                <joint axis="0 0 1" name="ankley_right" type="hinge" range="-0.1745329252 0.8726646260" actuatorfrcrange="-50 50" armature="0.0209776768142" frictionloss="0.0171195170804" damping="0.00286374498013"/>
+                <joint axis="0 0 1" name="ankley_right" type="hinge" range="-0.1745329252 0.3490658504" actuatorfrcrange="-50 50" armature="0.0209776768142" frictionloss="0.0171195170804" damping="0.00286374498013"/>
                 <inertial pos="-1.62086e-08 -0.000727483 0.02" mass="0.012" fullinertia="5.19458e-06 4.86353e-06 8.35665e-07 2.61119e-12 4.35145e-12 -7.24871e-13"/>
                 <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232_7 -->
                 <!-- Part 07534_05x40_catpart_2 -->
@@ -558,7 +558,7 @@
             <body name="shin_subassembly_sym" pos="-0.17 -0.294449 -0.0305" quat="0.723237 3.88595e-16 -3.33067e-16 -0.6906">
               <!-- Joint from tigh_subassembly_sym to shin_subassembly_sym -->
               <joint axis="0 0 1" name="knee_left" type="hinge" range="-0.5235987756 0.5235987756" actuatorfrcrange="-139 139" armature="0.0123305945439" frictionloss="0.11297747069" damping="0.388410433779"/>
-              <inertial pos="0.0013467 -0.0907957 -1.51262e-05" mass="0.7" fullinertia="0.00173882 0.000241815 0.00176032 -5.54293e-05 2.67934e-06 9.5357e-05"/>
+              <inertial pos="0.00133174 -0.0908013 -1.51262e-05" mass="0.7" fullinertia="0.00173882 0.000241815 0.00176032 -5.54293e-05 2.67934e-06 9.5357e-05"/>
               <!-- Part hex_socket_head_cap_screw_m3x0_50_x_20__7252065e4445f5ec71347b53fcae11e4_13 -->
               <!-- Part xt_30_2x2_f_6 -->
               <geom type="mesh" class="visual" pos="0.0212074 -0.0322876 0.0147" quat="0.270598 0.653281 0.270598 -0.653281" mesh="xt_30_2x2_f" material="xt_30_2x2_f_material"/>
@@ -676,7 +676,7 @@
               <!-- Link ankle_subassembly_2 -->
               <body name="ankle_subassembly_2" pos="-3.88578e-16 -0.26 -0.02" quat="0.888105 -5.59873e-16 0 -0.459641">
                 <!-- Joint from shin_subassembly_sym to ankle_subassembly_2 -->
-                <joint axis="0 0 1" name="ankley_left" type="hinge" range="-0.8726646260 0.1745329252" actuatorfrcrange="-50 50" armature="0.0209776768142" frictionloss="0.0171195170804" damping="0.00286374498013"/>
+                <joint axis="0 0 1" name="ankley_left" type="hinge" range="-0.3490658504 0.1745329252" actuatorfrcrange="-50 50" armature="0.0209776768142" frictionloss="0.0171195170804" damping="0.00286374498013"/>
                 <inertial pos="1.62086e-08 -0.000727483 0.02" mass="0.012" fullinertia="5.19458e-06 4.86353e-06 8.35665e-07 -2.61119e-12 4.35145e-12 7.24871e-13"/>
                 <!-- Part hex_socket_head_cap_screw_m2_5x0_45_x_6__ec244025d76f8b83b2775022a2cb3232_22 -->
                 <!-- Part 07534_05x40_catpart_4 -->
