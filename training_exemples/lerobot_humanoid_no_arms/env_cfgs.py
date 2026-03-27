@@ -967,8 +967,8 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
         {"step": 10_000 * 24, "weight": -1.0},
         {"step": 15_000 * 24, "weight": -2.0},
         {"step": 20_000 * 24, "weight": -4.0},
-        {"step": 25_000 * 24, "weight": -10.0},
-        {"step": 30_000 * 24, "weight": -15.0},
+        {"step": 25_000 * 24, "weight": -6.0},
+        {"step": 30_000 * 24, "weight": -6.0},
       ],
     },
   )
