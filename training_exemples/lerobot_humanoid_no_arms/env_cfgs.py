@@ -1,7 +1,6 @@
 """LeRobot Humanoid velocity environment configurations."""
 
 import csv
-from dataclasses import dataclass
 import math
 import re
 from datetime import datetime
@@ -9,14 +8,12 @@ from pathlib import Path
 from typing import Any
 
 from .lerobot_humanoid_no_arms_constants import (
-  LEROBOT_HUMANOID_NO_ARMS_ACTION_DELAY_STEPS,
   LEROBOT_HUMANOID_NO_ARMS_ACTION_SCALE,
   get_lerobot_humanoid_no_arms_robot_cfg,
 )
 from mjlab.envs import ManagerBasedRlEnvCfg
 from mjlab.envs import mdp as envs_mdp
-from mjlab.envs import ManagerBasedRlEnv
-from mjlab.envs.mdp.actions import JointPositionAction, JointPositionActionCfg
+from mjlab.envs.mdp.actions import JointPositionActionCfg
 from mjlab.managers.curriculum_manager import CurriculumTermCfg
 from mjlab.managers.event_manager import EventTermCfg
 from mjlab.managers.reward_manager import RewardTermCfg
@@ -25,7 +22,6 @@ from mjlab.sensor import ContactMatch, ContactSensorCfg
 from mjlab.tasks.velocity import mdp
 from mjlab.tasks.velocity.mdp import UniformVelocityCommandCfg
 from mjlab.tasks.velocity.velocity_env_cfg import make_velocity_env_cfg
-from mjlab.utils.lab_api.string import resolve_matching_names_values
 import sys
 import torch
 
@@ -33,86 +29,6 @@ import torch
 _CSV_LOG_STATE_BY_ENV: dict[int, dict[str, Any]] = {}
 _FOOT_CONTACT_STATE_BY_ENV: dict[int, dict[str, torch.Tensor]] = {}
 _ANKLE_JOINT_IDS_BY_ENV: dict[int, tuple[int, int, int, int]] = {}
-
-
-@dataclass(kw_only=True)
-class DelayedJointPositionActionCfg(JointPositionActionCfg):
-  """Joint position action with fixed per-actuator command delay in steps."""
-
-  delay_steps: int | dict[str, int] = 0
-
-  def build(self, env: ManagerBasedRlEnv) -> "DelayedJointPositionAction":
-    return DelayedJointPositionAction(self, env)
-
-
-class DelayedJointPositionAction(JointPositionAction):
-  """Joint position action that applies a fixed transport delay per actuator."""
-
-  cfg: DelayedJointPositionActionCfg
-
-  def __init__(self, cfg: DelayedJointPositionActionCfg, env: ManagerBasedRlEnv):
-    super().__init__(cfg=cfg, env=env)
-    self._delay_steps = self._resolve_delay_steps(cfg.delay_steps)
-    self._max_delay_steps = int(torch.max(self._delay_steps).item()) if self._delay_steps.numel() else 0
-
-    buffer_len = self._max_delay_steps + 1
-    self._delay_buffer = torch.zeros(
-      (self.num_envs, buffer_len, self.action_dim),
-      device=self.device,
-      dtype=self._processed_actions.dtype,
-    )
-    self._write_idx = 0
-
-    if isinstance(self._offset, torch.Tensor):
-      self._init_processed_actions = self._offset.clone()
-    else:
-      self._init_processed_actions = torch.full_like(self._processed_actions, float(self._offset))
-    self._delay_buffer[:] = self._init_processed_actions.unsqueeze(1)
-
-  def _resolve_delay_steps(self, delay_steps: int | dict[str, int]) -> torch.Tensor:
-    if isinstance(delay_steps, int):
-      if delay_steps < 0:
-        raise ValueError(f"delay_steps must be >= 0, got {delay_steps}")
-      return torch.full((self.action_dim,), delay_steps, device=self.device, dtype=torch.long)
-
-    if isinstance(delay_steps, dict):
-      delays = torch.zeros((self.action_dim,), device=self.device, dtype=torch.long)
-      index_list, _, value_list = resolve_matching_names_values(delay_steps, self._target_names)
-      values = [int(v) for v in value_list]
-      if any(v < 0 for v in values):
-        raise ValueError(f"delay_steps values must be >= 0, got {delay_steps}")
-      if len(index_list) > 0:
-        delays[index_list] = torch.tensor(values, device=self.device, dtype=torch.long)
-      return delays
-
-    raise TypeError(f"delay_steps must be int or dict[str, int], got {type(delay_steps)}")
-
-  def process_actions(self, actions: torch.Tensor):
-    super().process_actions(actions)
-
-    # Store newest command.
-    self._delay_buffer[:, self._write_idx, :] = self._processed_actions
-
-    if self._max_delay_steps > 0:
-      # Read command delayed by per-actuator fixed lags.
-      read_idx = (self._write_idx - self._delay_steps) % self._delay_buffer.shape[1]
-      gather_idx = read_idx.view(1, -1, 1).expand(self.num_envs, -1, 1)
-      delayed = torch.gather(self._delay_buffer.permute(0, 2, 1), 2, gather_idx).squeeze(-1)
-      self._processed_actions = delayed
-
-    self._write_idx = (self._write_idx + 1) % self._delay_buffer.shape[1]
-
-  def reset(self, env_ids: torch.Tensor | slice | None = None) -> None:
-    super().reset(env_ids)
-
-    if env_ids is None or isinstance(env_ids, slice):
-      self._delay_buffer[:] = self._init_processed_actions.unsqueeze(1)
-      self._write_idx = 0
-      return
-
-    self._delay_buffer[env_ids] = self._init_processed_actions[env_ids].unsqueeze(1).expand(
-      -1, self._delay_buffer.shape[1], -1
-    )
 
 
 class _SelectiveActionRateL2Penalty:
@@ -790,7 +706,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
     num_slots=1,
   )
   cfg.scene.sensors = (feet_ground_cfg, self_collision_cfg)
-  
+
   if cfg.scene.terrain is not None and cfg.scene.terrain.terrain_generator is not None:
     cfg.scene.terrain.terrain_generator.curriculum = True
     cfg.scene.terrain.terrain_generator.difficulty_range = (0.0, 0.3)
@@ -799,18 +715,6 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
 
   joint_pos_action = cfg.actions["joint_pos"]
   assert isinstance(joint_pos_action, JointPositionActionCfg)
-  cfg.actions["joint_pos"] = DelayedJointPositionActionCfg(
-    entity_name=joint_pos_action.entity_name,
-    clip=joint_pos_action.clip,
-    actuator_names=tuple(joint_pos_action.actuator_names),
-    scale=joint_pos_action.scale,
-    offset=joint_pos_action.offset,
-    preserve_order=joint_pos_action.preserve_order,
-    use_default_offset=joint_pos_action.use_default_offset,
-    delay_steps=LEROBOT_HUMANOID_NO_ARMS_ACTION_DELAY_STEPS,
-  )
-  joint_pos_action = cfg.actions["joint_pos"]
-  assert isinstance(joint_pos_action, DelayedJointPositionActionCfg)
   joint_pos_action.scale = LEROBOT_HUMANOID_NO_ARMS_ACTION_SCALE
 
   cfg.viewer.body_name = "torso_mesh"
