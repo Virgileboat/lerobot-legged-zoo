@@ -950,8 +950,8 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
         # Curriculum uses env.common_step_counter (env steps), while W&B "Step"
         # is PPO iterations. Here num_steps_per_env=24, so multiply by 24.
         {"step": 2_000 * 24, "weight": 2.0},
-        {"step": 4_000 * 24, "weight": 1.0},
-        {"step": 5_000 * 24, "weight": 1.0},
+        {"step": 4_000 * 24, "weight": 1.5},
+        {"step": 5_000 * 24, "weight": 1.5},
       ],
     },
   )
