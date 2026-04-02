@@ -48,15 +48,15 @@ def get_spec() -> mujoco.MjSpec:
 ##
 
 # Base actuator gains (no additional scaling).
-BASE_KP_HIPZ = 80.0
+BASE_KP_HIPZ = 40.0
 BASE_KV_HIPZ = 4.0
-BASE_KP_HIPX = 80.0
+BASE_KP_HIPX = 40.0
 BASE_KV_HIPX = 4.0
 BASE_KP_HIP = 70.0
 BASE_KV_HIP = 5.0
 BASE_KP_KNEE = 70.0
 BASE_KV_KNEE = 5.0
-BASE_KP_ANKLE = 30.0
+BASE_KP_ANKLE = 20.0
 BASE_KV_ANKLE = 1.0
 
 # Joint armature/frictionloss applied through actuator config.
