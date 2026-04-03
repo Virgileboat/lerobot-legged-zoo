@@ -742,24 +742,24 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
     base_lin_vel_term.noise.n_max = 0.075
   policy_obs.terms.pop("base_lin_vel", None)
   base_ang_vel_term = policy_obs.terms.get("base_ang_vel")
-  base_ang_vel_term.noise.n_min = -0.2
-  base_ang_vel_term.noise.n_max = 0.2
+  base_ang_vel_term.noise.n_min = -0.06
+  base_ang_vel_term.noise.n_max = 0.06
   projected_gravity_term = policy_obs.terms.get("projected_gravity")
-  projected_gravity_term.noise.n_min = -0.025
-  projected_gravity_term.noise.n_max = 0.025
+  projected_gravity_term.noise.n_min = -0.015
+  projected_gravity_term.noise.n_max = 0.015
   joint_pos_term = policy_obs.terms.get("joint_pos")
   if joint_pos_term is not None and getattr(joint_pos_term, "noise", None) is not None:
     joint_pos_noise_rad = math.radians(2.5)
     joint_pos_term.noise.n_min = -joint_pos_noise_rad
     joint_pos_term.noise.n_max = joint_pos_noise_rad
   joint_vel_term = policy_obs.terms.get("joint_vel")
-  joint_vel_term.noise.n_min = -math.radians(10.0)
-  joint_vel_term.noise.n_max = math.radians(10.0)
+  joint_vel_term.noise.n_min = -0.05
+  joint_vel_term.noise.n_max = 0.05
   # Joint torques with noise (sim2real: real actuators have torque measurement noise).
   if torque_obs:
     policy_obs.terms["joint_torques"] = ObservationTermCfg(
       func=_joint_torques_obs,
-      noise=Unoise(n_min=-5.0, n_max=5.0),  # ±5 Nm noise
+      noise=Unoise(n_min=-0.1, n_max=0.1),  # ±0.1 Nm — matches real torque estimation noise
       scale=1.0 / 88.0,  # Normalize by a representative effort limit.
     )
 
@@ -839,7 +839,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
   }
   # Simulate encoder calibration mismatch up to +/-5 deg.
   if "encoder_bias" in cfg.events:
-    encoder_bias_rad = math.radians(8.0)
+    encoder_bias_rad = math.radians(4.0)
     cfg.events["encoder_bias"].params["bias_range"] = (-encoder_bias_rad, encoder_bias_rad)
   # Add reset-time base attitude bias (e.g. IMU mounting / calibration mismatch proxy).
   if "reset_base" in cfg.events:
