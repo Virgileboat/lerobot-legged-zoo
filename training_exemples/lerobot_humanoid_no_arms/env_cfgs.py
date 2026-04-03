@@ -16,7 +16,9 @@ from mjlab.envs import mdp as envs_mdp
 from mjlab.envs.mdp.actions import JointPositionActionCfg
 from mjlab.managers.curriculum_manager import CurriculumTermCfg
 from mjlab.managers.event_manager import EventTermCfg
+from mjlab.managers.observation_manager import ObservationTermCfg
 from mjlab.managers.reward_manager import RewardTermCfg
+from mjlab.utils.noise import UniformNoiseCfg as Unoise
 from mjlab.managers.scene_entity_config import SceneEntityCfg
 from mjlab.sensor import ContactMatch, ContactSensorCfg
 from mjlab.tasks.velocity import mdp
@@ -652,6 +654,11 @@ class _AlternatingSingleSupportReward:
 _ALTERNATING_SINGLE_SUPPORT_REWARD = _AlternatingSingleSupportReward()
 
 
+def _joint_torques_obs(env) -> torch.Tensor:
+  """Return actuator torques for all joints. Shape: [num_envs, 12]."""
+  return env.scene["robot"].data.actuator_force
+
+
 def _print_actuator_torques(env, env_ids=None) -> None:
   """Print mean/max actuator torque (absolute) for quick debugging during play."""
   asset = env.scene["robot"]
@@ -671,7 +678,7 @@ def _print_actuator_torques(env, env_ids=None) -> None:
   sys.stdout.flush()
 
 
-def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
+def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool = True) -> ManagerBasedRlEnvCfg:
   """Create LeRobot Humanoid rough terrain velocity configuration."""
   cfg = make_velocity_env_cfg()
 
@@ -748,6 +755,13 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   joint_vel_term = policy_obs.terms.get("joint_vel")
   joint_vel_term.noise.n_min = -math.radians(10.0)
   joint_vel_term.noise.n_max = math.radians(10.0)
+  # Joint torques with noise (sim2real: real actuators have torque measurement noise).
+  if torque_obs:
+    policy_obs.terms["joint_torques"] = ObservationTermCfg(
+      func=_joint_torques_obs,
+      noise=Unoise(n_min=-5.0, n_max=5.0),  # ±5 Nm noise
+      scale=1.0 / 88.0,  # Normalize by a representative effort limit.
+    )
 
   # Disable velocity/command curricula while keeping terrain_levels curriculum.
   for curriculum_name in list(cfg.curriculum.keys()):
@@ -840,9 +854,10 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   # Hip joints get more freedom, ankle roll is tight for balance.
   cfg.rewards["pose"].params["std_standing"] = {
     # Lower body - 12 DOF.
+    # Tighter hipz/hipx stds encourage stillness when command velocity is zero.
     r".*hipy.*": 0.8,
-    r".*hipx.*": 0.1,
-    r".*hipz.*": 0.1,
+    r".*hipx.*": 0.05,
+    r".*hipz.*": 0.05,
     r".*knee.*": 0.8,
     r".*ankley.*": 0.35,
     r".*anklex.*": 0.2,
@@ -882,12 +897,14 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
 
   # Increase command tracking pressure.
   cfg.rewards["track_linear_velocity"].weight = 6.0
-  # cfg.rewards["track_angular_velocity"].weight = 4.0
+  cfg.rewards["track_angular_velocity"].weight = 3.0
 
   cfg.rewards["body_ang_vel"].weight = -0.05
   cfg.rewards["dof_pos_limits"].weight = -1.0
   cfg.rewards["angular_momentum"].weight = -0.02
   cfg.rewards["air_time"].weight = 0.0
+  cfg.rewards["foot_slip"].weight = -0.5
+  cfg.rewards["soft_landing"].weight = -1e-3
 
   # cfg.rewards["single_foot_contact"] = RewardTermCfg(
   #   func=_single_foot_on_ground_reward,
@@ -965,10 +982,10 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
         # is PPO iterations. Here num_steps_per_env=24, so multiply by 24.
         {"step": 5_000 * 24, "weight": -0.5},
         {"step": 10_000 * 24, "weight": -1.0},
-        {"step": 15_000 * 24, "weight": -2.0},
-        {"step": 20_000 * 24, "weight": -4.0},
-        {"step": 25_000 * 24, "weight": -6.0},
-        {"step": 30_000 * 24, "weight": -10.0},
+        {"step": 15_000 * 24, "weight": -1.5},
+        {"step": 20_000 * 24, "weight": -2.0},
+        {"step": 25_000 * 24, "weight": -2.5},
+        {"step": 30_000 * 24, "weight": -4.0},
       ],
     },
   )
@@ -981,10 +998,10 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
         # Curriculum uses env.common_step_counter (env steps), while W&B "Step"
         # is PPO iterations. Here num_steps_per_env=24, so multiply by 24.
         {"step": 5_000 * 24, "weight": -10.0},
-        {"step": 10_000 * 24, "weight": -20.0},
-        {"step": 15_000 * 24, "weight": -40.0},
-        {"step": 20_000 * 24, "weight": -60.0},
-        {"step": 25_000 * 24, "weight": -60.0},
+        {"step": 10_000 * 24, "weight": -15.0},
+        {"step": 15_000 * 24, "weight": -20.0},
+        {"step": 20_000 * 24, "weight": -30.0},
+        {"step": 25_000 * 24, "weight": -30.0},
       ],
     },
   )
@@ -1027,9 +1044,9 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False) -> ManagerBasedRl
   return cfg
 
 
-def lerobot_humanoid_no_arms_flat_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
+def lerobot_humanoid_no_arms_flat_env_cfg(play: bool = False, torque_obs: bool = True) -> ManagerBasedRlEnvCfg:
   """Create LeRobot Humanoid flat terrain velocity configuration."""
-  cfg = lerobot_humanoid_no_arms_rough_env_cfg(play=play)
+  cfg = lerobot_humanoid_no_arms_rough_env_cfg(play=play, torque_obs=torque_obs)
 
   cfg.sim.njmax = 300
   cfg.sim.mujoco.ccd_iterations = 50

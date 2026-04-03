@@ -23,3 +23,20 @@ register_mjlab_task(
   runner_cls=VelocityOnPolicyRunner,
 )
 
+# Ablation variants: with and without joint torque observation.
+register_mjlab_task(
+  task_id="Mjlab-Velocity-Flat-LeRobot-Humanoid-no-arms-torque-obs",
+  env_cfg=lerobot_humanoid_no_arms_flat_env_cfg(torque_obs=True),
+  play_env_cfg=lerobot_humanoid_no_arms_flat_env_cfg(play=True, torque_obs=True),
+  rl_cfg=lerobot_humanoid_no_arms_ppo_runner_cfg(),
+  runner_cls=VelocityOnPolicyRunner,
+)
+
+register_mjlab_task(
+  task_id="Mjlab-Velocity-Flat-LeRobot-Humanoid-no-arms-no-torque-obs",
+  env_cfg=lerobot_humanoid_no_arms_flat_env_cfg(torque_obs=False),
+  play_env_cfg=lerobot_humanoid_no_arms_flat_env_cfg(play=True, torque_obs=False),
+  rl_cfg=lerobot_humanoid_no_arms_ppo_runner_cfg(),
+  runner_cls=VelocityOnPolicyRunner,
+)
+
