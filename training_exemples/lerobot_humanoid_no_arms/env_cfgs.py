@@ -1,6 +1,7 @@
 """LeRobot Humanoid velocity environment configurations."""
 
 import csv
+import json
 import math
 import re
 from datetime import datetime
@@ -11,6 +12,8 @@ from .lerobot_humanoid_no_arms_constants import (
   LEROBOT_HUMANOID_NO_ARMS_ACTION_SCALE,
   get_lerobot_humanoid_no_arms_robot_cfg,
 )
+from mjlab.actuator.delayed_actuator import DelayedActuatorCfg
+from mjlab.entity import EntityArticulationInfoCfg
 from mjlab.envs import ManagerBasedRlEnvCfg
 from mjlab.envs import mdp as envs_mdp
 from mjlab.envs.mdp.actions import JointPositionActionCfg
@@ -289,7 +292,11 @@ def _log_obs_action_csv(
   env_index: int = 0,
   csv_path: str | None = None,
 ) -> None:
-  """Log policy observation and action to CSV at every environment step."""
+  """Log policy observation and action to CSV at every environment step.
+
+  Output format matches the real-robot debug CSV so sim and real logs can be
+  compared directly:  time_s, step, observation (JSON), action_pre_scale (JSON).
+  """
   del env_ids  # Unused for global interval events.
   if env_index < 0 or env_index >= env.num_envs:
     return
@@ -299,20 +306,10 @@ def _log_obs_action_csv(
   if obs_policy is None:
     return
 
-  obs_names, obs_values = _flatten_obs_policy_with_names(obs_policy, env_index)
-  projected_gravity = _get_projected_gravity_from_policy_obs(obs_policy, env_index)
+  obs_values = _flatten_obs_policy(obs_policy, env_index)
   action_values = (
     env.action_manager.action[env_index].detach().cpu().reshape(-1).tolist()
   )
-  action_applied_values = None
-  for attr_name in ("processed_action", "applied_action", "command", "action_scaled"):
-    attr = getattr(env.action_manager, attr_name, None)
-    if isinstance(attr, torch.Tensor):
-      try:
-        action_applied_values = attr[env_index].detach().cpu().reshape(-1).tolist()
-        break
-      except Exception:
-        continue
 
   env_key = id(env)
   state = _CSV_LOG_STATE_BY_ENV.get(env_key)
@@ -322,7 +319,7 @@ def _log_obs_action_csv(
       csv_file = (
         Path("logs")
         / "csv"
-        / f"lerobot_humanoid_no_arms_flat_play_{stamp}.csv"
+        / f"lerobot_humanoid_no_arms_play_{stamp}.csv"
       )
     else:
       csv_file = Path(csv_path)
@@ -332,35 +329,17 @@ def _log_obs_action_csv(
     print(f"[csv] Logging observations/actions to: {csv_file.resolve()}", flush=True)
 
   csv_file = state["path"]
-  header_written = bool(state["header_written"])
 
-  if not header_written:
-    header = ["global_step", "episode_step", "env_index"]
-    if projected_gravity is not None:
-      header += ["projected_gravity_x", "projected_gravity_y", "projected_gravity_z"]
-    header += [f"action_{i}" for i in range(len(action_values))]
-    if action_applied_values is not None:
-      header += [f"action_applied_{i}" for i in range(len(action_applied_values))]
-    header += obs_names
+  if not state["header_written"]:
     with csv_file.open("w", newline="") as f:
-      writer = csv.writer(f)
-      writer.writerow(header)
+      csv.writer(f).writerow(["time_s", "step", "observation", "action_pre_scale"])
     state["header_written"] = True
 
-  row = [
-    int(env.common_step_counter),
-    int(env.episode_length_buf[env_index].item()),
-    env_index,
-  ]
-  if projected_gravity is not None:
-    row += projected_gravity
-  row += action_values
-  if action_applied_values is not None:
-    row += action_applied_values
-  row += obs_values
+  sim_time = float(env.sim.data.time.item() if hasattr(env.sim.data.time, "item") else env.sim.data.time[0])
+  obs_json = json.dumps(obs_values, separators=(",", ":"))
+  act_json = json.dumps(action_values, separators=(",", ":"))
   with csv_file.open("a", newline="") as f:
-    writer = csv.writer(f)
-    writer.writerow(row)
+    csv.writer(f).writerow([f"{sim_time:.6f}", int(env.common_step_counter), obs_json, act_json])
 
 
 def _get_ankle_actuator_ids(asset) -> list[int]:
@@ -686,7 +665,19 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
   cfg.sim.contact_sensor_maxmatch = 1000
   cfg.sim.nconmax = 100
 
-  cfg.scene.entities = {"robot": get_lerobot_humanoid_no_arms_robot_cfg()}
+  # Wrap all actuators with randomized delay centred on the measured 1 control-tick
+  # latency (20 ms on the real robot, physics dt = 5 ms → 1 tick = 4 physics steps).
+  # Randomise from 0 to 2 control ticks (0–8 physics steps) for robustness.
+  robot_cfg = get_lerobot_humanoid_no_arms_robot_cfg()
+  orig_artic = robot_cfg.articulation
+  robot_cfg.articulation = EntityArticulationInfoCfg(
+    actuators=tuple(
+      DelayedActuatorCfg(base_cfg=a, delay_min_lag=0, delay_max_lag=8)
+      for a in orig_artic.actuators
+    ),
+    soft_joint_pos_limit_factor=orig_artic.soft_joint_pos_limit_factor,
+  )
+  cfg.scene.entities = {"robot": robot_cfg}
 
   site_names = ("foot_right", "foot_left")
   geom_names = ("left_foot_collision", "right_foot_collision")
@@ -1041,6 +1032,14 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
         cfg.scene.terrain.terrain_generator.num_rows = 5
         cfg.scene.terrain.terrain_generator.border_width = 10.0
 
+    cfg.events["log_obs_action_csv"] = EventTermCfg(
+      func=_log_obs_action_csv,
+      mode="interval",
+      interval_range_s=(0.0, 0.0),
+      is_global_time=True,
+      params={"env_index": 0},
+    )
+
   return cfg
 
 
@@ -1065,16 +1064,9 @@ def lerobot_humanoid_no_arms_flat_env_cfg(play: bool = False, torque_obs: bool =
   if play:
     twist_cmd = cfg.commands["twist"]
     assert isinstance(twist_cmd, UniformVelocityCommandCfg)
-    twist_cmd.ranges.lin_vel_x = (-0.8, 0.8)
-    twist_cmd.ranges.ang_vel_z = (-0.4, 0.4)
-
-    cfg.events["log_obs_action_csv"] = EventTermCfg(
-      func=_log_obs_action_csv,
-      mode="interval",
-      interval_range_s=(0.0, 0.0),
-      is_global_time=True,
-      params={"env_index": 0},
-    )
+    twist_cmd.ranges.lin_vel_x = (0.0, 0.0)
+    twist_cmd.ranges.lin_vel_y = (0.0, 0.0)
+    twist_cmd.ranges.ang_vel_z = (0.0, 0.0)
 
     cfg.events["print_actuator_torques"] = EventTermCfg(
       func=_print_actuator_torques,
