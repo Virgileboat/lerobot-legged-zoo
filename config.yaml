@@ -2,56 +2,54 @@ _wandb:
     value:
         cli_version: 0.24.0
         e:
-            ken9zjrto7pspwdbf02dgs6ayhvgyui6:
+            ov1bf5jprtnxh060hvz30cn604svujbj:
                 args:
-                    - Mjlab-Velocity-Flat-LeRobot-Humanoid-no-arms-high-gain-torque-obs
+                    - Mjlab-Velocity-Flat-LeRobot-Humanoid-no-arms
                     - --env.scene.num-envs
                     - "4096"
                 codePath: .venv/bin/train
                 codePathLocal: .venv/bin/train
                 cpu_count: 24
-                cpu_count_logical: 24
-                cudaVersion: "13.1"
+                cpu_count_logical: 32
+                cudaVersion: "12.9"
                 disk:
                     /:
-                        total: "3422889304064"
-                        used: "494113546240"
+                        total: "1843250438144"
+                        used: "1714732281856"
                 email: virgile.batto@huggingface.co
-                executable: /home/vbatto/devel/lerobot-legged-zoo/.venv/bin/python
+                executable: /home/virgile_batto/devel/lerobot-legged-zoo/.venv/bin/python
                 git:
-                    commit: abe4c9de4781563da9a0ab2ec13c8d4cec8d9ec5
+                    commit: acb0c04e1aab9c5f3695306cacce5b9a9095cd54
                     remote: git@github.com:Virgileboat/lerobot-legged-zoo.git
-                gpu: NVIDIA GeForce RTX 5090
+                gpu: NVIDIA GeForce RTX 4090
                 gpu_count: 1
                 gpu_nvidia:
-                    - architecture: Blackwell
-                      cudaCores: 21760
-                      memoryTotal: "34190917632"
-                      name: NVIDIA GeForce RTX 5090
-                      uuid: GPU-b8a618d5-a19f-83b3-b062-a7e0ed8bb4da
-                host: champagne-PC-ZI-ARTIST-9-STUDIO-V2
+                    - architecture: Ada
+                      cudaCores: 16384
+                      memoryTotal: "25757220864"
+                      name: NVIDIA GeForce RTX 4090
+                      uuid: GPU-7c081483-31d0-39c2-c3ad-6e613e3d9f5f
+                host: lerobot
                 memory:
-                    total: "66761080832"
-                os: Linux-6.17.0-19-generic-x86_64-with-glibc2.39
-                program: /home/vbatto/devel/lerobot-legged-zoo/.venv/bin/train
-                python: CPython 3.12.3
-                root: /home/vbatto/devel/lerobot-legged-zoo
-                startedAt: "2026-04-07T13:32:58.743266Z"
-                writerId: ken9zjrto7pspwdbf02dgs6ayhvgyui6
+                    total: "67222409216"
+                os: Linux-6.8.0-94-generic-x86_64-with-glibc2.35
+                program: /home/virgile_batto/devel/lerobot-legged-zoo/.venv/bin/train
+                python: CPython 3.13.11
+                root: /home/virgile_batto/devel/lerobot-legged-zoo
+                startedAt: "2026-02-26T05:32:10.435102Z"
+                writerId: ov1bf5jprtnxh060hvz30cn604svujbj
         m: []
-        python_version: 3.12.3
+        python_version: 3.13.11
         t:
             "1":
                 - 1
-                - 105
             "2":
                 - 1
-                - 105
             "3":
                 - 3
                 - 13
                 - 61
-            "4": 3.12.3
+            "4": 3.13.11
             "5": 0.24.0
             "12": 0.24.0
             "13": linux-x86_64
@@ -81,18 +79,12 @@ env_cfg:
                 offset: 0
                 preserve_order: false
                 scale:
-                    anklex_left: 0.55
-                    anklex_right: 0.55
-                    ankley_left: 0.55
-                    ankley_right: 0.55
-                    hipx_left: 0.55
-                    hipx_right: 0.55
-                    hipy_left: 0.36666666666666664
-                    hipy_right: 0.36666666666666664
-                    hipz_left: 0.7333333333333333
-                    hipz_right: 0.7333333333333333
-                    knee_left: 0.36666666666666664
-                    knee_right: 0.36666666666666664
+                    anklex_.*: 0.55
+                    ankley_.*: 0.55
+                    hipx_.*: 0.24444444444444444
+                    hipy_.*: 0.24444444444444444
+                    hipz_.*: 0.09375
+                    knee_.*: 0.24444444444444444
                 transmission_type: JOINT
                 use_default_offset: true
         commands:
@@ -110,11 +102,11 @@ env_cfg:
                         - -3.141592653589793
                         - 3.141592653589793
                     lin_vel_x:
-                        - -0.8
-                        - 0.8
+                        - -0.5
+                        - 0.5
                     lin_vel_y:
-                        - -0.4
-                        - 0.4
+                        - -1
+                        - 1
                 rel_heading_envs: 0.3
                 rel_standing_envs: 0.1
                 resampling_time_range:
@@ -124,23 +116,6 @@ env_cfg:
                     scale: 0.5
                     z_offset: 0.9
         curriculum:
-            action_rate_hipz_hipx_weight:
-                func: mjlab.tasks.velocity.mdp.curriculums.reward_weight
-                params:
-                    reward_name: action_rate_hipz_hipx_l2
-                    weight_stages:
-                        - step: 0
-                          weight: -5
-                        - step: 120000
-                          weight: -10
-                        - step: 240000
-                          weight: -15
-                        - step: 360000
-                          weight: -20
-                        - step: 480000
-                          weight: -30
-                        - step: 600000
-                          weight: -30
             action_rate_weight:
                 func: mjlab.tasks.velocity.mdp.curriculums.reward_weight
                 params:
@@ -149,30 +124,15 @@ env_cfg:
                         - step: 0
                           weight: -0.1
                         - step: 120000
-                          weight: -0.5
+                          weight: -0.38
                         - step: 240000
-                          weight: -1
+                          weight: -0.66
                         - step: 360000
-                          weight: -1.5
+                          weight: -0.94
                         - step: 480000
-                          weight: -2
+                          weight: -1.22
                         - step: 600000
-                          weight: -2.5
-                        - step: 720000
-                          weight: -4
-            pose_weight:
-                func: mjlab.tasks.velocity.mdp.curriculums.reward_weight
-                params:
-                    reward_name: pose
-                    weight_stages:
-                        - step: 0
-                          weight: 2.5
-                        - step: 48000
-                          weight: 2
-                        - step: 96000
-                          weight: 1.5
-                        - step: 120000
-                          weight: 1.5
+                          weight: -1.5
         decimation: 4
         episode_length_s: 20
         events:
@@ -194,7 +154,8 @@ env_cfg:
                             slice_start: null
                             slice_step: null
                             slice_stop: null
-                        body_names: null
+                        body_names:
+                            - torso_mesh
                         geom_ids:
                             slice_start: null
                             slice_step: null
@@ -216,14 +177,14 @@ env_cfg:
                     operation: add
                     ranges:
                         "0":
-                            - -0.02
-                            - 0.02
+                            - -0.05
+                            - 0.05
                         "1":
-                            - -0.02
-                            - 0.02
+                            - -0.05
+                            - 0.05
                         "2":
-                            - -0.02
-                            - 0.02
+                            - -0.06
+                            - 0.06
             encoder_bias:
                 domain_randomization: false
                 func: mjlab.envs.mdp.events.randomize_encoder_bias
@@ -261,8 +222,8 @@ env_cfg:
                             slice_stop: null
                         site_names: null
                     bias_range:
-                        - -0.06981317007977318
-                        - 0.06981317007977318
+                        - -0.08726646259971647
+                        - 0.08726646259971647
             foot_friction:
                 domain_randomization: true
                 func: mjlab.envs.mdp.events.randomize_field
@@ -286,7 +247,9 @@ env_cfg:
                             slice_start: null
                             slice_step: null
                             slice_stop: null
-                        geom_names: []
+                        geom_names:
+                            - left_foot1_collision
+                            - right_foot1_collision
                         joint_ids:
                             slice_start: null
                             slice_step: null
@@ -305,132 +268,6 @@ env_cfg:
                         - 0.3
                         - 1.2
                     shared_random: true
-            joint_armature:
-                domain_randomization: true
-                func: mjlab.envs.mdp.events.randomize_field
-                interval_range_s: null
-                is_global_time: false
-                min_step_count_between_reset: 0
-                mode: startup
-                params:
-                    asset_cfg:
-                        actuator_ids:
-                            slice_start: null
-                            slice_step: null
-                            slice_stop: null
-                        actuator_names: null
-                        body_ids:
-                            slice_start: null
-                            slice_step: null
-                            slice_stop: null
-                        body_names: null
-                        geom_ids:
-                            slice_start: null
-                            slice_step: null
-                            slice_stop: null
-                        geom_names: null
-                        joint_ids:
-                            slice_start: null
-                            slice_step: null
-                            slice_stop: null
-                        joint_names: null
-                        name: robot
-                        preserve_order: false
-                        site_ids:
-                            slice_start: null
-                            slice_step: null
-                            slice_stop: null
-                        site_names: null
-                    field: dof_armature
-                    operation: scale
-                    ranges:
-                        - 0.7
-                        - 1.3
-                    shared_random: false
-            joint_coulomb_friction:
-                domain_randomization: true
-                func: mjlab.envs.mdp.events.randomize_field
-                interval_range_s: null
-                is_global_time: false
-                min_step_count_between_reset: 0
-                mode: startup
-                params:
-                    asset_cfg:
-                        actuator_ids:
-                            slice_start: null
-                            slice_step: null
-                            slice_stop: null
-                        actuator_names: null
-                        body_ids:
-                            slice_start: null
-                            slice_step: null
-                            slice_stop: null
-                        body_names: null
-                        geom_ids:
-                            slice_start: null
-                            slice_step: null
-                            slice_stop: null
-                        geom_names: null
-                        joint_ids:
-                            slice_start: null
-                            slice_step: null
-                            slice_stop: null
-                        joint_names: null
-                        name: robot
-                        preserve_order: false
-                        site_ids:
-                            slice_start: null
-                            slice_step: null
-                            slice_stop: null
-                        site_names: null
-                    field: dof_frictionloss
-                    operation: scale
-                    ranges:
-                        - 0.5
-                        - 1.5
-                    shared_random: false
-            joint_viscous_friction:
-                domain_randomization: true
-                func: mjlab.envs.mdp.events.randomize_field
-                interval_range_s: null
-                is_global_time: false
-                min_step_count_between_reset: 0
-                mode: startup
-                params:
-                    asset_cfg:
-                        actuator_ids:
-                            slice_start: null
-                            slice_step: null
-                            slice_stop: null
-                        actuator_names: null
-                        body_ids:
-                            slice_start: null
-                            slice_step: null
-                            slice_stop: null
-                        body_names: null
-                        geom_ids:
-                            slice_start: null
-                            slice_step: null
-                            slice_stop: null
-                        geom_names: null
-                        joint_ids:
-                            slice_start: null
-                            slice_step: null
-                            slice_stop: null
-                        joint_names: null
-                        name: robot
-                        preserve_order: false
-                        site_ids:
-                            slice_start: null
-                            slice_step: null
-                            slice_stop: null
-                        site_names: null
-                    field: dof_damping
-                    operation: scale
-                    ranges:
-                        - 0.7
-                        - 1.3
-                    shared_random: false
             push_robot:
                 domain_randomization: false
                 func: mjlab.envs.mdp.events.push_by_setting_velocity
@@ -470,11 +307,11 @@ env_cfg:
                 params:
                     pose_range:
                         pitch:
-                            - -0.03490658503988659
-                            - 0.03490658503988659
+                            - -0.08726646259971647
+                            - 0.08726646259971647
                         roll:
-                            - -0.03490658503988659
-                            - 0.03490658503988659
+                            - -0.08726646259971647
+                            - 0.08726646259971647
                         x:
                             - -0.5
                             - 0.5
@@ -530,48 +367,6 @@ env_cfg:
                     velocity_range:
                         - 0
                         - 0
-            robot_weight:
-                domain_randomization: true
-                func: mjlab.envs.mdp.events.randomize_field
-                interval_range_s: null
-                is_global_time: false
-                min_step_count_between_reset: 0
-                mode: startup
-                params:
-                    asset_cfg:
-                        actuator_ids:
-                            slice_start: null
-                            slice_step: null
-                            slice_stop: null
-                        actuator_names: null
-                        body_ids:
-                            slice_start: null
-                            slice_step: null
-                            slice_stop: null
-                        body_names: null
-                        geom_ids:
-                            slice_start: null
-                            slice_step: null
-                            slice_stop: null
-                        geom_names: null
-                        joint_ids:
-                            slice_start: null
-                            slice_step: null
-                            slice_stop: null
-                        joint_names: null
-                        name: robot
-                        preserve_order: false
-                        site_ids:
-                            slice_start: null
-                            slice_step: null
-                            slice_stop: null
-                        site_names: null
-                    field: body_mass
-                    operation: scale
-                    ranges:
-                        - 0.7
-                        - 1.3
-                    shared_random: false
         is_finite_horizon: false
         observations:
             critic:
@@ -608,29 +403,11 @@ env_cfg:
                         func: mjlab.envs.mdp.observations.builtin_sensor
                         history_length: 0
                         noise:
-                            n_max: 0.06
-                            n_min: -0.06
+                            n_max: 0.35
+                            n_min: -0.35
                             operation: add
                         params:
                             sensor_name: robot/imu_ang_vel
-                        scale: null
-                    base_lin_vel:
-                        clip: null
-                        delay_hold_prob: 0
-                        delay_max_lag: 0
-                        delay_min_lag: 0
-                        delay_per_env: true
-                        delay_per_env_phase: true
-                        delay_update_period: 0
-                        flatten_history_dim: true
-                        func: mjlab.envs.mdp.observations.builtin_sensor
-                        history_length: 0
-                        noise:
-                            n_max: 0.075
-                            n_min: -0.075
-                            operation: add
-                        params:
-                            sensor_name: robot/imu_lin_vel
                         scale: null
                     command:
                         clip: null
@@ -748,8 +525,8 @@ env_cfg:
                         func: mjlab.envs.mdp.observations.joint_pos_rel
                         history_length: 0
                         noise:
-                            n_max: 0.08726646259971647
-                            n_min: -0.08726646259971647
+                            n_max: 0.05235987755982989
+                            n_min: -0.05235987755982989
                             operation: add
                         scale: null
                     joint_vel:
@@ -764,8 +541,8 @@ env_cfg:
                         func: mjlab.envs.mdp.observations.joint_vel_rel
                         history_length: 0
                         noise:
-                            n_max: 0.05
-                            n_min: -0.05
+                            n_max: 4
+                            n_min: -4
                             operation: add
                         scale: null
                     projected_gravity:
@@ -780,8 +557,8 @@ env_cfg:
                         func: mjlab.envs.mdp.observations.projected_gravity
                         history_length: 0
                         noise:
-                            n_max: 0.015
-                            n_min: -0.015
+                            n_max: 0.07
+                            n_min: -0.07
                             operation: add
                         scale: null
             policy:
@@ -818,11 +595,29 @@ env_cfg:
                         func: mjlab.envs.mdp.observations.builtin_sensor
                         history_length: 0
                         noise:
-                            n_max: 0.06
-                            n_min: -0.06
+                            n_max: 0.35
+                            n_min: -0.35
                             operation: add
                         params:
                             sensor_name: robot/imu_ang_vel
+                        scale: null
+                    base_lin_vel:
+                        clip: null
+                        delay_hold_prob: 0
+                        delay_max_lag: 0
+                        delay_min_lag: 0
+                        delay_per_env: true
+                        delay_per_env_phase: true
+                        delay_update_period: 0
+                        flatten_history_dim: true
+                        func: mjlab.envs.mdp.observations.builtin_sensor
+                        history_length: 0
+                        noise:
+                            n_max: 0.15
+                            n_min: -0.15
+                            operation: add
+                        params:
+                            sensor_name: robot/imu_lin_vel
                         scale: null
                     command:
                         clip: null
@@ -851,26 +646,10 @@ env_cfg:
                         func: mjlab.envs.mdp.observations.joint_pos_rel
                         history_length: 0
                         noise:
-                            n_max: 0.08726646259971647
-                            n_min: -0.08726646259971647
+                            n_max: 0.05235987755982989
+                            n_min: -0.05235987755982989
                             operation: add
                         scale: null
-                    joint_torques:
-                        clip: null
-                        delay_hold_prob: 0
-                        delay_max_lag: 0
-                        delay_min_lag: 0
-                        delay_per_env: true
-                        delay_per_env_phase: true
-                        delay_update_period: 0
-                        flatten_history_dim: true
-                        func: training_exemples.lerobot_humanoid_no_arms.env_cfgs._joint_torques_obs
-                        history_length: 0
-                        noise:
-                            n_max: 0.1
-                            n_min: -0.1
-                            operation: add
-                        scale: 0.011363636363636364
                     joint_vel:
                         clip: null
                         delay_hold_prob: 0
@@ -883,8 +662,8 @@ env_cfg:
                         func: mjlab.envs.mdp.observations.joint_vel_rel
                         history_length: 0
                         noise:
-                            n_max: 0.05
-                            n_min: -0.05
+                            n_max: 4
+                            n_min: -4
                             operation: add
                         scale: null
                     projected_gravity:
@@ -899,24 +678,24 @@ env_cfg:
                         func: mjlab.envs.mdp.observations.projected_gravity
                         history_length: 0
                         noise:
-                            n_max: 0.015
-                            n_min: -0.015
+                            n_max: 0.07
+                            n_min: -0.07
                             operation: add
                         scale: null
         rewards:
-            action_rate_hipz_hipx_l2:
-                func: <training_exemples.lerobot_humanoid_no_arms.env_cfgs._SelectiveActionRateL2Penalty object at 0x7c37f522a210>
+            action_fft_band_le_3hz_ratio:
+                func: <training_exemples.lerobot_humanoid_no_arms.env_cfgs._ActionFftBandRatioReward object at 0x7284f0a876f0>
                 params:
-                    joint_name_patterns:
-                        - .*hipz.*
-                        - .*hipx.*
-                weight: -5
+                    cutoff_hz: 3
+                    history_len: 50
+                    min_history: 50
+                weight: 3
             action_rate_l2:
                 func: mjlab.envs.mdp.rewards.action_rate_l2
                 weight: -0.1
             actuator_torque_l2:
                 func: training_exemples.lerobot_humanoid_no_arms.env_cfgs._all_actuator_torque_l2
-                weight: -0.002
+                weight: -0.0002
             air_time:
                 func: mjlab.tasks.velocity.mdp.rewards.feet_air_time
                 params:
@@ -931,10 +710,16 @@ env_cfg:
                 params:
                     sensor_name: robot/root_angmom
                 weight: -0.02
+            ankle_power_l1:
+                func: training_exemples.lerobot_humanoid_no_arms.env_cfgs._ankle_actuator_power_l1
+                weight: -0.0005
+            ankle_torque_l2:
+                func: training_exemples.lerobot_humanoid_no_arms.env_cfgs._ankle_actuator_torque_l2
+                weight: -0.003
             ankle_torque_over_5nm_l2:
                 func: training_exemples.lerobot_humanoid_no_arms.env_cfgs._ankle_torque_above_limit_l2
                 params:
-                    limit_nm: 4
+                    limit_nm: 5
                 weight: -0.02
             body_ang_vel:
                 func: mjlab.tasks.velocity.mdp.rewards.body_angular_velocity_penalty
@@ -1045,7 +830,7 @@ env_cfg:
                     command_name: twist
                     command_threshold: 0.05
                     sensor_name: feet_ground_contact
-                weight: -0.5
+                weight: -0.1
             foot_swing_height:
                 func: mjlab.tasks.velocity.mdp.rewards.feet_swing_height
                 params:
@@ -1119,28 +904,23 @@ env_cfg:
                     command_name: twist
                     running_threshold: 1.5
                     std_running:
-                        .*anklex.*: 0.1
-                        .*ankley.*: 0.2
-                        .*hipx.*: 0.1
-                        .*hipy.*: 0.8
-                        .*hipz.*: 0.1
-                        .*knee.*: 0.8
+                        .*anklex.*: 0.25
+                        .*ankley.*: 0.45
+                        .*hipx.*: 0.2
+                        .*hipy.*: 0.5
+                        .*hipz.*: 0.2
+                        .*knee.*: 0.6
                     std_standing:
-                        .*anklex.*: 0.2
-                        .*ankley.*: 0.35
-                        .*hipx.*: 0.05
-                        .*hipy.*: 0.8
-                        .*hipz.*: 0.05
-                        .*knee.*: 0.8
+                        .*: 0.05
                     std_walking:
                         .*anklex.*: 0.2
                         .*ankley.*: 0.35
-                        .*hipx.*: 0.1
-                        .*hipy.*: 0.8
-                        .*hipz.*: 0.1
-                        .*knee.*: 0.8
+                        .*hipx.*: 0.15
+                        .*hipy.*: 0.3
+                        .*hipz.*: 0.15
+                        .*knee.*: 0.35
                     walking_threshold: 0.05
-                weight: 2.5
+                weight: 1
             self_collisions:
                 func: mjlab.tasks.velocity.mdp.rewards.self_collision_cost
                 params:
@@ -1152,19 +932,19 @@ env_cfg:
                     command_name: twist
                     command_threshold: 0.05
                     sensor_name: feet_ground_contact
-                weight: -0.001
+                weight: -1e-05
             track_angular_velocity:
                 func: mjlab.tasks.velocity.mdp.rewards.track_angular_velocity
                 params:
                     command_name: twist
                     std: 0.7071067811865476
-                weight: 3
+                weight: 2
             track_linear_velocity:
                 func: mjlab.tasks.velocity.mdp.rewards.track_linear_velocity
                 params:
                     command_name: twist
                     std: 0.5
-                weight: 6
+                weight: 2
             upright:
                 func: mjlab.tasks.velocity.mdp.rewards.flat_orientation
                 params:
@@ -1198,108 +978,53 @@ env_cfg:
                             slice_stop: null
                         site_names: null
                     std: 0.4472135954999579
-                weight: 1.5
+                weight: 1
         scale_rewards_by_dt: true
         scene:
             entities:
                 robot:
                     articulation:
                         actuators:
-                            - armature: 0.0226574181459
-                              damping: 3
-                              effort_limit: 88
-                              frictionloss: 1.35093364028
-                              stiffness: 30
-                              target_names_expr:
-                                - hipz_right
-                              transmission_type: JOINT
-                            - armature: 0.0226574181459
-                              damping: 3
-                              effort_limit: 88
-                              frictionloss: 1.35093364028
-                              stiffness: 30
-                              target_names_expr:
-                                - hipz_left
-                              transmission_type: JOINT
-                            - armature: 0.133269754407
-                              damping: 3
-                              effort_limit: 88
-                              frictionloss: 1.15781879707
+                            - armature: 0.02
+                              damping: 2
+                              effort_limit: 15
+                              frictionloss: 0
                               stiffness: 40
                               target_names_expr:
-                                - hipx_right
+                                - hipz_.*
                               transmission_type: JOINT
-                            - armature: 0.133877916753
+                            - armature: 0.02
+                              damping: 2
+                              effort_limit: 88
+                              frictionloss: 0
+                              stiffness: 90
+                              target_names_expr:
+                                - hipx_.*
+                              transmission_type: JOINT
+                            - armature: 0.02
+                              damping: 2
+                              effort_limit: 88
+                              frictionloss: 0
+                              stiffness: 90
+                              target_names_expr:
+                                - hipy_.*
+                              transmission_type: JOINT
+                            - armature: 0.015
+                              damping: 2
+                              effort_limit: 88
+                              frictionloss: 0
+                              stiffness: 90
+                              target_names_expr:
+                                - knee_.*
+                              transmission_type: JOINT
+                            - armature: 0.01
                               damping: 3
-                              effort_limit: 88
-                              frictionloss: 1.16683759813
-                              stiffness: 40
-                              target_names_expr:
-                                - hipx_left
-                              transmission_type: JOINT
-                            - armature: 0.14077316233
-                              damping: 4
-                              effort_limit: 88
-                              frictionloss: 1.3122407137
-                              stiffness: 60
-                              target_names_expr:
-                                - hipy_right
-                              transmission_type: JOINT
-                            - armature: 0.14077316233
-                              damping: 4
-                              effort_limit: 88
-                              frictionloss: 1.3122407137
-                              stiffness: 60
-                              target_names_expr:
-                                - hipy_left
-                              transmission_type: JOINT
-                            - armature: 0.123300247512
-                              damping: 4
-                              effort_limit: 88
-                              frictionloss: 0.91947125507
-                              stiffness: 60
-                              target_names_expr:
-                                - knee_right
-                              transmission_type: JOINT
-                            - armature: 0.123303314591
-                              damping: 4
-                              effort_limit: 88
-                              frictionloss: 1.0764965485
-                              stiffness: 60
-                              target_names_expr:
-                                - knee_left
-                              transmission_type: JOINT
-                            - armature: 0.0300692570618
-                              damping: 1.5
                               effort_limit: 44
-                              frictionloss: 0.171194932409
+                              frictionloss: 0
                               stiffness: 20
                               target_names_expr:
-                                - ankley_right
-                              transmission_type: JOINT
-                            - armature: 0.0296987477637
-                              damping: 1.5
-                              effort_limit: 44
-                              frictionloss: 0.17117010829
-                              stiffness: 20
-                              target_names_expr:
-                                - ankley_left
-                              transmission_type: JOINT
-                            - armature: 0.0299366151844
-                              damping: 1.5
-                              effort_limit: 44
-                              frictionloss: 0.233720916986
-                              stiffness: 20
-                              target_names_expr:
-                                - anklex_right
-                              transmission_type: JOINT
-                            - armature: 0.0300569538165
-                              damping: 1.5
-                              effort_limit: 44
-                              frictionloss: 0.290252613159
-                              stiffness: 20
-                              target_names_expr:
-                                - anklex_left
+                                - ankley_.*
+                                - anklex_.*
                               transmission_type: JOINT
                         soft_joint_pos_limit_factor: 0.9
                     cameras: []
@@ -1307,45 +1032,25 @@ env_cfg:
                         - conaffinity: 1
                           condim:
                             .*_collision: 1
-                            ^(left|right)_foot_collision$: 3
+                            ^(left|right)_foot1_collision$: 3
                           contype: 1
                           disable_other_geoms: true
                           friction:
-                            ^(left|right)_foot_collision$:
+                            ^(left|right)_foot1_collision$:
                                 - 0.6
                           geom_names_expr:
                             - .*_collision
                           priority:
-                            ^(left|right)_foot_collision$: 1
-                          solimp:
-                            ^(left|right)_foot_collision$:
-                                - 0.995
-                                - 0.9995
-                                - 0.001
-                                - 0.5
-                                - 2
-                          solref:
-                            ^(left|right)_foot_collision$:
-                                - 0.005
-                                - 1
+                            ^(left|right)_foot1_collision$: 1
+                          solimp: null
+                          solref: null
                     init_state:
                         ang_vel:
                             - 0
                             - 0
                             - 0
                         joint_pos:
-                            anklex_left: 0
-                            anklex_right: 0
-                            ankley_left: -0
-                            ankley_right: 0
-                            hipx_left: 0
-                            hipx_right: 0
-                            hipy_left: -0
-                            hipy_right: 0
-                            hipz_left: 0
-                            hipz_right: 0
-                            knee_left: 0
-                            knee_right: 0
+                            .*: 0
                         joint_vel:
                             .*: 0
                         lin_vel:
@@ -1355,7 +1060,7 @@ env_cfg:
                         pos:
                             - 0
                             - 0
-                            - 0.72
+                            - 0.75
                         rot:
                             - 1
                             - 0
@@ -1363,7 +1068,7 @@ env_cfg:
                             - 0
                     lights: []
                     materials: []
-                    spec_fn: training_exemples.lerobot_humanoid_no_arms_high_gain.lerobot_humanoid_no_arms_high_gain_constants.get_spec
+                    spec_fn: training_exemples.lerobot_humanoid_no_arms.lerobot_humanoid_no_arms_constants.get_spec
                     textures: []
             env_spacing: 2
             extent: 2
@@ -1471,7 +1176,7 @@ env_cfg:
             origin_type: ASSET_BODY
             width: 320
 log_dir:
-    value: logs/rsl_rl/lerobot_humanoid_no_arms_velocity/2026-04-07_15-32-55
+    value: logs/rsl_rl/lerobot_humanoid_no_arms_velocity/2026-02-26_06-32-06
 policy_cfg:
     value:
         activation: elu
@@ -1486,7 +1191,7 @@ policy_cfg:
             - 128
         critic_obs_normalization: true
         init_noise_std: 1
-        noise_std_type: log
+        noise_std_type: scalar
 runner_cfg:
     value:
         algorithm:
@@ -1509,7 +1214,7 @@ runner_cfg:
         load_checkpoint: model_.*.pt
         load_run: .*
         logger: wandb
-        max_iterations: 40000
+        max_iterations: 30000
         num_steps_per_env: 24
         obs_groups:
             critic:
@@ -1529,7 +1234,7 @@ runner_cfg:
                 - 128
             critic_obs_normalization: true
             init_noise_std: 1
-            noise_std_type: log
+            noise_std_type: scalar
         resume: false
         run_name: ""
         save_interval: 50
