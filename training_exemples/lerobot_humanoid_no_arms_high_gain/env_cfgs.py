@@ -20,6 +20,25 @@ from .lerobot_humanoid_no_arms_high_gain_constants import (
   get_lerobot_hg_robot_cfg,
 )
 
+ACTION_RATE_PENALTY_SCALE = 0.5
+
+
+def _scale_high_gain_action_rate_penalties(cfg: ManagerBasedRlEnvCfg) -> None:
+  """Reduce action-rate penalties for the high-gain variants only."""
+  for reward_name in ("action_rate_l2", "action_rate_hipz_hipx_l2"):
+    reward_term = cfg.rewards.get(reward_name)
+    if reward_term is not None:
+      reward_term.weight *= ACTION_RATE_PENALTY_SCALE
+
+  for curriculum_name in ("action_rate_weight", "action_rate_hipz_hipx_weight"):
+    curriculum_term = cfg.curriculum.get(curriculum_name)
+    if curriculum_term is None:
+      continue
+    weight_stages = curriculum_term.params.get("weight_stages", [])
+    for stage in weight_stages:
+      if "weight" in stage:
+        stage["weight"] *= ACTION_RATE_PENALTY_SCALE
+
 
 def _apply_high_gain_robot(cfg: ManagerBasedRlEnvCfg, torque_obs: bool) -> ManagerBasedRlEnvCfg:
   """Swap in the high-gain robot and update dependent config."""
@@ -28,12 +47,13 @@ def _apply_high_gain_robot(cfg: ManagerBasedRlEnvCfg, torque_obs: bool) -> Manag
   joint_pos_action = cfg.actions["joint_pos"]
   assert isinstance(joint_pos_action, JointPositionActionCfg)
   joint_pos_action.scale = LEROBOT_HG_ACTION_SCALE
+  _scale_high_gain_action_rate_penalties(cfg)
 
   # Sync torque obs with torque_obs flag (base config already added/skipped it).
   if torque_obs and "joint_torques" not in cfg.observations["policy"].terms:
     cfg.observations["policy"].terms["joint_torques"] = ObservationTermCfg(
       func=_joint_torques_obs,
-      noise=Unoise(n_min=-5.0, n_max=5.0),
+      noise=Unoise(n_min=-0.1, n_max=0.1),
       scale=1.0 / 88.0,
     )
   elif not torque_obs:
