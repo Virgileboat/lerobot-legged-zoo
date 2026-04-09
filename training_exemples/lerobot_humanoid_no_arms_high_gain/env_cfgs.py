@@ -12,6 +12,8 @@ from mjlab.entity import EntityArticulationInfoCfg
 from mjlab.envs import ManagerBasedRlEnvCfg
 from mjlab.envs.mdp.actions import JointPositionActionCfg
 from mjlab.managers.observation_manager import ObservationTermCfg
+from mjlab.managers.reward_manager import RewardTermCfg
+from mjlab.tasks.velocity import mdp
 from mjlab.utils.noise import UniformNoiseCfg as Unoise
 
 from ..lerobot_humanoid_no_arms.env_cfgs import (
@@ -44,6 +46,38 @@ def _scale_high_gain_action_rate_penalties(cfg: ManagerBasedRlEnvCfg) -> None:
         stage["weight"] *= ACTION_RATE_PENALTY_SCALE
 
 
+def _stabilize_high_gain_training(cfg: ManagerBasedRlEnvCfg) -> None:
+  """Make standing a strong local optimum to avoid early-collapse policies."""
+  twist_cmd = cfg.commands.get("twist")
+  if twist_cmd is not None:
+    # Smaller commands and more standing samples improve early-stage balance.
+    twist_cmd.ranges.lin_vel_x = (-0.5, 0.5)
+    twist_cmd.ranges.lin_vel_y = (-0.25, 0.25)
+    twist_cmd.ranges.ang_vel_z = (-0.15, 0.15)
+    twist_cmd.rel_standing_envs = max(float(twist_cmd.rel_standing_envs), 0.5)
+    twist_cmd.resampling_time_range = (4.0, 10.0)
+
+  # Disable random pushes while the policy is learning to stabilize.
+  cfg.events.pop("push_robot", None)
+
+  fell_over = cfg.terminations.get("fell_over")
+  if fell_over is not None:
+    fell_over.params["limit_angle"] = math.radians(55.0)
+
+  # Penalize falls explicitly and reward staying alive.
+  cfg.rewards["is_alive"] = RewardTermCfg(func=mdp.is_alive, weight=0.25)
+  cfg.rewards["termination_penalty"] = RewardTermCfg(
+    func=mdp.is_terminated,
+    weight=-50.0,
+  )
+
+  # Bias shaping toward stable posture before aggressive tracking.
+  cfg.rewards["pose"].weight = max(float(cfg.rewards["pose"].weight), 3.0)
+  cfg.rewards["upright"].weight = max(float(cfg.rewards["upright"].weight), 2.5)
+  cfg.rewards["track_linear_velocity"].weight = 4.0
+  cfg.rewards["track_angular_velocity"].weight = 2.0
+
+
 def _apply_high_gain_robot(cfg: ManagerBasedRlEnvCfg, torque_obs: bool) -> ManagerBasedRlEnvCfg:
   """Swap in the high-gain robot and update dependent config."""
   robot_cfg = get_lerobot_hg_robot_cfg()
@@ -61,6 +95,7 @@ def _apply_high_gain_robot(cfg: ManagerBasedRlEnvCfg, torque_obs: bool) -> Manag
   assert isinstance(joint_pos_action, JointPositionActionCfg)
   joint_pos_action.scale = LEROBOT_HG_ACTION_SCALE
   _scale_high_gain_action_rate_penalties(cfg)
+  _stabilize_high_gain_training(cfg)
   joint_pos_obs = cfg.observations["policy"].terms.get("joint_pos")
   if joint_pos_obs is not None and getattr(joint_pos_obs, "noise", None) is not None:
     joint_pos_noise_rad = math.radians(3.0)
