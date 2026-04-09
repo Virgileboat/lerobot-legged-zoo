@@ -740,17 +740,16 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
   projected_gravity_term.noise.n_max = 0.015
   joint_pos_term = policy_obs.terms.get("joint_pos")
   if joint_pos_term is not None and getattr(joint_pos_term, "noise", None) is not None:
-    joint_pos_noise_rad = math.radians(5)
-    joint_pos_term.noise.n_min = -joint_pos_noise_rad
-    joint_pos_term.noise.n_max = joint_pos_noise_rad
+    joint_pos_term.noise.n_min = 0.0
+    joint_pos_term.noise.n_max = 0.0
   joint_vel_term = policy_obs.terms.get("joint_vel")
-  joint_vel_term.noise.n_min = -0.05
-  joint_vel_term.noise.n_max = 0.05
+  joint_vel_term.noise.n_min = -0.1
+  joint_vel_term.noise.n_max = 0.1
   # Joint torques with noise (sim2real: real actuators have torque measurement noise).
   if torque_obs:
     policy_obs.terms["joint_torques"] = ObservationTermCfg(
       func=_joint_torques_obs,
-      noise=Unoise(n_min=-0.1, n_max=0.1),  # ±0.1 Nm — matches real torque readout noise
+      noise=Unoise(n_min=-0.05, n_max=0.05),  # ±0.05 Nm — matches real torque readout noise
       scale=1.0 / 88.0,  # Normalize by a representative effort limit.
     )
 

@@ -7,8 +7,6 @@ identification) and the actuator gains differ.
 
 import math
 
-from mjlab.actuator.delayed_actuator import DelayedActuatorCfg
-from mjlab.entity import EntityArticulationInfoCfg
 from mjlab.envs import ManagerBasedRlEnvCfg
 from mjlab.envs.mdp.actions import JointPositionActionCfg
 from mjlab.managers.observation_manager import ObservationTermCfg
@@ -80,33 +78,19 @@ def _stabilize_high_gain_training(cfg: ManagerBasedRlEnvCfg) -> None:
 
 def _apply_high_gain_robot(cfg: ManagerBasedRlEnvCfg, torque_obs: bool) -> ManagerBasedRlEnvCfg:
   """Swap in the high-gain robot and update dependent config."""
-  robot_cfg = get_lerobot_hg_robot_cfg()
-  orig_artic = robot_cfg.articulation
-  robot_cfg.articulation = EntityArticulationInfoCfg(
-    actuators=tuple(
-      DelayedActuatorCfg(base_cfg=a, delay_min_lag=0, delay_max_lag=8)
-      for a in orig_artic.actuators
-    ),
-    soft_joint_pos_limit_factor=orig_artic.soft_joint_pos_limit_factor,
-  )
-  cfg.scene.entities = {"robot": robot_cfg}
+  cfg.scene.entities = {"robot": get_lerobot_hg_robot_cfg()}
 
   joint_pos_action = cfg.actions["joint_pos"]
   assert isinstance(joint_pos_action, JointPositionActionCfg)
   joint_pos_action.scale = LEROBOT_HG_ACTION_SCALE
   _scale_high_gain_action_rate_penalties(cfg)
   _stabilize_high_gain_training(cfg)
-  joint_pos_obs = cfg.observations["policy"].terms.get("joint_pos")
-  if joint_pos_obs is not None and getattr(joint_pos_obs, "noise", None) is not None:
-    joint_pos_noise_rad = math.radians(3.0)
-    joint_pos_obs.noise.n_min = -joint_pos_noise_rad
-    joint_pos_obs.noise.n_max = joint_pos_noise_rad
 
   # Sync torque obs with torque_obs flag (base config already added/skipped it).
   if torque_obs and "joint_torques" not in cfg.observations["policy"].terms:
     cfg.observations["policy"].terms["joint_torques"] = ObservationTermCfg(
       func=_joint_torques_obs,
-      noise=Unoise(n_min=-0.1, n_max=0.1),
+      noise=Unoise(n_min=-0.05, n_max=0.05),
       scale=1.0 / 88.0,
     )
   elif not torque_obs:
