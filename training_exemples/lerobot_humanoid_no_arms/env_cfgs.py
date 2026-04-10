@@ -3,6 +3,7 @@
 import csv
 import json
 import math
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -16,6 +17,7 @@ from mjlab.entity import EntityArticulationInfoCfg
 from mjlab.envs import ManagerBasedRlEnvCfg
 from mjlab.envs import mdp as envs_mdp
 from mjlab.envs.mdp.actions import JointPositionActionCfg
+from mjlab.managers.curriculum_manager import CurriculumTermCfg
 from mjlab.managers.event_manager import EventTermCfg
 from mjlab.managers.observation_manager import ObservationTermCfg
 from mjlab.managers.reward_manager import RewardTermCfg
@@ -30,6 +32,89 @@ import torch
 
 
 _CSV_LOG_STATE_BY_ENV: dict[int, dict[str, Any]] = {}
+
+
+class _SelectiveActionRateL2Penalty:
+  """L2 action-rate penalty computed on a selected subset of action dimensions."""
+
+  def __init__(self) -> None:
+    self._state_by_env: dict[int, dict[str, Any]] = {}
+
+  def _resolve_joint_indices(
+    self,
+    env,
+    num_actions: int,
+    joint_name_patterns: tuple[str, ...],
+    device: torch.device,
+  ) -> torch.Tensor:
+    if num_actions <= 0:
+      return torch.empty((0,), dtype=torch.long, device=device)
+
+    asset = env.scene["robot"]
+    candidate_name_lists = [
+      ("actuator_names", getattr(asset, "actuator_names", None)),
+      ("joint_names", getattr(asset, "joint_names", None)),
+      ("dof_names", getattr(asset, "dof_names", None)),
+    ]
+    compiled_patterns = [re.compile(p) for p in joint_name_patterns]
+
+    checked_sources: list[str] = []
+    for source_name, names in candidate_name_lists:
+      if names is None or len(names) != num_actions:
+        size = "None" if names is None else str(len(names))
+        checked_sources.append(f"{source_name}={size}")
+        continue
+      checked_sources.append(f"{source_name}={len(names)}")
+      ids = [
+        i
+        for i, name in enumerate(names)
+        if any(pattern.fullmatch(name) for pattern in compiled_patterns)
+      ]
+      if ids:
+        return torch.tensor(ids, dtype=torch.long, device=device)
+    raise ValueError(
+      "No action dimensions matched joint_name_patterns="
+      f"{joint_name_patterns} with num_actions={num_actions}. "
+      f"Checked sources: {', '.join(checked_sources)}."
+    )
+
+  def __call__(
+    self,
+    env,
+    joint_name_patterns: tuple[str, ...] = (r".*hipz.*", r".*hipx.*"),
+  ) -> torch.Tensor:
+    actions = env.action_manager.action
+    prev_actions = env.action_manager.prev_action
+    env_key = id(env)
+
+    state = self._state_by_env.get(env_key)
+    needs_init = (
+      state is None
+      or state["joint_ids"].device != actions.device
+      or state["num_actions"] != actions.shape[1]
+      or state["joint_name_patterns"] != joint_name_patterns
+    )
+    if needs_init:
+      state = {
+        "joint_ids": self._resolve_joint_indices(
+          env=env,
+          num_actions=actions.shape[1],
+          joint_name_patterns=joint_name_patterns,
+          device=actions.device,
+        ),
+        "num_actions": actions.shape[1],
+        "joint_name_patterns": joint_name_patterns,
+      }
+      self._state_by_env[env_key] = state
+
+    joint_ids = state["joint_ids"]
+
+    if joint_ids.numel() == 0:
+      return torch.zeros(actions.shape[0], device=actions.device, dtype=actions.dtype)
+    return torch.sum(torch.square(actions[:, joint_ids] - prev_actions[:, joint_ids]), dim=1)
+
+  def reset(self, env_ids: torch.Tensor | slice | None = None) -> None:
+    del env_ids
 
 
 class _ActionFftBandRatioReward:
@@ -149,6 +234,7 @@ class _ActionFftBandRatioReward:
 
 
 _ACTION_FFT_BAND_RATIO_REWARD = _ActionFftBandRatioReward()
+_SELECTIVE_ACTION_RATE_L2_PENALTY = _SelectiveActionRateL2Penalty()
 
 
 def _flatten_obs_policy(
@@ -298,6 +384,9 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
     cfg.scene.terrain.terrain_generator.difficulty_range = (0.0, 0.3)
     if hasattr(cfg.scene.terrain, "max_init_terrain_level"):
       cfg.scene.terrain.max_init_terrain_level = 2
+
+  # Disable default velocity-command curriculum, keep terrain curriculum.
+  cfg.curriculum.pop("command_vel", None)
 
   joint_pos_action = cfg.actions["joint_pos"]
   assert isinstance(joint_pos_action, JointPositionActionCfg)
@@ -572,6 +661,58 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
     params={"history_len": 50, "min_history": 50, "cutoff_hz": 2.5},
   )
   cfg.rewards["action_rate_l2"].weight = -0.1
+  cfg.rewards["action_rate_hipz_hipx_l2"] = RewardTermCfg(
+    func=_SELECTIVE_ACTION_RATE_L2_PENALTY,
+    weight=-5.0,
+    params={"joint_name_patterns": (r".*hipz.*", r".*hipx.*")},
+  )
+  cfg.curriculum["pose_weight"] = CurriculumTermCfg(
+    func=mdp.reward_weight,
+    params={
+      "reward_name": "pose",
+      "weight_stages": [
+        {"step": 0, "weight": 2.5},
+        # Curriculum uses env.common_step_counter (env steps), while W&B "Step"
+        # is PPO iterations. Here num_steps_per_env=24, so multiply by 24.
+        {"step": 2_000 * 24, "weight": 2.0},
+        {"step": 4_000 * 24, "weight": 1.5},
+        {"step": 5_000 * 24, "weight": 1.5},
+      ],
+    },
+  )
+  cfg.curriculum["action_rate_weight"] = CurriculumTermCfg(
+    func=mdp.reward_weight,
+    params={
+      "reward_name": "action_rate_l2",
+      "weight_stages": [
+        {"step": 0, "weight": -0.1},
+        # Curriculum uses env.common_step_counter (env steps), while W&B "Step"
+        # is PPO iterations. Here num_steps_per_env=24, so multiply by 24.
+        {"step": 5_000 * 24, "weight": -0.5},
+        {"step": 10_000 * 24, "weight": -1.0},
+        {"step": 15_000 * 24, "weight": -1.5},
+        {"step": 20_000 * 24, "weight": -2.0},
+        {"step": 25_000 * 24, "weight": -2.5},
+        {"step": 30_000 * 24, "weight": -4.0},
+      ],
+    },
+  )
+  cfg.curriculum["action_rate_hipz_hipx_weight"] = CurriculumTermCfg(
+    func=mdp.reward_weight,
+    params={
+      "reward_name": "action_rate_hipz_hipx_l2",
+      "weight_stages": [
+        {"step": 0, "weight": -5.0},
+        # Curriculum uses env.common_step_counter (env steps), while W&B "Step"
+        # is PPO iterations. Here num_steps_per_env=24, so multiply by 24.
+        {"step": 5_000 * 24, "weight": -10.0},
+        {"step": 10_000 * 24, "weight": -15.0},
+        {"step": 15_000 * 24, "weight": -20.0},
+        {"step": 20_000 * 24, "weight": -30.0},
+        {"step": 25_000 * 24, "weight": -30.0},
+      ],
+    },
+  )
 
   cfg.rewards["self_collisions"] = RewardTermCfg(
     func=mdp.self_collision_cost,
