@@ -1,0 +1,13 @@
+{
+    "configuration": "default",
+    "documentId": "fb645318a27646d1d8840be6",
+    "documentMicroversion": "62703f4209e5f22cf8592f0d",
+    "elementId": "b2c80746951c21e879668914",
+    "fullConfiguration": "default",
+    "id": "M/yY+m7fIzX3vgACy",
+    "isStandardContent": false,
+    "name": "gpio <34>",
+    "partId": "KFTD",
+    "suppressed": false,
+    "type": "Part"
+}

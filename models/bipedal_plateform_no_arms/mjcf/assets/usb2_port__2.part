@@ -1,0 +1,13 @@
+{
+    "configuration": "default",
+    "documentId": "fb645318a27646d1d8840be6",
+    "documentMicroversion": "16606b8218dd098adb9b1713",
+    "elementId": "b2c80746951c21e879668914",
+    "fullConfiguration": "default",
+    "id": "McJMd+QsyH+RKkTsO",
+    "isStandardContent": false,
+    "name": "usb2-port <3>",
+    "partId": "KFTE",
+    "suppressed": false,
+    "type": "Part"
+}

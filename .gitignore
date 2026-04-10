@@ -22,11 +22,16 @@ coverage.xml
 logs/
 wandb/
 *.log
+/bipedal_state_log*.csv
+/debug_ctrl*.csv
+/less_noice_high_gain_torque_obs/*.csv
 
 # OS / editor
 .DS_Store
 .idea/
 .vscode/
+.codex
+**/.codex
 
 *.pkl
 *.onnx

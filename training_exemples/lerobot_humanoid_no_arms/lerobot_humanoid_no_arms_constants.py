@@ -43,54 +43,53 @@ def get_spec() -> mujoco.MjSpec:
 # Actuator config.
 #
 # The robot uses position-controlled actuators.
-# We define conservative stiffness and damping values.
-# Adjust based on your actual motor specifications.
+# Keep gains and actuator dynamics aligned with the current MJCF model.
 ##
 
-# Base actuator gains (no additional scaling).
-BASE_KP_HIPZ = 10.0
-BASE_KV_HIPZ = 2.0
-BASE_KP_HIPX = 20.0
-BASE_KV_HIPX = 2.0
-BASE_KP_HIP = 20.0
-BASE_KV_HIP = 2.0
-BASE_KP_KNEE = 20.0
-BASE_KV_KNEE = 2.0
+# Base actuator gains.
+BASE_KP_HIPZ = 30.0
+BASE_KV_HIPZ = 3.0
+BASE_KP_HIPX = 40.0
+BASE_KV_HIPX = 3.0
+BASE_KP_HIP = 60.0
+BASE_KV_HIP = 4.0
+BASE_KP_KNEE = 60.0
+BASE_KV_KNEE = 4.0
 BASE_KP_ANKLE = 20.0
-BASE_KV_ANKLE = 1.0
+BASE_KV_ANKLE = 1.5
 
 # Joint armature and dry friction (frictionloss) applied through actuator config.
 # Keep these aligned with the robot MJCF values.
-HIPZ_RIGHT_ARMATURE = 0.024646
-HIPZ_LEFT_ARMATURE = 0.019441
-HIPX_RIGHT_ARMATURE = 0.012288
-HIPX_LEFT_ARMATURE = 0.035200
-HIPY_RIGHT_ARMATURE = 0.000508
-HIPY_LEFT_ARMATURE = 0.000494
-KNEE_RIGHT_ARMATURE = 0.105781
-KNEE_LEFT_ARMATURE = 0.050623
-ANKLEY_RIGHT_ARMATURE = 0.030236
-ANKLEY_LEFT_ARMATURE = 0.032793
-ANKLEX_RIGHT_ARMATURE = 0.026138
-ANKLEX_LEFT_ARMATURE = 0.027463
+HIPZ_RIGHT_ARMATURE = 0.0226574181459
+HIPZ_LEFT_ARMATURE = 0.0226574181459
+HIPX_RIGHT_ARMATURE = 0.133269754407
+HIPX_LEFT_ARMATURE = 0.133877916753
+HIPY_RIGHT_ARMATURE = 0.14077316233
+HIPY_LEFT_ARMATURE = 0.14077316233
+KNEE_RIGHT_ARMATURE = 0.123300247512
+KNEE_LEFT_ARMATURE = 0.123303314591
+ANKLEY_RIGHT_ARMATURE = 0.0300692570618
+ANKLEY_LEFT_ARMATURE = 0.0296987477637
+ANKLEX_RIGHT_ARMATURE = 0.0299366151844
+ANKLEX_LEFT_ARMATURE = 0.0300569538165
 
-HIPZ_RIGHT_FRICTIONLOSS = 0.132564
-HIPZ_LEFT_FRICTIONLOSS = 0.300258
-HIPX_RIGHT_FRICTIONLOSS = 0.208260
-HIPX_LEFT_FRICTIONLOSS = 0.376974
-HIPY_RIGHT_FRICTIONLOSS = 0.592031
-HIPY_LEFT_FRICTIONLOSS = 0.025919
-KNEE_RIGHT_FRICTIONLOSS = 0.669380
-KNEE_LEFT_FRICTIONLOSS = 0.308026
-ANKLEY_RIGHT_FRICTIONLOSS = 0.264357
-ANKLEY_LEFT_FRICTIONLOSS = 0.224141
-ANKLEX_RIGHT_FRICTIONLOSS = 0.579672
-ANKLEX_LEFT_FRICTIONLOSS = 0.636787
+HIPZ_RIGHT_FRICTIONLOSS = 1.35093364028
+HIPZ_LEFT_FRICTIONLOSS = 1.35093364028
+HIPX_RIGHT_FRICTIONLOSS = 1.15781879707
+HIPX_LEFT_FRICTIONLOSS = 1.16683759813
+HIPY_RIGHT_FRICTIONLOSS = 1.3122407137
+HIPY_LEFT_FRICTIONLOSS = 1.3122407137
+KNEE_RIGHT_FRICTIONLOSS = 0.91947125507
+KNEE_LEFT_FRICTIONLOSS = 1.0764965485
+ANKLEY_RIGHT_FRICTIONLOSS = 0.171194932409
+ANKLEY_LEFT_FRICTIONLOSS = 0.17117010829
+ANKLEX_RIGHT_FRICTIONLOSS = 0.233720916986
+ANKLEX_LEFT_FRICTIONLOSS = 0.290252613159
 
 # Effort limits (Nm) - adjust based on your motors.
 HIP_EFFORT_LIMIT = 88.0
-KNEE_EFFORT_LIMIT = 88.
-ANKLE_EFFORT_LIMIT = 44.
+KNEE_EFFORT_LIMIT = 88.0
+ANKLE_EFFORT_LIMIT = 44.0
 
 
 LEROBOT_ACTUATOR_HIPZ_RIGHT = BuiltinPositionActuatorCfg(
@@ -99,7 +98,7 @@ LEROBOT_ACTUATOR_HIPZ_RIGHT = BuiltinPositionActuatorCfg(
   ),
   stiffness=BASE_KP_HIPZ,
   damping=BASE_KV_HIPZ,
-  effort_limit=150.0,
+  effort_limit=HIP_EFFORT_LIMIT,
   armature=HIPZ_RIGHT_ARMATURE,
   frictionloss=HIPZ_RIGHT_FRICTIONLOSS,
 )
@@ -110,7 +109,7 @@ LEROBOT_ACTUATOR_HIPZ_LEFT = BuiltinPositionActuatorCfg(
   ),
   stiffness=BASE_KP_HIPZ,
   damping=BASE_KV_HIPZ,
-  effort_limit=150.0,
+  effort_limit=HIP_EFFORT_LIMIT,
   armature=HIPZ_LEFT_ARMATURE,
   frictionloss=HIPZ_LEFT_FRICTIONLOSS,
 )
@@ -122,7 +121,7 @@ LEROBOT_ACTUATOR_HIPX_RIGHT = BuiltinPositionActuatorCfg(
   ),
   stiffness=BASE_KP_HIPX,
   damping=BASE_KV_HIPX,
-  effort_limit=88.0,
+  effort_limit=HIP_EFFORT_LIMIT,
   armature=HIPX_RIGHT_ARMATURE,
   frictionloss=HIPX_RIGHT_FRICTIONLOSS,
 )
@@ -134,7 +133,7 @@ LEROBOT_ACTUATOR_HIPX_LEFT = BuiltinPositionActuatorCfg(
   ),
   stiffness=BASE_KP_HIPX,
   damping=BASE_KV_HIPX,
-  effort_limit=88.0,
+  effort_limit=HIP_EFFORT_LIMIT,
   armature=HIPX_LEFT_ARMATURE,
   frictionloss=HIPX_LEFT_FRICTIONLOSS,
 )
@@ -146,7 +145,7 @@ LEROBOT_ACTUATOR_HIPY_RIGHT = BuiltinPositionActuatorCfg(
   ),
   stiffness=BASE_KP_HIP,
   damping=BASE_KV_HIP,
-  effort_limit=88.0,
+  effort_limit=HIP_EFFORT_LIMIT,
   armature=HIPY_RIGHT_ARMATURE,
   frictionloss=HIPY_RIGHT_FRICTIONLOSS,
 )
@@ -157,7 +156,7 @@ LEROBOT_ACTUATOR_HIPY_LEFT = BuiltinPositionActuatorCfg(
   ),
   stiffness=BASE_KP_HIP,
   damping=BASE_KV_HIP,
-  effort_limit=88.0,
+  effort_limit=HIP_EFFORT_LIMIT,
   armature=HIPY_LEFT_ARMATURE,
   frictionloss=HIPY_LEFT_FRICTIONLOSS,
 )
@@ -167,7 +166,7 @@ LEROBOT_ACTUATOR_KNEE_RIGHT = BuiltinPositionActuatorCfg(
   target_names_expr=("knee_right",),
   stiffness=BASE_KP_KNEE,
   damping=BASE_KV_KNEE,
-  effort_limit=88.0,
+  effort_limit=KNEE_EFFORT_LIMIT,
   armature=KNEE_RIGHT_ARMATURE,
   frictionloss=KNEE_RIGHT_FRICTIONLOSS,
 )
@@ -176,7 +175,7 @@ LEROBOT_ACTUATOR_KNEE_LEFT = BuiltinPositionActuatorCfg(
   target_names_expr=("knee_left",),
   stiffness=BASE_KP_KNEE,
   damping=BASE_KV_KNEE,
-  effort_limit=88.0,
+  effort_limit=KNEE_EFFORT_LIMIT,
   armature=KNEE_LEFT_ARMATURE,
   frictionloss=KNEE_LEFT_FRICTIONLOSS,
 )
@@ -187,7 +186,7 @@ LEROBOT_ACTUATOR_ANKLEY_RIGHT = BuiltinPositionActuatorCfg(
   ),
   stiffness=BASE_KP_ANKLE,
   damping=BASE_KV_ANKLE,
-  effort_limit=44.0,
+  effort_limit=ANKLE_EFFORT_LIMIT,
   armature=ANKLEY_RIGHT_ARMATURE,
   frictionloss=ANKLEY_RIGHT_FRICTIONLOSS,
 )
@@ -198,7 +197,7 @@ LEROBOT_ACTUATOR_ANKLEY_LEFT = BuiltinPositionActuatorCfg(
   ),
   stiffness=BASE_KP_ANKLE,
   damping=BASE_KV_ANKLE,
-  effort_limit=44.0,
+  effort_limit=ANKLE_EFFORT_LIMIT,
   armature=ANKLEY_LEFT_ARMATURE,
   frictionloss=ANKLEY_LEFT_FRICTIONLOSS,
 )
@@ -207,7 +206,7 @@ LEROBOT_ACTUATOR_ANKLEX_RIGHT = BuiltinPositionActuatorCfg(
   target_names_expr=("anklex_right",),
   stiffness=BASE_KP_ANKLE,
   damping=BASE_KV_ANKLE,
-  effort_limit=44.0,
+  effort_limit=ANKLE_EFFORT_LIMIT,
   armature=ANKLEX_RIGHT_ARMATURE,
   frictionloss=ANKLEX_RIGHT_FRICTIONLOSS,
 )
@@ -216,7 +215,7 @@ LEROBOT_ACTUATOR_ANKLEX_LEFT = BuiltinPositionActuatorCfg(
   target_names_expr=("anklex_left",),
   stiffness=BASE_KP_ANKLE,
   damping=BASE_KV_ANKLE,
-  effort_limit=44.0,
+  effort_limit=ANKLE_EFFORT_LIMIT,
   armature=ANKLEX_LEFT_ARMATURE,
   frictionloss=ANKLEX_LEFT_FRICTIONLOSS,
 )
@@ -308,6 +307,8 @@ FEET_ONLY_COLLISION = CollisionCfg(
   # Stiffer contact settings to reduce penetration.
   solref=(0.005, 1.0),
   solimp=(0.995, 0.9995, 0.001, 0.5, 2),
+  # Keep non-matching geoms unchanged (visual meshes stay non-colliding).
+  disable_other_geoms=False,
 )
 
 # Full collision including self-collisions.
@@ -319,6 +320,8 @@ FULL_COLLISION = CollisionCfg(
   # Foot-specific stiff contact settings to reduce penetration.
   solref={r"^(left|right)_foot_collision$": (0.005, 1.0)},
   solimp={r"^(left|right)_foot_collision$": (0.995, 0.9995, 0.001, 0.5, 2)},
+  # Keep non-matching geoms unchanged (visual meshes stay non-colliding).
+  disable_other_geoms=False,
 )
 ##
 # Final config.
@@ -366,6 +369,8 @@ for a in LEROBOT_HUMANOID_NO_ARMS_ARTICULATION.actuators:
   names = a.target_names_expr
   assert e is not None
   for n in names:
+    if n in LEROBOT_HUMANOID_NO_ARMS_ACTION_SCALE:
+      raise ValueError(f"Duplicate actuator target name in action scale map: {n}")
     LEROBOT_HUMANOID_NO_ARMS_ACTION_SCALE[n] = 0.25 * e / s
 
 if __name__ == "__main__":

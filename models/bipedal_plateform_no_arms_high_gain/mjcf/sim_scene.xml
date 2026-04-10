@@ -1,0 +1,37 @@
+<mujoco model="sim_scene">
+  <compiler inertiafromgeom="true"/>
+  <option
+    timestep="0.005"
+    gravity="0 0 -9.81"
+    integrator="implicitfast"
+    cone="pyramidal"
+    impratio="1"/>
+
+  <include file="robot.xml"/>
+
+  <actuator>
+    <position name="m_hipz_left"   joint="hipz_left"   kp="30"  kv="3"   gear="1"/>
+    <position name="m_hipx_left"   joint="hipx_left"   kp="40"  kv="3"   gear="1"/>
+    <position name="m_hipy_left"   joint="hipy_left"   kp="60"  kv="4"   gear="1"/>
+    <position name="m_knee_left"   joint="knee_left"   kp="60"  kv="4"   gear="1"/>
+    <position name="m_ankley_left" joint="ankley_left"  kp="20"  kv="1.5" gear="1"/>
+    <position name="m_anklex_left" joint="anklex_left"  kp="20"  kv="1.5" gear="1"/>
+    <position name="m_hipz_right"   joint="hipz_right"   kp="30"  kv="3"   gear="1"/>
+    <position name="m_hipx_right"   joint="hipx_right"   kp="40"  kv="3"   gear="1"/>
+    <position name="m_hipy_right"   joint="hipy_right"   kp="60"  kv="4"   gear="1"/>
+    <position name="m_knee_right"   joint="knee_right"   kp="60"  kv="4"   gear="1"/>
+    <position name="m_ankley_right" joint="ankley_right"  kp="20"  kv="1.5" gear="1"/>
+    <position name="m_anklex_right" joint="anklex_right"  kp="20"  kv="1.5" gear="1"/>
+  </actuator>
+
+  <worldbody>
+    <light pos="0 0 5"/>
+    <geom
+      name="floor"
+      type="plane"
+      size="10 10 0.1"
+      rgba="0.2 0.2 0.2 1"
+      contype="1"
+      conaffinity="1"/>
+  </worldbody>
+</mujoco>

@@ -1,0 +1,13 @@
+{
+    "configuration": "default",
+    "documentId": "fb645318a27646d1d8840be6",
+    "documentMicroversion": "62703f4209e5f22cf8592f0d",
+    "elementId": "b2c80746951c21e879668914",
+    "fullConfiguration": "default",
+    "id": "M11vbmi9nNihf+aQY",
+    "isStandardContent": false,
+    "name": "gpio <24>",
+    "partId": "KFrC",
+    "suppressed": false,
+    "type": "Part"
+}
