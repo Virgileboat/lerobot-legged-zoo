@@ -471,12 +471,12 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
   # Domain Randomization: Joint Dynamics
   # ---------------------------------------------------------------------------
   joint_groups = {
-    "hipz": ("hipz_left", "hipz_right"),
-    "hipx": ("hipx_left", "hipx_right"),
-    "hipy": ("hipy_left", "hipy_right"),
-    "knee": ("knee_left", "knee_right"),
-    "ankley": ("ankley_left", "ankley_right"),
-    "anklex": ("anklex_left", "anklex_right"),
+    "hipz": ("hipz_right", "hipz_left"),
+    "hipx": ("hipx_right", "hipx_left"),
+    "hipy": ("hipy_right", "hipy_left"),
+    "knee": ("knee_right", "knee_left"),
+    "ankley": ("ankley_right", "ankley_left"),
+    "anklex": ("anklex_right", "anklex_left"),
   }
   joint_armature_scales = {
     "hipz": (0.85, 1.15),
@@ -504,7 +504,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
     "anklex": (0.50, 2.00),
   }
   for group_name, joint_names in joint_groups.items():
-    asset_cfg = SceneEntityCfg("robot", joint_names=joint_names)
+    asset_cfg = SceneEntityCfg("robot", joint_names=list(joint_names))
     cfg.events[f"joint_armature_{group_name}"] = EventTermCfg(
       func=envs_mdp.randomize_field,
       mode="startup",
@@ -730,6 +730,9 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
     # Effectively infinite episode length.
     cfg.episode_length_s = int(1e9)
 
+    cfg.viewer.azimuth = 135.0
+    cfg.viewer.elevation = -20.0
+
     cfg.observations["policy"].enable_corruption = False
     cfg.events.pop("push_robot", None)
     cfg.events["randomize_terrain"] = EventTermCfg(
@@ -777,7 +780,7 @@ def lerobot_humanoid_no_arms_flat_env_cfg(play: bool = False, torque_obs: bool =
   if play:
     twist_cmd = cfg.commands["twist"]
     assert isinstance(twist_cmd, UniformVelocityCommandCfg)
-    twist_cmd.ranges.lin_vel_x = (0.0, 0.8)
+    twist_cmd.ranges.lin_vel_x = (0.3, 0.8)
     twist_cmd.ranges.lin_vel_y = (0.0, 0.0)
     twist_cmd.ranges.ang_vel_z = (0.0, 0.0)
 
