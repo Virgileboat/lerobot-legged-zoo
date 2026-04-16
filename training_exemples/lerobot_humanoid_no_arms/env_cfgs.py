@@ -491,20 +491,20 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
     base_lin_vel_term.noise.n_min = -0.075
     base_lin_vel_term.noise.n_max = 0.075
   policy_obs.terms.pop("base_lin_vel", None)
-  base_ang_vel_term = policy_obs.terms.get("base_ang_vel")
-  base_ang_vel_term.noise.n_min = -0.06
-  base_ang_vel_term.noise.n_max = 0.06
+  policy_obs.terms.pop("base_ang_vel", None)
   projected_gravity_term = policy_obs.terms.get("projected_gravity")
   projected_gravity_term.noise.n_min = -0.015
   projected_gravity_term.noise.n_max = 0.015
   joint_pos_term = policy_obs.terms.get("joint_pos")
   if joint_pos_term is not None and getattr(joint_pos_term, "noise", None) is not None:
-    joint_pos_noise_rad = math.radians(2.0)
+    joint_pos_noise_rad = math.radians(1.5)
     joint_pos_term.noise.n_min = -joint_pos_noise_rad
     joint_pos_term.noise.n_max = joint_pos_noise_rad
   joint_vel_term = policy_obs.terms.get("joint_vel")
-  joint_vel_term.noise.n_min = -0.1
-  joint_vel_term.noise.n_max = 0.1
+  # Real hardware finite-difference velocity noise: ~10 deg/s = 0.1745 rad/s
+  joint_vel_noise_rad_s = 10.0 * math.pi / 180.0
+  joint_vel_term.noise.n_min = -joint_vel_noise_rad_s
+  joint_vel_term.noise.n_max = joint_vel_noise_rad_s
   # Joint torques with noise (sim2real: real actuators have torque measurement noise).
   if torque_obs:
     policy_obs.terms["joint_torques"] = ObservationTermCfg(
@@ -516,6 +516,8 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
   cfg.observations["critic"].terms["foot_height"].params[
     "asset_cfg"
   ].site_names = site_names
+  # Keep critic and actor consistent: base_ang_vel removed from actor for sim2real.
+  cfg.observations["critic"].terms.pop("base_ang_vel", None)
 
   # ---------------------------------------------------------------------------
   # Domain Randomization: Contact Parameters

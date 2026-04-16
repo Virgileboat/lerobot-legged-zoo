@@ -34,7 +34,6 @@ import re
 import subprocess
 from pathlib import Path
 
-import anthropic
 import discord
 
 # ---------------------------------------------------------------------------
@@ -199,30 +198,218 @@ def _load_feedback_tags() -> dict[str, str]:
     return tags
 
 
+CLAUDE_BIN = "/home/vbatto/.local/bin/claude"
+CLAUDE_MODEL = "claude-haiku-4-5"
+
+_QUESTION_STARTERS = (
+    "what ", "why ", "how ", "when ", "where ", "who ", "which ",
+    "can ", "could ", "would ", "should ", "will ", "is ", "are ",
+    "was ", "were ", "do ", "does ", "did ", "has ", "have ", "had ",
+    "tell me", "explain", "describe", "show me",
+)
+
+_MODIFICATION_VERBS = (
+    "increase", "decrease", "reduce", "lower", "raise", "bump", "boost",
+    "add", "remove", "set", "change", "modify", "update", "adjust", "tune",
+    "try ", "use ", "switch", "enable", "disable", "apply",
+    "kill and", "stop and", "restart with",
+)
+
+
+def is_question(text: str) -> bool:
+    """Return True if the message looks like a question rather than feedback."""
+    t = text.lower().strip()
+    return t.endswith("?") or any(t.startswith(q) for q in _QUESTION_STARTERS)
+
+
+def is_modification_request(text: str) -> bool:
+    """Return True if the message looks like a training modification request."""
+    t = text.lower().strip()
+    return any(t.startswith(v) for v in _MODIFICATION_VERBS)
+
+
+def _load_training_context(branch_sanitized: str) -> str:
+    """Build a concise training context string for the QA system prompt."""
+    session_dir = SESSION_DIR / branch_sanitized
+    if not session_dir.exists():
+        return "No active training session found."
+    state_file = session_dir / "session_state.json"
+    if not state_file.exists():
+        return "No session state found."
+    state = json.loads(state_file.read_text())
+    run_num = state.get("current_run", 1)
+    run_dir = session_dir / f"run_{run_num:03d}"
+    parts = [
+        f"Branch: {state.get('branch', '?')}",
+        f"Goal: {state.get('goal', 'unknown')}",
+        f"Phase: {state.get('phase', '?')} | Run: {run_num} | Host: {state.get('host', '?')}",
+        f"WandB: {state.get('wandb_run_path', 'N/A')}",
+    ]
+    if run_dir.exists():
+        monitors = sorted(run_dir.glob("monitor_*.md"))
+        if monitors:
+            latest = monitors[-1].read_text()
+            if "<!-- RAW_METRICS:" in latest:
+                latest = latest[: latest.index("<!-- RAW_METRICS:")]
+            parts.append(f"\nLatest monitor:\n{latest.strip()[:1200]}")
+        eval_report = run_dir / "eval_report.md"
+        if eval_report.exists():
+            report = eval_report.read_text()
+            if "<!-- RAW_METRICS:" in report:
+                report = report[: report.index("<!-- RAW_METRICS:")]
+            parts.append(f"\nBehavioral evaluation:\n{report.strip()[:800]}")
+        derived = sorted(run_dir.glob("derived_metrics_*.json"))
+        if derived:
+            data = json.loads(derived[-1].read_text())
+            summary = {k: v for k, v in data.items() if k != "missing"}
+            parts.append(f"\nQuality metrics: {json.dumps(summary)}")
+    return "\n".join(parts)
+
+
+def answer_question(question: str, context: str) -> str:
+    """Use Claude to answer a question about the current training run."""
+    try:
+        prompt = (
+            "You are an RL training assistant for a legged humanoid robot (12-DOF biped, no arms). "
+            "You help interpret training metrics and behavioral evaluations. "
+            "Be concise and precise. When referencing numbers use the context provided.\n\n"
+            f"Current training context:\n{context}\n\n"
+            f"Question: {question}"
+        )
+        return _claude(prompt, max_tokens=512)
+    except Exception as e:
+        return f"⚠️ Could not answer: {e}"
+
+
+def parse_modification_request(text: str, context: str) -> dict:
+    """Use Claude to parse a training modification request into a structured intent."""
+    try:
+        prompt = (
+            "You are an RL training assistant for a legged humanoid robot. "
+            "Parse training modification requests into structured JSON.\n\n"
+            f"Current training context:\n{context}\n\n"
+            f'Modification request: "{text}"\n\n'
+            "Return a JSON object with:\n"
+            '- "summary": one-line description of the requested change\n'
+            '- "parameters": list of affected training parameters (reward weights, curriculum, etc.)\n'
+            '- "urgency": "immediate" (kill current run now) or "next_iterate" (apply when training ends naturally)\n'
+            '- "notes": full user request verbatim\n'
+            "Only return the JSON object, no commentary."
+        )
+        return json.loads(_claude(prompt, max_tokens=256))
+    except Exception as e:
+        return {
+            "summary": text[:100],
+            "parameters": [],
+            "urgency": "next_iterate",
+            "notes": text,
+            "error": str(e),
+        }
+
+
+def queue_modification(branch_sanitized: str, run_num: int, parsed: dict) -> None:
+    """Write a pending modification request to the session directory."""
+    session_dir = SESSION_DIR / branch_sanitized
+    queue_file = session_dir / "pending_modification.json"
+    entry = {
+        "run": run_num,
+        "summary": parsed.get("summary", ""),
+        "parameters": parsed.get("parameters", []),
+        "urgency": parsed.get("urgency", "next_iterate"),
+        "notes": parsed.get("notes", ""),
+    }
+    # Append to existing queue or start new one
+    queue = []
+    if queue_file.exists():
+        try:
+            queue = json.loads(queue_file.read_text())
+        except Exception:
+            pass
+    queue.append(entry)
+    queue_file.write_text(json.dumps(queue, indent=2))
+
+
+def _claude(prompt: str, max_tokens: int = 512) -> str:
+    """Run a one-shot Claude Code query and return the text response."""
+    result = subprocess.run(
+        [CLAUDE_BIN, "--print", "--model", CLAUDE_MODEL, prompt],
+        capture_output=True, text=True, timeout=60, cwd=str(REPO_ROOT),
+    )
+    if result.returncode != 0:
+        raise RuntimeError(result.stderr.strip() or "claude exited non-zero")
+    return result.stdout.strip()
+
+
 def classify_feedback(text: str, tags: dict[str, str]) -> dict:
-    """Use Claude Haiku to extract feedback tags from free-text."""
+    """Use Claude to extract feedback tags from free-text."""
     tag_list = "\n".join(f"- {name}: {desc}" for name, desc in tags.items())
     try:
-        ai = anthropic.Anthropic()
-        resp = ai.messages.create(
-            model="claude-haiku-4-5-20251001",
-            max_tokens=256,
-            messages=[{
-                "role": "user",
-                "content": (
-                    "You classify observer feedback on a robot walking trial.\n\n"
-                    f"Available tags:\n{tag_list}\n\n"
-                    f'Observer message: "{text}"\n\n'
-                    "Return a JSON object with:\n"
-                    '- "tags": list of matching tag names (empty list if none)\n'
-                    '- "notes": the original message verbatim\n'
-                    "Only return the JSON object, no commentary."
-                ),
-            }],
+        prompt = (
+            "You classify observer feedback on a robot walking trial.\n\n"
+            f"Available tags:\n{tag_list}\n\n"
+            f'Observer message: "{text}"\n\n'
+            "Return a JSON object with:\n"
+            '- "tags": list of matching tag names (empty list if none)\n'
+            '- "notes": the original message verbatim\n'
+            "Only return the JSON object, no commentary."
         )
-        return json.loads(resp.content[0].text.strip())
+        return json.loads(_claude(prompt, max_tokens=256))
     except Exception as e:
         return {"tags": [], "notes": text, "error": str(e)}
+
+
+def apply_modification_now(branch_sanitized: str) -> str:
+    """Kill training immediately and set phase=ITERATE to apply pending modification."""
+    session_dir = SESSION_DIR / branch_sanitized
+    queue_file = session_dir / "pending_modification.json"
+
+    if not queue_file.exists():
+        return "No pending modification found. Queue one first with a free-text message."
+
+    queue = json.loads(queue_file.read_text())
+    if not queue:
+        return "Pending modification file is empty."
+    mod = queue[-1]
+
+    # Kill training
+    kill_script = REPO_ROOT / ".claude" / "rl-training" / "hosts" / "remote" / "kill.sh"
+    kill_result = subprocess.run(
+        ["bash", str(kill_script), branch_sanitized],
+        capture_output=True, text=True, timeout=30,
+    )
+
+    # Consume the modification
+    consumed_file = session_dir / "consumed_modification.json"
+    queue_file.rename(consumed_file)
+
+    # Read current state
+    state = json.loads((session_dir / "session_state.json").read_text())
+    run_num = state.get("current_run", 1)
+    new_run = run_num + 1
+
+    # Advance state to ITERATE
+    session_script = REPO_ROOT / ".claude" / "rl-training" / "scripts" / "session.py"
+    subprocess.run(
+        ["uv", "run", str(session_script), "update", str(session_dir),
+         "--set", "phase=ITERATE", "--set", f"current_run={new_run}"],
+        capture_output=True, text=True, cwd=str(REPO_ROOT), timeout=15,
+    )
+    subprocess.run(
+        ["uv", "run", str(session_script), "add-iteration", str(session_dir),
+         "--run", str(run_num), "--result", f"Interrupted by user: {mod.get('summary', '')}"],
+        capture_output=True, text=True, cwd=str(REPO_ROOT), timeout=15,
+    )
+
+    # Create next run dir
+    next_run_dir = session_dir / f"run_{new_run:03d}"
+    next_run_dir.mkdir(exist_ok=True)
+
+    kill_out = (kill_result.stdout + kill_result.stderr).strip()[:200]
+    return (
+        f"Training killed. phase → ITERATE (run {run_num} → {new_run})\n"
+        f"Modification: {mod.get('summary', '(unknown)')}\n"
+        f"Kill output: {kill_out or 'ok'}"
+    )
 
 
 def persist_feedback(branch_sanitized: str, run_num: int, tags: list[str], notes: str) -> str:
@@ -275,11 +462,76 @@ async def on_message(message: discord.Message):
                 "`!logs <branch>` — latest monitor report\n"
                 "`!metrics <branch>` — latest quality scores\n"
                 "`!video <branch>` — post latest evaluation video\n"
+                "`!ask <question>` — ask anything about the current training run\n"
+                "`!pending [branch]` — show queued modification requests\n"
+                "`!apply [branch]` — interrupt training now to apply queued modification\n"
                 "`!help` — this message\n\n"
-                "**Tip:** send any free-text message and I'll interpret it as "
-                "human feedback for the active training session."
+                "**Tip:** questions (ending in `?` or starting with what/how/why/…) "
+                "are answered by the bot. Messages starting with increase/decrease/set/change/… "
+                "are queued as modification requests. Other free-text is stored as human feedback."
             )
             await message.channel.send(help_text)
+
+        elif cmd == "!ask":
+            if len(parts) < 2:
+                await message.channel.send("Usage: `!ask <your question>`")
+                return
+            question = content[len("!ask"):].strip()
+            sessions = get_sessions()
+            active = [s for s in sessions if s.get("phase") in ("MONITOR", "ITERATE", "LAUNCH")]
+            if not active:
+                await message.channel.send("No active training session to ask about.")
+                return
+            session = active[-1]
+            branch_sanitized = session.get("branch", "?").replace("/", "--")
+            await message.add_reaction("⏳")
+            ctx = await asyncio.get_event_loop().run_in_executor(
+                None, _load_training_context, branch_sanitized
+            )
+            answer = await asyncio.get_event_loop().run_in_executor(
+                None, answer_question, question, ctx
+            )
+            await message.remove_reaction("⏳", client.user)
+            await message.channel.send(answer)
+
+        elif cmd == "!pending":
+            sessions = get_sessions()
+            active = [s for s in sessions if s.get("phase") in ("MONITOR", "ITERATE", "LAUNCH")]
+            branch_sanitized = parts[1].replace("/", "--") if len(parts) > 1 else (active[-1].get("branch", "?").replace("/", "--") if active else None)
+            if not branch_sanitized:
+                await message.channel.send("No active session found.")
+                return
+            queue_file = SESSION_DIR / branch_sanitized / "pending_modification.json"
+            if not queue_file.exists():
+                await message.channel.send(f"No pending modifications for `{branch_sanitized}`.")
+                return
+            queue = json.loads(queue_file.read_text())
+            if not queue:
+                await message.channel.send("Pending modification file is empty.")
+                return
+            lines = [f"**Pending modifications for `{branch_sanitized}`** ({len(queue)} queued)"]
+            for i, entry in enumerate(queue, 1):
+                urgency_icon = "⚡" if entry.get("urgency") == "immediate" else "⏳"
+                params = ", ".join(entry.get("parameters", [])) or "unspecified"
+                lines.append(f"{i}. {urgency_icon} **{entry.get('summary', '?')}**")
+                lines.append(f"   Parameters: {params}")
+                lines.append(f"   Note: {entry.get('notes', '')[:120]}")
+            await message.channel.send("\n".join(lines))
+
+        elif cmd == "!apply":
+            # Interrupt training now to apply queued modification
+            sessions = get_sessions()
+            active = [s for s in sessions if s.get("phase") == "MONITOR"]
+            if not active:
+                await message.channel.send("No session in MONITOR phase to interrupt.")
+                return
+            branch_sanitized = parts[1].replace("/", "--") if len(parts) > 1 else active[-1].get("branch", "?").replace("/", "--")
+            await message.channel.send(f"Interrupting `{branch_sanitized}` to apply pending modification…")
+            result = await asyncio.get_event_loop().run_in_executor(
+                None, apply_modification_now, branch_sanitized
+            )
+            await message.channel.send(f"```\n{result}\n```")
+            await message.channel.send("Phase is now **ITERATE** — re-invoke `/rlcopilot` in Claude Code to apply changes and relaunch.")
 
         elif cmd == "!status":
             await message.channel.send(format_status())
@@ -331,21 +583,14 @@ async def on_message(message: discord.Message):
         return  # handled as command
 
     # ------------------------------------------------------------------ #
-    # Free-text → human feedback                                           #
+    # Free-text → question (Haiku Q&A) or human feedback                  #
     # ------------------------------------------------------------------ #
     sessions = get_sessions()
     active = [s for s in sessions if s.get("phase") in ("MONITOR", "ITERATE", "LAUNCH")]
     if not active:
-        return  # nothing to attach feedback to
+        return  # nothing to work with
 
     if len(active) > 1:
-        branches = ", ".join(f"`{s.get('branch', '?')}`" for s in active)
-        await message.channel.send(
-            f"Multiple active sessions ({branches}). "
-            "Use `!feedback <branch> <message>` to target a specific one.\n"
-            "_(For now I'll attach your feedback to the most recently started session.)_"
-        )
-        # Fall through: attach to last active session by default
         session = active[-1]
     else:
         session = active[0]
@@ -355,6 +600,53 @@ async def on_message(message: discord.Message):
     run_num = session.get("current_run", 1)
 
     await message.add_reaction("⏳")
+
+    # Route: question → Haiku Q&A, modification request → queue, other → feedback
+    if is_question(content):
+        ctx = await asyncio.get_event_loop().run_in_executor(
+            None, _load_training_context, branch_sanitized
+        )
+        answer = await asyncio.get_event_loop().run_in_executor(
+            None, answer_question, content, ctx
+        )
+        await message.remove_reaction("⏳", client.user)
+        await message.channel.send(answer)
+        return
+
+    if is_modification_request(content):
+        ctx = await asyncio.get_event_loop().run_in_executor(
+            None, _load_training_context, branch_sanitized
+        )
+        parsed = await asyncio.get_event_loop().run_in_executor(
+            None, parse_modification_request, content, ctx
+        )
+        await asyncio.get_event_loop().run_in_executor(
+            None, queue_modification, branch_sanitized, run_num, parsed
+        )
+        await message.remove_reaction("⏳", client.user)
+        urgency = parsed.get("urgency", "next_iterate")
+        params = parsed.get("parameters", [])
+        param_str = ", ".join(f"`{p}`" for p in params) if params else "_(unspecified)_"
+        urgency_str = "⚡ **immediate** (will trigger ITERATE now)" if urgency == "immediate" else "⏳ **queued** (applied at next ITERATE cycle)"
+        err = parsed.get("error")
+        reply = (
+            f"Modification request queued for `{branch}`\n"
+            f"Summary: {parsed.get('summary', content[:80])}\n"
+            f"Parameters: {param_str}\n"
+            f"Urgency: {urgency_str}"
+        )
+        if err:
+            reply += f"\n⚠️ Parse warning: {err}"
+        await message.channel.send(reply)
+        return
+
+    # Feedback path
+    if len(active) > 1:
+        branches = ", ".join(f"`{s.get('branch', '?')}`" for s in active)
+        await message.channel.send(
+            f"Multiple active sessions ({branches}). "
+            "Attaching feedback to the most recent one."
+        )
 
     tags_map = _load_feedback_tags()
     classified = await asyncio.get_event_loop().run_in_executor(
@@ -368,7 +660,7 @@ async def on_message(message: discord.Message):
     if err:
         await message.channel.send(f"⚠️ Classification failed ({err}) — storing as raw note.")
 
-    persist_result = await asyncio.get_event_loop().run_in_executor(
+    await asyncio.get_event_loop().run_in_executor(
         None, persist_feedback, branch_sanitized, run_num, tags, notes
     )
 
