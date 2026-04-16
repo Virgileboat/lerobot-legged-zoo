@@ -11,6 +11,7 @@ requires-python = ">=3.10"
 dependencies = [
   "matplotlib>=3.10.8",
   "mjlab @ git+https://github.com/mujocolab/mjlab.git",
+  "discord.py>=2.3.0",
 ]
 
 [project.optional-dependencies]

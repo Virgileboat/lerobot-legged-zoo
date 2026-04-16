@@ -1,3 +1,6 @@
+# Secrets (never commit)
+.discord_secrets
+
 # Python
 __pycache__/
 *.py[cod]
