@@ -312,7 +312,7 @@ def main():
     agent_cfg = load_rl_cfg(task_id)
     env_cfg.scene.num_envs = 1
 
-    env = ManagerBasedRlEnv(cfg=env_cfg, device=device, render_mode=None)
+    env = ManagerBasedRlEnv(cfg=env_cfg, device=device, render_mode="rgb_array")
     env = RslRlVecEnvWrapper(env, clip_actions=getattr(agent_cfg, "clip_actions", False))
 
     if args.dry_run:
