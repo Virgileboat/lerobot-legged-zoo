@@ -12,10 +12,15 @@ Commands (in the configured Discord channel):
     !kill <branch>   — kill training for a branch
     !logs <branch>   — show latest monitor report
     !metrics <branch>— show latest quality scores
+    !video <branch>  — post latest evaluation video
     !help            — list commands
 
 Notifications (sent automatically by notify.sh):
     Training started, monitor updates, training killed, blockers.
+
+Free-text messages (not starting with !):
+    Interpreted as human feedback for the active training session.
+    Tags are extracted via Claude API and stored with feedback.py.
 
 Secrets: read from .discord_secrets in the repo root.
     BOT_TOKEN=...
@@ -25,9 +30,11 @@ Secrets: read from .discord_secrets in the repo root.
 import asyncio
 import json
 import os
+import re
 import subprocess
 from pathlib import Path
 
+import anthropic
 import discord
 
 # ---------------------------------------------------------------------------
@@ -38,6 +45,8 @@ REPO_ROOT = Path(__file__).parent
 SECRETS_FILE = REPO_ROOT / ".discord_secrets"
 SESSION_DIR = REPO_ROOT / "logs" / "sessions"
 RL_CONFIG = REPO_ROOT / ".claude" / "rl-training" / "config.md"
+TASK_CONFIG = REPO_ROOT / ".claude" / "rl-training" / "tasks" / "locomotion" / "monitor_config.md"
+FEEDBACK_SCRIPT = REPO_ROOT / ".claude" / "rl-training" / "scripts" / "feedback.py"
 
 
 def load_secrets() -> dict:
@@ -108,12 +117,10 @@ def get_latest_monitor(branch_sanitized: str) -> str:
     if run_num < 1:
         run_num = 1
     run_dir = session_dir / f"run_{run_num:03d}"
-    # Find latest monitor file
     monitors = sorted(run_dir.glob("monitor_*.md")) if run_dir.exists() else []
     if not monitors:
         return f"No monitor files yet for run {run_num:03d}"
     latest = monitors[-1].read_text()
-    # Trim to Discord 2000 char limit (strip RAW_METRICS block)
     if "<!-- RAW_METRICS:" in latest:
         latest = latest[:latest.index("<!-- RAW_METRICS:")]
     return latest.strip()[:1900]
@@ -143,6 +150,24 @@ def get_latest_metrics(branch_sanitized: str) -> str:
     return "\n".join(lines)
 
 
+def find_latest_video(branch_sanitized: str) -> Path | None:
+    """Return the most recent eval_video.mp4 path for this branch, or None."""
+    session_dir = SESSION_DIR / branch_sanitized
+    if not session_dir.exists():
+        return None
+    state_file = session_dir / "session_state.json"
+    if not state_file.exists():
+        return None
+    state = json.loads(state_file.read_text())
+    run_num = state.get("current_run", 1)
+    # Search from current run back to run 1
+    for r in range(run_num, 0, -1):
+        video = session_dir / f"run_{r:03d}" / "eval_video.mp4"
+        if video.exists():
+            return video
+    return None
+
+
 def kill_training(branch_sanitized: str) -> str:
     kill_script = REPO_ROOT / ".claude" / "rl-training" / "hosts" / "remote" / "kill.sh"
     if not kill_script.exists():
@@ -153,6 +178,67 @@ def kill_training(branch_sanitized: str) -> str:
     )
     output = (result.stdout + result.stderr).strip()
     return output[:1500] if output else ("Killed." if result.returncode == 0 else "Kill failed (no output)")
+
+
+def _load_feedback_tags() -> dict[str, str]:
+    """Parse human feedback tags from monitor_config.md."""
+    if not TASK_CONFIG.exists():
+        return {}
+    tags = {}
+    in_section = False
+    for line in TASK_CONFIG.read_text().splitlines():
+        if "## Human Feedback Tags" in line:
+            in_section = True
+            continue
+        if in_section and line.startswith("##"):
+            break
+        if in_section:
+            m = re.match(r"^- (\w+):\s*(.+)$", line)
+            if m:
+                tags[m.group(1)] = m.group(2).strip()
+    return tags
+
+
+def classify_feedback(text: str, tags: dict[str, str]) -> dict:
+    """Use Claude Haiku to extract feedback tags from free-text."""
+    tag_list = "\n".join(f"- {name}: {desc}" for name, desc in tags.items())
+    try:
+        ai = anthropic.Anthropic()
+        resp = ai.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=256,
+            messages=[{
+                "role": "user",
+                "content": (
+                    "You classify observer feedback on a robot walking trial.\n\n"
+                    f"Available tags:\n{tag_list}\n\n"
+                    f'Observer message: "{text}"\n\n'
+                    "Return a JSON object with:\n"
+                    '- "tags": list of matching tag names (empty list if none)\n'
+                    '- "notes": the original message verbatim\n'
+                    "Only return the JSON object, no commentary."
+                ),
+            }],
+        )
+        return json.loads(resp.content[0].text.strip())
+    except Exception as e:
+        return {"tags": [], "notes": text, "error": str(e)}
+
+
+def persist_feedback(branch_sanitized: str, run_num: int, tags: list[str], notes: str) -> str:
+    session_dir = SESSION_DIR / branch_sanitized
+    result = subprocess.run(
+        [
+            "uv", "run", str(FEEDBACK_SCRIPT),
+            str(session_dir),
+            "--run", str(run_num),
+            "--tags", ",".join(tags),
+            "--notes", notes,
+            "--task-config", str(TASK_CONFIG),
+        ],
+        capture_output=True, text=True, cwd=str(REPO_ROOT), timeout=30,
+    )
+    return (result.stdout + result.stderr).strip()
 
 
 # ---------------------------------------------------------------------------
@@ -169,55 +255,131 @@ async def on_message(message: discord.Message):
     secrets = client._secrets
     channel_id = int(secrets.get("CHANNEL_ID", "0"))
 
-    # Only respond in the configured channel, ignore own messages
     if message.channel.id != channel_id or message.author == client.user:
         return
 
     content = message.content.strip()
-    if not content.startswith("!"):
-        return
 
-    parts = content.split()
-    cmd = parts[0].lower()
+    # ------------------------------------------------------------------ #
+    # Commands (start with !)                                              #
+    # ------------------------------------------------------------------ #
+    if content.startswith("!"):
+        parts = content.split()
+        cmd = parts[0].lower()
 
-    if cmd == "!help":
-        help_text = (
-            "**RL Training Bot Commands**\n"
-            "`!status` — show all training sessions\n"
-            "`!kill <branch>` — kill training for a branch\n"
-            "`!logs <branch>` — latest monitor report\n"
-            "`!metrics <branch>` — latest quality scores\n"
-            "`!help` — this message"
+        if cmd == "!help":
+            help_text = (
+                "**RL Training Bot Commands**\n"
+                "`!status` — show all training sessions\n"
+                "`!kill <branch>` — kill training for a branch\n"
+                "`!logs <branch>` — latest monitor report\n"
+                "`!metrics <branch>` — latest quality scores\n"
+                "`!video <branch>` — post latest evaluation video\n"
+                "`!help` — this message\n\n"
+                "**Tip:** send any free-text message and I'll interpret it as "
+                "human feedback for the active training session."
+            )
+            await message.channel.send(help_text)
+
+        elif cmd == "!status":
+            await message.channel.send(format_status())
+
+        elif cmd == "!kill":
+            if len(parts) < 2:
+                await message.channel.send("Usage: `!kill <branch>` — e.g. `!kill claude--symmetric-walk`")
+                return
+            branch_sanitized = parts[1].replace("/", "--")
+            await message.channel.send(f"Killing training for `{branch_sanitized}`...")
+            result = await asyncio.get_event_loop().run_in_executor(None, kill_training, branch_sanitized)
+            await message.channel.send(f"```\n{result}\n```")
+
+        elif cmd == "!logs":
+            if len(parts) < 2:
+                await message.channel.send("Usage: `!logs <branch>`")
+                return
+            branch_sanitized = parts[1].replace("/", "--")
+            logs = await asyncio.get_event_loop().run_in_executor(None, get_latest_monitor, branch_sanitized)
+            await message.channel.send(f"```\n{logs}\n```")
+
+        elif cmd == "!metrics":
+            if len(parts) < 2:
+                await message.channel.send("Usage: `!metrics <branch>`")
+                return
+            branch_sanitized = parts[1].replace("/", "--")
+            metrics = await asyncio.get_event_loop().run_in_executor(None, get_latest_metrics, branch_sanitized)
+            await message.channel.send(metrics)
+
+        elif cmd == "!video":
+            if len(parts) < 2:
+                await message.channel.send("Usage: `!video <branch>`")
+                return
+            branch_sanitized = parts[1].replace("/", "--")
+            video_path = await asyncio.get_event_loop().run_in_executor(
+                None, find_latest_video, branch_sanitized
+            )
+            if video_path is None:
+                await message.channel.send(
+                    f"No eval video found for `{branch_sanitized}`. "
+                    "Videos are generated during policy evaluation (each monitor tick)."
+                )
+            else:
+                await message.channel.send(
+                    f"Latest eval video for `{branch_sanitized}` (run {video_path.parent.name}):",
+                    file=discord.File(str(video_path)),
+                )
+
+        return  # handled as command
+
+    # ------------------------------------------------------------------ #
+    # Free-text → human feedback                                           #
+    # ------------------------------------------------------------------ #
+    sessions = get_sessions()
+    active = [s for s in sessions if s.get("phase") in ("MONITOR", "ITERATE", "LAUNCH")]
+    if not active:
+        return  # nothing to attach feedback to
+
+    if len(active) > 1:
+        branches = ", ".join(f"`{s.get('branch', '?')}`" for s in active)
+        await message.channel.send(
+            f"Multiple active sessions ({branches}). "
+            "Use `!feedback <branch> <message>` to target a specific one.\n"
+            "_(For now I'll attach your feedback to the most recently started session.)_"
         )
-        await message.channel.send(help_text)
+        # Fall through: attach to last active session by default
+        session = active[-1]
+    else:
+        session = active[0]
 
-    elif cmd == "!status":
-        await message.channel.send(format_status())
+    branch = session.get("branch", "?")
+    branch_sanitized = branch.replace("/", "--")
+    run_num = session.get("current_run", 1)
 
-    elif cmd == "!kill":
-        if len(parts) < 2:
-            await message.channel.send("Usage: `!kill <branch>` — e.g. `!kill claude--symmetric-walk`")
-            return
-        branch_sanitized = parts[1].replace("/", "--")
-        await message.channel.send(f"Killing training for `{branch_sanitized}`...")
-        result = await asyncio.get_event_loop().run_in_executor(None, kill_training, branch_sanitized)
-        await message.channel.send(f"```\n{result}\n```")
+    await message.add_reaction("⏳")
 
-    elif cmd == "!logs":
-        if len(parts) < 2:
-            await message.channel.send("Usage: `!logs <branch>`")
-            return
-        branch_sanitized = parts[1].replace("/", "--")
-        logs = await asyncio.get_event_loop().run_in_executor(None, get_latest_monitor, branch_sanitized)
-        await message.channel.send(f"```\n{logs}\n```")
+    tags_map = _load_feedback_tags()
+    classified = await asyncio.get_event_loop().run_in_executor(
+        None, classify_feedback, content, tags_map
+    )
 
-    elif cmd == "!metrics":
-        if len(parts) < 2:
-            await message.channel.send("Usage: `!metrics <branch>`")
-            return
-        branch_sanitized = parts[1].replace("/", "--")
-        metrics = await asyncio.get_event_loop().run_in_executor(None, get_latest_metrics, branch_sanitized)
-        await message.channel.send(metrics)
+    tags = classified.get("tags", [])
+    notes = classified.get("notes", content)
+    err = classified.get("error")
+
+    if err:
+        await message.channel.send(f"⚠️ Classification failed ({err}) — storing as raw note.")
+
+    persist_result = await asyncio.get_event_loop().run_in_executor(
+        None, persist_feedback, branch_sanitized, run_num, tags, notes
+    )
+
+    tag_str = ", ".join(f"`{t}`" for t in tags) if tags else "_(no matching tags)_"
+    reply = (
+        f"Feedback stored for `{branch}` run {run_num}.\n"
+        f"Tags: {tag_str}\n"
+        f"Note: {notes[:200]}"
+    )
+    await message.remove_reaction("⏳", client.user)
+    await message.channel.send(reply)
 
 
 # ---------------------------------------------------------------------------
