@@ -233,8 +233,90 @@ class _ActionFftBandRatioReward:
     count[env_ids] = 0
 
 
+class _BilateralSymmetryReward:
+  """Penalize bilateral asymmetry between paired joints.
+
+  Action vector layout (12 DOF humanoid):
+    [hipz_r(0), hipz_l(1), hipx_r(2), hipx_l(3), hipy_r(4), hipy_l(5),
+     knee_r(6), knee_l(7), ankley_r(8), ankley_l(9), anklex_r(10), anklex_l(11)]
+
+  Lateral joints (hipz, hipx, anklex): action_r + action_l ≈ 0 for symmetric gait.
+  Sagittal joints (hipy, knee, ankley): rolling |amplitude| should match between sides.
+  """
+
+  # (right_idx, left_idx, antisymmetric)
+  # antisymmetric=True → penalize (a_r + a_l)^2 (should cancel)
+  # antisymmetric=False → penalize (mean|a_r| - mean|a_l|)^2 (amplitudes should match)
+  PAIRS = [
+    (0, 1, True),   # hipz: equal & opposite
+    (2, 3, True),   # hipx: equal & opposite
+    (4, 5, False),  # hipy: same amplitude (phase-shifted in gait)
+    (6, 7, False),  # knee: same amplitude
+    (8, 9, False),  # ankley: same amplitude
+    (10, 11, True), # anklex: equal & opposite
+  ]
+
+  def __init__(self) -> None:
+    self._state_by_env: dict[int, dict] = {}
+    self._last_env_key: int | None = None
+
+  def __call__(self, env, history_len: int = 30) -> torch.Tensor:
+    actions = env.action_manager.action  # [N, 12]
+    env_key = id(env)
+    self._last_env_key = env_key
+
+    state = self._state_by_env.get(env_key)
+    needs_init = (
+      state is None
+      or state["buf"].shape[0] != actions.shape[0]
+      or state["buf"].shape[1] != history_len
+    )
+    if needs_init:
+      state = {
+        "buf": torch.zeros(
+          (actions.shape[0], history_len, actions.shape[1]),
+          device=actions.device,
+          dtype=actions.dtype,
+        ),
+        "pos": 0,
+        "count": torch.zeros(actions.shape[0], device=actions.device, dtype=torch.long),
+      }
+      self._state_by_env[env_key] = state
+
+    pos = int(state["pos"])
+    state["buf"][:, pos, :] = actions
+    state["pos"] = (pos + 1) % history_len
+    state["count"].add_(1).clamp_(max=history_len)
+
+    abs_means = state["buf"].abs().mean(dim=1)  # [N, 12]
+
+    penalty = torch.zeros(actions.shape[0], device=actions.device, dtype=actions.dtype)
+    for ri, li, antisym in self.PAIRS:
+      if antisym:
+        penalty += (actions[:, ri] + actions[:, li]).square()
+      else:
+        penalty += (abs_means[:, ri] - abs_means[:, li]).square()
+
+    return -penalty
+
+  def reset(self, env_ids: torch.Tensor | slice | None = None) -> None:
+    if self._last_env_key is None:
+      return
+    state = self._state_by_env.get(self._last_env_key)
+    if state is None:
+      return
+    if env_ids is None or isinstance(env_ids, slice):
+      state["buf"].zero_()
+      state["count"].zero_()
+      state["pos"] = 0
+      return
+    state["buf"][env_ids] = 0.0
+    state["count"][env_ids] = 0
+
+
 _ACTION_FFT_BAND_RATIO_REWARD = _ActionFftBandRatioReward()
 _SELECTIVE_ACTION_RATE_L2_PENALTY = _SelectiveActionRateL2Penalty()
+_BILATERAL_SYMMETRY_REWARD = _BilateralSymmetryReward()
 
 
 def _flatten_obs_policy(
@@ -417,7 +499,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
   projected_gravity_term.noise.n_max = 0.015
   joint_pos_term = policy_obs.terms.get("joint_pos")
   if joint_pos_term is not None and getattr(joint_pos_term, "noise", None) is not None:
-    joint_pos_noise_rad = math.radians(4.0)
+    joint_pos_noise_rad = math.radians(2.0)
     joint_pos_term.noise.n_min = -joint_pos_noise_rad
     joint_pos_term.noise.n_max = joint_pos_noise_rad
   joint_vel_term = policy_obs.terms.get("joint_vel")
@@ -659,6 +741,11 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
     func=_ACTION_FFT_BAND_RATIO_REWARD,
     weight=3.0,
     params={"history_len": 50, "min_history": 50, "cutoff_hz": 2.5},
+  )
+  cfg.rewards["bilateral_symmetry"] = RewardTermCfg(
+    func=_BILATERAL_SYMMETRY_REWARD,
+    weight=0.3,
+    params={"history_len": 30},
   )
   cfg.rewards["action_rate_l2"].weight = -0.1
   cfg.rewards["action_rate_hipz_hipx_l2"] = RewardTermCfg(
