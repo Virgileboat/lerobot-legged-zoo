@@ -234,68 +234,111 @@ class _ActionFftBandRatioReward:
 
 
 class _BilateralSymmetryReward:
-  """Penalize bilateral asymmetry between paired joints.
+  """Penalize bilateral asymmetry using foot trajectory (primary) and joint actions (secondary).
 
-  Action vector layout (12 DOF humanoid):
-    [hipz_r(0), hipz_l(1), hipx_r(2), hipx_l(3), hipy_r(4), hipy_l(5),
-     knee_r(6), knee_l(7), ankley_r(8), ankley_l(9), anklex_r(10), anklex_l(11)]
+  Primary: foot site y-positions mirror about sagittal plane, foot z-height RMS matches.
+  Secondary: hipy mean-position symmetry — catches systematic offset (one leg always more bent).
+  Tertiary: antisymmetric joint pairs (hipz, hipx, anklex) action sums ≈ 0.
 
-  Lateral joints (hipz, hipx, anklex): action_r + action_l ≈ 0 for symmetric gait.
-  Sagittal joints (hipy, knee, ankley): rolling |amplitude| should match between sides.
+  Foot-based metric captures lateral lean directly from foot placement, which is more
+  robust than joint action comparison and harder to game.
+  Hipy mean catches the case where abs-amplitude is similar but one leg is systematically
+  more/less flexed on average — directly causes visual hipy asymmetry.
   """
 
-  # (right_idx, left_idx, antisymmetric)
-  # antisymmetric=True → penalize (a_r + a_l)^2 (should cancel)
-  # antisymmetric=False → penalize (mean|a_r| - mean|a_l|)^2 (amplitudes should match)
-  PAIRS = [
-    (0, 1, True),   # hipz: equal & opposite
-    (2, 3, True),   # hipx: equal & opposite
-    (4, 5, False),  # hipy: same amplitude (phase-shifted in gait)
-    (6, 7, False),  # knee: same amplitude
-    (8, 9, False),  # ankley: same amplitude
-    (10, 11, True), # anklex: equal & opposite
-  ]
+  # Antisymmetric joint pairs: action_r + action_l ≈ 0
+  _ANTISYM_PAIRS = [(0, 1), (2, 3), (10, 11)]  # hipz, hipx, anklex
 
   def __init__(self) -> None:
     self._state_by_env: dict[int, dict] = {}
     self._last_env_key: int | None = None
 
-  def __call__(self, env, history_len: int = 30) -> torch.Tensor:
+  def __call__(self, env, history_len: int = 60) -> torch.Tensor:
     actions = env.action_manager.action  # [N, 12]
+    N = actions.shape[0]
     env_key = id(env)
     self._last_env_key = env_key
 
     state = self._state_by_env.get(env_key)
-    needs_init = (
+    if (
       state is None
-      or state["buf"].shape[0] != actions.shape[0]
-      or state["buf"].shape[1] != history_len
-    )
-    if needs_init:
+      or state["foot_z_r"].shape[0] != N
+      or state["foot_z_r"].shape[1] != history_len
+    ):
       state = {
-        "buf": torch.zeros(
-          (actions.shape[0], history_len, actions.shape[1]),
-          device=actions.device,
-          dtype=actions.dtype,
-        ),
+        "foot_z_r": torch.zeros((N, history_len), device=actions.device, dtype=actions.dtype),
+        "foot_z_l": torch.zeros((N, history_len), device=actions.device, dtype=actions.dtype),
+        "hipy_r": torch.zeros((N, history_len), device=actions.device, dtype=actions.dtype),
+        "hipy_l": torch.zeros((N, history_len), device=actions.device, dtype=actions.dtype),
+        "hipy_count": torch.zeros(N, device=actions.device, dtype=torch.long),
         "pos": 0,
-        "count": torch.zeros(actions.shape[0], device=actions.device, dtype=torch.long),
+        "site_r": None,
+        "site_l": None,
       }
       self._state_by_env[env_key] = state
 
+    penalty = torch.zeros(N, device=actions.device, dtype=actions.dtype)
+
+    # Always advance position counter so hipy is tracked even if foot sites unavailable.
     pos = int(state["pos"])
-    state["buf"][:, pos, :] = actions
     state["pos"] = (pos + 1) % history_len
-    state["count"].add_(1).clamp_(max=history_len)
 
-    abs_means = state["buf"].abs().mean(dim=1)  # [N, 12]
+    # --- Hipy mean-position symmetry ---
+    # Penalize systematic offset between right and left hip pitch.
+    # mean(hipy_r) ≈ mean(hipy_l) for a balanced gait; visible asymmetry when one leg
+    # is consistently more bent/extended than the other.
+    # Gate until buffer is half-full to avoid bias from zero-initialized entries.
+    state["hipy_r"][:, pos] = actions[:, 4]
+    state["hipy_l"][:, pos] = actions[:, 5]
+    state["hipy_count"].add_(1).clamp_(max=history_len)
+    hipy_count = state["hipy_count"].float().clamp(min=1)
+    mean_hipy_r = state["hipy_r"].sum(dim=1) / hipy_count
+    mean_hipy_l = state["hipy_l"].sum(dim=1) / hipy_count
+    hipy_ready = state["hipy_count"] >= (history_len // 2)
+    hipy_penalty = (mean_hipy_r - mean_hipy_l).square() * 3.0
+    penalty += torch.where(hipy_ready, hipy_penalty, torch.zeros_like(hipy_penalty))
 
-    penalty = torch.zeros(actions.shape[0], device=actions.device, dtype=actions.dtype)
-    for ri, li, antisym in self.PAIRS:
-      if antisym:
-        penalty += (actions[:, ri] + actions[:, li]).square()
-      else:
-        penalty += (abs_means[:, ri] - abs_means[:, li]).square()
+    # --- Primary: foot trajectory symmetry ---
+    try:
+      robot = env.scene["robot"]
+      site_pos_w = robot.data.site_pos_w  # [N, num_sites, 3]
+      root_pos_w = robot.data.root_pos_w  # [N, 3]
+
+      # Resolve site indices once and cache
+      if state["site_r"] is None:
+        site_names = list(robot.data.site_names)
+        r_idx = next((i for i, n in enumerate(site_names) if n == "foot_right"), None)
+        l_idx = next((i for i, n in enumerate(site_names) if n == "foot_left"), None)
+        state["site_r"] = r_idx
+        state["site_l"] = l_idx
+
+      r_idx, l_idx = state["site_r"], state["site_l"]
+
+      if r_idx is not None and l_idx is not None:
+        foot_r = site_pos_w[:, r_idx, :]  # [N, 3]
+        foot_l = site_pos_w[:, l_idx, :]  # [N, 3]
+
+        # Lateral (y) symmetry: feet should mirror about sagittal plane.
+        # In base frame: foot_r_y ≈ -foot_l_y → (foot_r_y + foot_l_y - 2*base_y) ≈ 0.
+        # Catches lateral lean at the foot level.
+        y_asym = (foot_r[:, 1] + foot_l[:, 1] - 2.0 * root_pos_w[:, 1]).square()
+        penalty += y_asym * 4.0
+
+        # Height (z) RMS symmetry over history: mean foot height should match.
+        # Robust to phase offset between left and right feet during gait.
+        state["foot_z_r"][:, pos] = foot_r[:, 2]
+        state["foot_z_l"][:, pos] = foot_l[:, 2]
+
+        rms_r = state["foot_z_r"].square().mean(dim=1).sqrt()  # [N]
+        rms_l = state["foot_z_l"].square().mean(dim=1).sqrt()  # [N]
+        penalty += (rms_r - rms_l).square() * 2.0
+
+    except Exception:
+      pass  # If foot site data unavailable, hipy + joint-only penalty still applies
+
+    # --- Tertiary: antisymmetric joint pairs ---
+    for ri, li in self._ANTISYM_PAIRS:
+      penalty += (actions[:, ri] + actions[:, li]).square() * 0.5
 
     return -penalty
 
@@ -306,12 +349,18 @@ class _BilateralSymmetryReward:
     if state is None:
       return
     if env_ids is None or isinstance(env_ids, slice):
-      state["buf"].zero_()
-      state["count"].zero_()
+      state["foot_z_r"].zero_()
+      state["foot_z_l"].zero_()
+      state["hipy_r"].zero_()
+      state["hipy_l"].zero_()
+      state["hipy_count"].zero_()
       state["pos"] = 0
       return
-    state["buf"][env_ids] = 0.0
-    state["count"][env_ids] = 0
+    state["foot_z_r"][env_ids] = 0.0
+    state["foot_z_l"][env_ids] = 0.0
+    state["hipy_r"][env_ids] = 0.0
+    state["hipy_l"][env_ids] = 0.0
+    state["hipy_count"][env_ids] = 0
 
 
 _ACTION_FFT_BAND_RATIO_REWARD = _ActionFftBandRatioReward()
@@ -746,8 +795,8 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
   )
   cfg.rewards["bilateral_symmetry"] = RewardTermCfg(
     func=_BILATERAL_SYMMETRY_REWARD,
-    weight=0.3,
-    params={"history_len": 30},
+    weight=2.0,
+    params={"history_len": 60},
   )
   cfg.rewards["action_rate_l2"].weight = -0.1
   cfg.rewards["action_rate_hipz_hipx_l2"] = RewardTermCfg(
