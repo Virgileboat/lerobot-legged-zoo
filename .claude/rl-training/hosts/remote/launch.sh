@@ -37,7 +37,15 @@ fi
 echo "=== Setting up worktree ==="
 cd "$REPO_DIR"
 git fetch origin 2>/dev/null || echo "Warning: could not fetch from remote, using local branch state"
-git worktree add "$WORKTREE_DIR" "$BRANCH" 2>/dev/null || (cd "$WORKTREE_DIR" && git checkout "$BRANCH" && git pull origin "$BRANCH" 2>/dev/null || echo "Warning: could not pull, using existing worktree state")
+
+# If main repo is already on this branch, use it directly (no separate worktree needed)
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+if [ "$CURRENT_BRANCH" = "$BRANCH" ]; then
+    echo "Main repo is already on $BRANCH — using repo dir directly"
+    WORKTREE_DIR="$REPO_DIR"
+else
+    git worktree add "$WORKTREE_DIR" "$BRANCH" 2>/dev/null || (cd "$WORKTREE_DIR" && git checkout "$BRANCH" && git pull origin "$BRANCH" 2>/dev/null || echo "Warning: could not pull, using existing worktree state")
+fi
 
 ACTUAL_DEPS="${DEPS_CMD:-$HOST_DEPS}"
 if [ -n "$ACTUAL_DEPS" ]; then
@@ -45,8 +53,7 @@ if [ -n "$ACTUAL_DEPS" ]; then
     (cd "$WORKTREE_DIR" && $ACTUAL_DEPS)
 fi
 
-# Append branch name as WandB run name for identification
-FULL_TRAIN_CMD="$TRAIN_CMD --runner.run_name \"$BRANCH_SANITIZED\""
+FULL_TRAIN_CMD="$TRAIN_CMD"
 
 echo "=== Launching training in screen $SCREEN_NAME ==="
 screen -ls | grep -q "$SCREEN_NAME" && screen -S "$SCREEN_NAME" -X stuff $'\003' || screen -dmS "$SCREEN_NAME"
