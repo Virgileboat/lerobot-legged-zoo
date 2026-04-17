@@ -236,14 +236,13 @@ class _ActionFftBandRatioReward:
 class _BilateralSymmetryReward:
   """Penalize bilateral asymmetry using foot trajectory (primary) and joint actions (secondary).
 
-  Primary: foot site y-positions mirror about sagittal plane, foot z-height RMS matches.
+  Primary: foot y-lateral lean, peak swing height, and step-length (x-range) symmetry.
   Secondary: hipy mean-position symmetry — catches systematic offset (one leg always more bent).
   Tertiary: antisymmetric joint pairs (hipz, hipx, anklex) action sums ≈ 0.
 
-  Foot-based metric captures lateral lean directly from foot placement, which is more
-  robust than joint action comparison and harder to game.
-  Hipy mean catches the case where abs-amplitude is similar but one leg is systematically
-  more/less flexed on average — directly causes visual hipy asymmetry.
+  Peak height (max z over history) directly penalizes unequal foot lift height.
+  Step-length (x-displacement range over history) penalizes unequal forward/backward reach.
+  Both are more targeted than RMS-based metrics, which dilute swing phase signal.
   """
 
   # Antisymmetric joint pairs: action_r + action_l ≈ 0
@@ -268,6 +267,8 @@ class _BilateralSymmetryReward:
       state = {
         "foot_z_r": torch.zeros((N, history_len), device=actions.device, dtype=actions.dtype),
         "foot_z_l": torch.zeros((N, history_len), device=actions.device, dtype=actions.dtype),
+        "foot_x_r": torch.zeros((N, history_len), device=actions.device, dtype=actions.dtype),
+        "foot_x_l": torch.zeros((N, history_len), device=actions.device, dtype=actions.dtype),
         "hipy_r": torch.zeros((N, history_len), device=actions.device, dtype=actions.dtype),
         "hipy_l": torch.zeros((N, history_len), device=actions.device, dtype=actions.dtype),
         "hipy_count": torch.zeros(N, device=actions.device, dtype=torch.long),
@@ -283,7 +284,7 @@ class _BilateralSymmetryReward:
     pos = int(state["pos"])
     state["pos"] = (pos + 1) % history_len
 
-    # --- Hipy mean-position symmetry ---
+    # --- Secondary: hipy mean-position symmetry ---
     # Penalize systematic offset between right and left hip pitch.
     # mean(hipy_r) ≈ mean(hipy_l) for a balanced gait; visible asymmetry when one leg
     # is consistently more bent/extended than the other.
@@ -319,19 +320,24 @@ class _BilateralSymmetryReward:
         foot_l = site_pos_w[:, l_idx, :]  # [N, 3]
 
         # Lateral (y) symmetry: feet should mirror about sagittal plane.
-        # In base frame: foot_r_y ≈ -foot_l_y → (foot_r_y + foot_l_y - 2*base_y) ≈ 0.
-        # Catches lateral lean at the foot level.
         y_asym = (foot_r[:, 1] + foot_l[:, 1] - 2.0 * root_pos_w[:, 1]).square()
         penalty += y_asym * 4.0
 
-        # Height (z) RMS symmetry over history: mean foot height should match.
-        # Robust to phase offset between left and right feet during gait.
+        # Peak swing height symmetry: both feet should lift to the same max height.
+        # Max z over history captures the highest point reached, ignoring stance phase.
         state["foot_z_r"][:, pos] = foot_r[:, 2]
         state["foot_z_l"][:, pos] = foot_l[:, 2]
+        max_z_r = state["foot_z_r"].max(dim=1).values
+        max_z_l = state["foot_z_l"].max(dim=1).values
+        penalty += (max_z_r - max_z_l).square() * 4.0
 
-        rms_r = state["foot_z_r"].square().mean(dim=1).sqrt()  # [N]
-        rms_l = state["foot_z_l"].square().mean(dim=1).sqrt()  # [N]
-        penalty += (rms_r - rms_l).square() * 2.0
+        # Step-length symmetry: x-displacement range (base-relative) should match.
+        # Range = max - min captures full forward/backward reach of each foot per window.
+        state["foot_x_r"][:, pos] = foot_r[:, 0] - root_pos_w[:, 0]
+        state["foot_x_l"][:, pos] = foot_l[:, 0] - root_pos_w[:, 0]
+        range_x_r = state["foot_x_r"].max(dim=1).values - state["foot_x_r"].min(dim=1).values
+        range_x_l = state["foot_x_l"].max(dim=1).values - state["foot_x_l"].min(dim=1).values
+        penalty += (range_x_r - range_x_l).square() * 3.0
 
     except Exception:
       pass  # If foot site data unavailable, hipy + joint-only penalty still applies
@@ -351,6 +357,8 @@ class _BilateralSymmetryReward:
     if env_ids is None or isinstance(env_ids, slice):
       state["foot_z_r"].zero_()
       state["foot_z_l"].zero_()
+      state["foot_x_r"].zero_()
+      state["foot_x_l"].zero_()
       state["hipy_r"].zero_()
       state["hipy_l"].zero_()
       state["hipy_count"].zero_()
@@ -358,6 +366,8 @@ class _BilateralSymmetryReward:
       return
     state["foot_z_r"][env_ids] = 0.0
     state["foot_z_l"][env_ids] = 0.0
+    state["foot_x_r"][env_ids] = 0.0
+    state["foot_x_l"][env_ids] = 0.0
     state["hipy_r"][env_ids] = 0.0
     state["hipy_l"][env_ids] = 0.0
     state["hipy_count"][env_ids] = 0
