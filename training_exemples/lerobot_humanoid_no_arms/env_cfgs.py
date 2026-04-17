@@ -746,7 +746,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
   )
   cfg.rewards["bilateral_symmetry"] = RewardTermCfg(
     func=_BILATERAL_SYMMETRY_REWARD,
-    weight=0.8,
+    weight=0.3,
     params={"history_len": 30},
   )
   cfg.rewards["action_rate_l2"].weight = -0.1
@@ -766,27 +766,8 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
         # Curriculum uses env.common_step_counter (env steps), while W&B "Step"
         # is PPO iterations. Here num_steps_per_env=24, so multiply by 24.
         {"step": 5_000 * 24, "weight": -0.5},
-        {"step": 10_000 * 24, "weight": -1.0},
-        {"step": 15_000 * 24, "weight": -1.5},
-        {"step": 20_000 * 24, "weight": -2.0},
-        {"step": 25_000 * 24, "weight": -2.5},
-        {"step": 30_000 * 24, "weight": -4.0},
-      ],
-    },
-  )
-  cfg.curriculum["action_rate_hipz_hipx_weight"] = CurriculumTermCfg(
-    func=mdp.reward_weight,
-    params={
-      "reward_name": "action_rate_hipz_hipx_l2",
-      "weight_stages": [
-        {"step": 0, "weight": -5.0},
-        # Curriculum uses env.common_step_counter (env steps), while W&B "Step"
-        # is PPO iterations. Here num_steps_per_env=24, so multiply by 24.
-        {"step": 5_000 * 24, "weight": -10.0},
-        {"step": 10_000 * 24, "weight": -15.0},
-        {"step": 15_000 * 24, "weight": -20.0},
-        {"step": 20_000 * 24, "weight": -30.0},
-        {"step": 25_000 * 24, "weight": -30.0},
+        {"step": 10_000 * 24, "weight": -1.5},
+        {"step": 15_000 * 24, "weight": -3.0},
       ],
     },
   )
