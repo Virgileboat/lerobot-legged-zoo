@@ -28,7 +28,7 @@ Order: [remote]
 - Metric categories: [Episode_Reward/, Episode_Termination/, Train/]
 - Key metrics: [Train/mean_reward, Episode_Reward/track_linear_velocity, Episode_Reward/action_fft_band_le_3hz_ratio, Episode_Reward/action_rate_hipz_hipx_l2]
 - Kill threshold: 2
-- Max iterations: 10
+- Max iterations: 4
 
 ## Evaluation
 - Scenarios:

@@ -746,7 +746,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
   )
   cfg.rewards["bilateral_symmetry"] = RewardTermCfg(
     func=_BILATERAL_SYMMETRY_REWARD,
-    weight=0.3,
+    weight=0.8,
     params={"history_len": 30},
   )
   cfg.rewards["action_rate_l2"].weight = -0.1
@@ -755,20 +755,8 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
     weight=-5.0,
     params={"joint_name_patterns": (r".*hipz.*", r".*hipx.*")},
   )
-  cfg.curriculum["pose_weight"] = CurriculumTermCfg(
-    func=mdp.reward_weight,
-    params={
-      "reward_name": "pose",
-      "weight_stages": [
-        {"step": 0, "weight": 2.5},
-        # Curriculum uses env.common_step_counter (env steps), while W&B "Step"
-        # is PPO iterations. Here num_steps_per_env=24, so multiply by 24.
-        {"step": 2_000 * 24, "weight": 2.0},
-        {"step": 4_000 * 24, "weight": 1.5},
-        {"step": 5_000 * 24, "weight": 1.5},
-      ],
-    },
-  )
+  cfg.rewards["pose"].weight = 1.5
+  cfg.curriculum.pop("pose_weight", None)
   cfg.curriculum["action_rate_weight"] = CurriculumTermCfg(
     func=mdp.reward_weight,
     params={
