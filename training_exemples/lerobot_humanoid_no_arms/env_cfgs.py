@@ -734,7 +734,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
   cfg.rewards["body_ang_vel"].weight = -0.05
   cfg.rewards["dof_pos_limits"].weight = -1.0
   cfg.rewards["angular_momentum"].weight = -0.02
-  cfg.rewards["air_time"].weight = 0.0
+  cfg.rewards["air_time"].weight = 1.5
   cfg.rewards["foot_slip"].weight = -0.1
   cfg.rewards["soft_landing"].weight = -1e-5
 
@@ -752,7 +752,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
   cfg.rewards["action_rate_l2"].weight = -0.1
   cfg.rewards["action_rate_hipz_hipx_l2"] = RewardTermCfg(
     func=_SELECTIVE_ACTION_RATE_L2_PENALTY,
-    weight=-5.0,
+    weight=-0.5,
     params={"joint_name_patterns": (r".*hipz.*", r".*hipx.*")},
   )
   cfg.rewards["pose"].weight = 1.5
