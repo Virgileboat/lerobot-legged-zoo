@@ -531,7 +531,7 @@ async def on_message(message: discord.Message):
                 None, apply_modification_now, branch_sanitized
             )
             await message.channel.send(f"```\n{result}\n```")
-            await message.channel.send("Phase is now **ITERATE** — re-invoke `/rlcopilot` in Claude Code to apply changes and relaunch.")
+            await message.channel.send("Phase is now **ITERATE** — keepalive agent will auto-implement changes and relaunch training within 17 minutes. No action needed.")
 
         elif cmd == "!status":
             await message.channel.send(format_status())

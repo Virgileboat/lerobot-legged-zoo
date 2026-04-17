@@ -36,8 +36,8 @@ fi
 
 echo "=== Setting up worktree ==="
 cd "$REPO_DIR"
-git fetch origin
-git worktree add "$WORKTREE_DIR" "$BRANCH" 2>/dev/null || (cd "$WORKTREE_DIR" && git checkout "$BRANCH" && git pull origin "$BRANCH")
+git fetch origin 2>/dev/null || echo "Warning: could not fetch from remote, using local branch state"
+git worktree add "$WORKTREE_DIR" "$BRANCH" 2>/dev/null || (cd "$WORKTREE_DIR" && git checkout "$BRANCH" && git pull origin "$BRANCH" 2>/dev/null || echo "Warning: could not pull, using existing worktree state")
 
 ACTUAL_DEPS="${DEPS_CMD:-$HOST_DEPS}"
 if [ -n "$ACTUAL_DEPS" ]; then
