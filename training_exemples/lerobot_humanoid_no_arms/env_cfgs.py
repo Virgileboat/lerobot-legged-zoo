@@ -240,9 +240,9 @@ class _BilateralSymmetryReward:
   Secondary: hipy mean-position symmetry — catches systematic offset (one leg always more bent).
   Tertiary: antisymmetric joint pairs (hipz, hipx, anklex) action sums ≈ 0.
 
-  Peak height (max z over history) directly penalizes unequal foot lift height.
+  Swing amplitude (z-range over history) penalizes unequal foot lift height, robust to tilt.
   Step-length (x-displacement range over history) penalizes unequal forward/backward reach.
-  Both are more targeted than RMS-based metrics, which dilute swing phase signal.
+  Both use range (max-min) to measure amplitude, independent of absolute position or lean.
   """
 
   # Antisymmetric joint pairs: action_r + action_l ≈ 0
@@ -323,13 +323,14 @@ class _BilateralSymmetryReward:
         y_asym = (foot_r[:, 1] + foot_l[:, 1] - 2.0 * root_pos_w[:, 1]).square()
         penalty += y_asym * 4.0
 
-        # Peak swing height symmetry: both feet should lift to the same max height.
-        # Max z over history captures the highest point reached, ignoring stance phase.
+        # Swing amplitude symmetry: both feet should lift the same height above their
+        # ground contact. Range (max-min) over history measures lift amplitude robustly,
+        # independent of absolute z or lateral tilt. Analogous to step-length x-range.
         state["foot_z_r"][:, pos] = foot_r[:, 2]
         state["foot_z_l"][:, pos] = foot_l[:, 2]
-        max_z_r = state["foot_z_r"].max(dim=1).values
-        max_z_l = state["foot_z_l"].max(dim=1).values
-        penalty += (max_z_r - max_z_l).square() * 4.0
+        swing_r = state["foot_z_r"].max(dim=1).values - state["foot_z_r"].min(dim=1).values
+        swing_l = state["foot_z_l"].max(dim=1).values - state["foot_z_l"].min(dim=1).values
+        penalty += (swing_r - swing_l).square() * 4.0
 
         # Step-length symmetry: x-displacement range (base-relative) should match.
         # Range = max - min captures full forward/backward reach of each foot per window.
