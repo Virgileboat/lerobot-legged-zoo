@@ -43,6 +43,15 @@ LATERAL_PAIRS = [
     ("anklex", 10, 11),
 ]
 
+# Sagittal joints: symmetric gait means both legs oscillate with equal amplitude
+# (right and left do the same movement but half-period apart)
+# Asymmetry here = one foot goes higher than the other (different swing amplitudes)
+SAGITTAL_PAIRS = [
+    ("hipy",   4, 5),
+    ("knee",   6, 7),
+    ("ankley", 8, 9),
+]
+
 EVAL_STEPS = 500   # ~10 seconds at 50Hz control
 DRY_RUN_STEPS = 20
 
@@ -153,19 +162,40 @@ def run_scenario(env, policy, scenario, num_steps, device, record_video=False):
 
 
 def compute_bilateral_asymmetry(actions):
-    """For lateral joints: symmetric gait means mean(right) + mean(left) ≈ 0."""
+    """Compute symmetry metrics for lateral and sagittal joint pairs.
+
+    Lateral (hipz, hipx, anklex): symmetric gait means mean(r) + mean(l) ≈ 0
+    (they mirror each other — one yaws/rolls one way, the other the opposite).
+
+    Sagittal (hipy, knee, ankley): symmetric gait means equal oscillation amplitudes
+    (both legs swing with same height/range, half-period apart).
+    Asymmetry = one foot goes higher than the other = std(r) ≠ std(l).
+    """
     if actions is None or len(actions) == 0:
-        return {}
-    result = {}
+        return {}, {}
+    lateral = {}
     for name, r_idx, l_idx in LATERAL_PAIRS:
         r_mean = float(np.mean(actions[:, r_idx]))
         l_mean = float(np.mean(actions[:, l_idx]))
-        result[name] = {
+        lateral[name] = {
             "right_mean": round(r_mean, 4),
             "left_mean":  round(l_mean, 4),
             "bias":       round(abs(r_mean + l_mean), 4),
         }
-    return result
+    sagittal = {}
+    for name, r_idx, l_idx in SAGITTAL_PAIRS:
+        r_std = float(np.std(actions[:, r_idx]))
+        l_std = float(np.std(actions[:, l_idx]))
+        r_mean = float(np.mean(actions[:, r_idx]))
+        l_mean = float(np.mean(actions[:, l_idx]))
+        sagittal[name] = {
+            "right_std":  round(r_std, 4),
+            "left_std":   round(l_std, 4),
+            "amp_bias":   round(abs(r_std - l_std), 4),   # swing amplitude asymmetry
+            "right_mean": round(r_mean, 4),
+            "left_mean":  round(l_mean, 4),
+        }
+    return lateral, sagittal
 
 
 def compute_fft_ratio_3hz(actions, dt=0.02):
@@ -186,25 +216,30 @@ def format_report(scenario_results, eval_mod, monitor_config_path):
     lines = ["# Behavioral Evaluation Report", ""]
 
     # Aggregate summary stats
-    all_rewards, all_biases, all_fft = [], [], []
+    all_rewards, all_biases, all_amp_biases, all_fft = [], [], [], []
     for data in scenario_results.values():
         all_rewards.append(float(np.mean(data["rewards"])))
         for p in data["asymmetry"].values():
             all_biases.append(p["bias"])
+        for p in data["sagittal_asymmetry"].values():
+            all_amp_biases.append(p["amp_bias"])
         if data["fft_ratio"] is not None:
             all_fft.append(data["fft_ratio"])
 
-    mean_reward = np.mean(all_rewards) if all_rewards else 0.0
-    mean_bias   = np.mean(all_biases)  if all_biases  else 0.0
-    mean_fft    = np.mean(all_fft)     if all_fft     else 0.0
+    mean_reward    = np.mean(all_rewards)    if all_rewards    else 0.0
+    mean_bias      = np.mean(all_biases)     if all_biases     else 0.0
+    mean_amp_bias  = np.mean(all_amp_biases) if all_amp_biases else 0.0
+    mean_fft       = np.mean(all_fft)        if all_fft        else 0.0
 
-    asym_status = "OK" if mean_bias < 0.05 else ("!" if mean_bias < 0.15 else "!! asymmetric_gait")
-    fft_status  = "physics-feasible" if mean_fft > 0.8 else ("borderline" if mean_fft > 0.6 else "!! HIGH-FREQ sim2real risk")
+    asym_status     = "OK" if mean_bias < 0.05     else ("!" if mean_bias < 0.15     else "!! asymmetric_gait")
+    amp_bias_status = "OK" if mean_amp_bias < 0.05 else ("!" if mean_amp_bias < 0.15 else "!! foot_height_asymmetry")
+    fft_status      = "physics-feasible" if mean_fft > 0.8 else ("borderline" if mean_fft > 0.6 else "!! HIGH-FREQ sim2real risk")
 
     lines += [
         "## Summary",
         f"- Mean episode reward: {mean_reward:.3f}",
         f"- Bilateral bias (lateral joints, lower=better): {mean_bias:.3f} → {asym_status}",
+        f"- Sagittal amp bias (foot height, lower=better): {mean_amp_bias:.3f} → {amp_bias_status}",
         f"- Action energy ≤3Hz (physics motion): {mean_fft:.3f} → {fft_status}",
         "",
     ]
@@ -222,13 +257,21 @@ def format_report(scenario_results, eval_mod, monitor_config_path):
         lines.append(f"- Mean reward: {mean_r:.3f}")
         lines.append(f"- Episode resets (falls): {data['episode_breaks']}")
 
-        # Symmetry
+        # Lateral symmetry (mean-based)
         lines.append("- Bilateral symmetry (lateral joints):")
         for joint, pd in data["asymmetry"].items():
             flag = "" if pd["bias"] < 0.05 else (" !" if pd["bias"] < 0.15 else " !!")
             lines.append(
                 f"  - {joint}: right={pd['right_mean']:+.3f}  left={pd['left_mean']:+.3f}"
                 f"  bias={pd['bias']:.3f}{flag}"
+            )
+        # Sagittal symmetry (amplitude-based: detects foot height asymmetry)
+        lines.append("- Sagittal symmetry (foot height — amp_bias=|std_r - std_l|):")
+        for joint, pd in data["sagittal_asymmetry"].items():
+            flag = "" if pd["amp_bias"] < 0.05 else (" !" if pd["amp_bias"] < 0.15 else " !!")
+            lines.append(
+                f"  - {joint}: std_r={pd['right_std']:.3f}  std_l={pd['left_std']:.3f}"
+                f"  amp_bias={pd['amp_bias']:.3f}{flag}"
             )
 
         # FFT
@@ -253,14 +296,18 @@ def format_report(scenario_results, eval_mod, monitor_config_path):
             "mean_reward":           mean_r,
             "fft_ratio_3hz":         data["fft_ratio"],
             "bilateral_asymmetry":   data["asymmetry"],
+            "sagittal_asymmetry":    data["sagittal_asymmetry"],
             "episode_breaks":        data["episode_breaks"],
             "quality_score":         quality_score,
         }
 
     # Cross-scenario analysis
     lines.append("## Cross-Scenario Analysis")
-    hipx_biases = [scenario_results[s]["asymmetry"].get("hipx", {}).get("bias", 0.0) for s in scenario_results]
-    hipz_biases = [scenario_results[s]["asymmetry"].get("hipz", {}).get("bias", 0.0) for s in scenario_results]
+    hipx_biases  = [scenario_results[s]["asymmetry"].get("hipx", {}).get("bias", 0.0) for s in scenario_results]
+    hipz_biases  = [scenario_results[s]["asymmetry"].get("hipz", {}).get("bias", 0.0) for s in scenario_results]
+    hipy_amps    = [scenario_results[s]["sagittal_asymmetry"].get("hipy",   {}).get("amp_bias", 0.0) for s in scenario_results]
+    knee_amps    = [scenario_results[s]["sagittal_asymmetry"].get("knee",   {}).get("amp_bias", 0.0) for s in scenario_results]
+    ankley_amps  = [scenario_results[s]["sagittal_asymmetry"].get("ankley", {}).get("amp_bias", 0.0) for s in scenario_results]
 
     if np.mean(hipx_biases) > 0.10:
         lines.append(
@@ -275,6 +322,22 @@ def format_report(scenario_results, eval_mod, monitor_config_path):
 
     if np.mean(hipz_biases) > 0.05:
         lines.append(f"- hipz asymmetry detected (mean bias {np.mean(hipz_biases):.3f})")
+
+    # Sagittal (foot height) analysis
+    mean_hipy_amp   = np.mean(hipy_amps)
+    mean_knee_amp   = np.mean(knee_amps)
+    mean_ankley_amp = np.mean(ankley_amps)
+    if mean_knee_amp > 0.05 or mean_hipy_amp > 0.05:
+        lines.append(
+            f"- **Foot height asymmetry detected** — "
+            f"hipy amp_bias {mean_hipy_amp:.3f}, knee amp_bias {mean_knee_amp:.3f}, "
+            f"ankley amp_bias {mean_ankley_amp:.3f}. Tag: foot_height_asymmetry."
+        )
+    else:
+        lines.append(
+            f"- Sagittal symmetry OK — hipy amp_bias {mean_hipy_amp:.3f}, "
+            f"knee amp_bias {mean_knee_amp:.3f}"
+        )
 
     if all_fft:
         lines.append(f"- Physics motion ratio (≤3Hz): {np.mean(all_fft):.3f} (target >0.8 for sim2real)")
@@ -340,7 +403,7 @@ def main():
         record = (len(video_frames) == 0)  # only record first scenario
         data = run_scenario(env, policy, scenario, num_steps, device, record_video=record)
 
-        data["asymmetry"] = compute_bilateral_asymmetry(data["actions"])
+        data["asymmetry"], data["sagittal_asymmetry"] = compute_bilateral_asymmetry(data["actions"])
         data["fft_ratio"] = compute_fft_ratio_3hz(data["actions"])
 
         if eval_mod and data["joint_pos"] is not None and data["contacts"] is not None:

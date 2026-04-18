@@ -246,7 +246,9 @@ class _BilateralSymmetryReward:
   """
 
   # Antisymmetric joint pairs: action_r + action_l ≈ 0
-  _ANTISYM_PAIRS = [(0, 1), (2, 3), (10, 11)]  # hipz, hipx, anklex
+  # Lateral: hipz(0,1), hipx(2,3), anklex(10,11)
+  # Sagittal: hipy(4,5), knee(6,7), ankley(8,9) — control foot height
+  _ANTISYM_PAIRS = [(0, 1), (2, 3), (10, 11), (4, 5), (6, 7), (8, 9)]
 
   def __init__(self) -> None:
     self._state_by_env: dict[int, dict] = {}
@@ -344,6 +346,7 @@ class _BilateralSymmetryReward:
       pass  # If foot site data unavailable, hipy + joint-only penalty still applies
 
     # --- Tertiary: antisymmetric joint pairs ---
+    # All pairs (lateral + sagittal): weight 0.5
     for ri, li in self._ANTISYM_PAIRS:
       penalty += (actions[:, ri] + actions[:, li]).square() * 0.5
 
