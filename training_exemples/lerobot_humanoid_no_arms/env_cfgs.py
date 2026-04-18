@@ -234,21 +234,15 @@ class _ActionFftBandRatioReward:
 
 
 class _BilateralSymmetryReward:
-  """Penalize bilateral asymmetry using foot trajectory (primary) and joint actions (secondary).
+  """Penalize bilateral asymmetry using foot position metrics exclusively.
 
-  Primary: foot y-lateral lean, peak swing height, and step-length (x-range) symmetry.
-  Secondary: hipy mean-position symmetry — catches systematic offset (one leg always more bent).
-  Tertiary: antisymmetric joint pairs (hipz, hipx, anklex) action sums ≈ 0.
-
-  Swing amplitude (z-range over history) penalizes unequal foot lift height, robust to tilt.
-  Step-length (x-displacement range over history) penalizes unequal forward/backward reach.
-  Both use range (max-min) to measure amplitude, independent of absolute position or lean.
+  No joint-space metrics. All penalties based on foot site positions:
+  - Lateral lean (y): feet should mirror about sagittal plane
+  - Max height: both feet should reach the same peak height
+  - Mean height: both feet should maintain the same average height
+  - Max swing distance (x-range): both feet should have equal forward/backward reach
+  - Mean swing distance: both feet should have equal average forward position
   """
-
-  # Antisymmetric joint pairs: action_r + action_l ≈ 0
-  # Lateral: hipz(0,1), hipx(2,3), anklex(10,11)
-  # Sagittal: hipy(4,5), knee(6,7), ankley(8,9) — control foot height
-  _ANTISYM_PAIRS = [(0, 1), (2, 3), (10, 11), (4, 5), (6, 7), (8, 9)]
 
   def __init__(self) -> None:
     self._state_by_env: dict[int, dict] = {}
@@ -271,9 +265,7 @@ class _BilateralSymmetryReward:
         "foot_z_l": torch.zeros((N, history_len), device=actions.device, dtype=actions.dtype),
         "foot_x_r": torch.zeros((N, history_len), device=actions.device, dtype=actions.dtype),
         "foot_x_l": torch.zeros((N, history_len), device=actions.device, dtype=actions.dtype),
-        "hipy_r": torch.zeros((N, history_len), device=actions.device, dtype=actions.dtype),
-        "hipy_l": torch.zeros((N, history_len), device=actions.device, dtype=actions.dtype),
-        "hipy_count": torch.zeros(N, device=actions.device, dtype=torch.long),
+        "count": torch.zeros(N, device=actions.device, dtype=torch.long),
         "pos": 0,
         "site_r": None,
         "site_l": None,
@@ -282,32 +274,14 @@ class _BilateralSymmetryReward:
 
     penalty = torch.zeros(N, device=actions.device, dtype=actions.dtype)
 
-    # Always advance position counter so hipy is tracked even if foot sites unavailable.
     pos = int(state["pos"])
     state["pos"] = (pos + 1) % history_len
 
-    # --- Secondary: hipy mean-position symmetry ---
-    # Penalize systematic offset between right and left hip pitch.
-    # mean(hipy_r) ≈ mean(hipy_l) for a balanced gait; visible asymmetry when one leg
-    # is consistently more bent/extended than the other.
-    # Gate until buffer is half-full to avoid bias from zero-initialized entries.
-    state["hipy_r"][:, pos] = actions[:, 4]
-    state["hipy_l"][:, pos] = actions[:, 5]
-    state["hipy_count"].add_(1).clamp_(max=history_len)
-    hipy_count = state["hipy_count"].float().clamp(min=1)
-    mean_hipy_r = state["hipy_r"].sum(dim=1) / hipy_count
-    mean_hipy_l = state["hipy_l"].sum(dim=1) / hipy_count
-    hipy_ready = state["hipy_count"] >= (history_len // 2)
-    hipy_penalty = (mean_hipy_r - mean_hipy_l).square() * 3.0
-    penalty += torch.where(hipy_ready, hipy_penalty, torch.zeros_like(hipy_penalty))
-
-    # --- Primary: foot trajectory symmetry ---
     try:
       robot = env.scene["robot"]
       site_pos_w = robot.data.site_pos_w  # [N, num_sites, 3]
       root_pos_w = robot.data.root_pos_w  # [N, 3]
 
-      # Resolve site indices once and cache
       if state["site_r"] is None:
         site_names = list(robot.data.site_names)
         r_idx = next((i for i, n in enumerate(site_names) if n == "foot_right"), None)
@@ -321,34 +295,45 @@ class _BilateralSymmetryReward:
         foot_r = site_pos_w[:, r_idx, :]  # [N, 3]
         foot_l = site_pos_w[:, l_idx, :]  # [N, 3]
 
-        # Lateral (y) symmetry: feet should mirror about sagittal plane.
+        # Lateral (y) symmetry: feet should mirror about sagittal plane
         y_asym = (foot_r[:, 1] + foot_l[:, 1] - 2.0 * root_pos_w[:, 1]).square()
         penalty += y_asym * 4.0
 
-        # Swing amplitude symmetry: both feet should lift the same height above their
-        # ground contact. Range (max-min) over history measures lift amplitude robustly,
-        # independent of absolute z or lateral tilt. Analogous to step-length x-range.
+        # Update foot position history
         state["foot_z_r"][:, pos] = foot_r[:, 2]
         state["foot_z_l"][:, pos] = foot_l[:, 2]
-        swing_r = state["foot_z_r"].max(dim=1).values - state["foot_z_r"].min(dim=1).values
-        swing_l = state["foot_z_l"].max(dim=1).values - state["foot_z_l"].min(dim=1).values
-        penalty += (swing_r - swing_l).square() * 4.0
-
-        # Step-length symmetry: x-displacement range (base-relative) should match.
-        # Range = max - min captures full forward/backward reach of each foot per window.
         state["foot_x_r"][:, pos] = foot_r[:, 0] - root_pos_w[:, 0]
         state["foot_x_l"][:, pos] = foot_l[:, 0] - root_pos_w[:, 0]
+        state["count"].add_(1).clamp_(max=history_len)
+        count = state["count"].float().clamp(min=1)
+        ready = state["count"] >= (history_len // 2)
+
+        # Max height symmetry: both feet should reach the same peak height
+        max_z_r = state["foot_z_r"].max(dim=1).values
+        max_z_l = state["foot_z_l"].max(dim=1).values
+        max_h = (max_z_r - max_z_l).square() * 6.0
+        penalty += torch.where(ready, max_h, torch.zeros_like(max_h))
+
+        # Mean height symmetry: both feet should have the same average height
+        mean_z_r = state["foot_z_r"].sum(dim=1) / count
+        mean_z_l = state["foot_z_l"].sum(dim=1) / count
+        mean_h = (mean_z_r - mean_z_l).square() * 4.0
+        penalty += torch.where(ready, mean_h, torch.zeros_like(mean_h))
+
+        # Max swing distance: forward/backward reach (x-range) should be equal
         range_x_r = state["foot_x_r"].max(dim=1).values - state["foot_x_r"].min(dim=1).values
         range_x_l = state["foot_x_l"].max(dim=1).values - state["foot_x_l"].min(dim=1).values
-        penalty += (range_x_r - range_x_l).square() * 3.0
+        swing_dist = (range_x_r - range_x_l).square() * 3.0
+        penalty += torch.where(ready, swing_dist, torch.zeros_like(swing_dist))
+
+        # Mean swing distance: average forward position should be equal
+        mean_x_r = state["foot_x_r"].sum(dim=1) / count
+        mean_x_l = state["foot_x_l"].sum(dim=1) / count
+        mean_swing = (mean_x_r - mean_x_l).square() * 3.0
+        penalty += torch.where(ready, mean_swing, torch.zeros_like(mean_swing))
 
     except Exception:
-      pass  # If foot site data unavailable, hipy + joint-only penalty still applies
-
-    # --- Tertiary: antisymmetric joint pairs ---
-    # All pairs (lateral + sagittal): weight 0.5
-    for ri, li in self._ANTISYM_PAIRS:
-      penalty += (actions[:, ri] + actions[:, li]).square() * 0.5
+      pass
 
     return -penalty
 
@@ -363,18 +348,14 @@ class _BilateralSymmetryReward:
       state["foot_z_l"].zero_()
       state["foot_x_r"].zero_()
       state["foot_x_l"].zero_()
-      state["hipy_r"].zero_()
-      state["hipy_l"].zero_()
-      state["hipy_count"].zero_()
+      state["count"].zero_()
       state["pos"] = 0
       return
     state["foot_z_r"][env_ids] = 0.0
     state["foot_z_l"][env_ids] = 0.0
     state["foot_x_r"][env_ids] = 0.0
     state["foot_x_l"][env_ids] = 0.0
-    state["hipy_r"][env_ids] = 0.0
-    state["hipy_l"][env_ids] = 0.0
-    state["hipy_count"][env_ids] = 0
+    state["count"][env_ids] = 0
 
 
 _ACTION_FFT_BAND_RATIO_REWARD = _ActionFftBandRatioReward()
