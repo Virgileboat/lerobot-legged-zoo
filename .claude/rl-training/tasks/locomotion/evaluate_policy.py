@@ -403,7 +403,9 @@ def main():
         record = (len(video_frames) == 0)  # only record first scenario
         data = run_scenario(env, policy, scenario, num_steps, device, record_video=record)
 
-        data["asymmetry"], data["sagittal_asymmetry"] = compute_bilateral_asymmetry(data["actions"])
+        # Use actual joint positions (not raw network output) for meaningful symmetry metrics
+        sym_src = data["joint_pos"] if data["joint_pos"] is not None else data["actions"]
+        data["asymmetry"], data["sagittal_asymmetry"] = compute_bilateral_asymmetry(sym_src)
         data["fft_ratio"] = compute_fft_ratio_3hz(data["actions"])
 
         if eval_mod and data["joint_pos"] is not None and data["contacts"] is not None:

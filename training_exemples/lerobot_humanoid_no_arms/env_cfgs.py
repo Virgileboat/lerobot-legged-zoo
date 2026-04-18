@@ -283,7 +283,7 @@ class _BilateralSymmetryReward:
       root_pos_w = robot.data.root_pos_w  # [N, 3]
 
       if state["site_r"] is None:
-        site_names = list(robot.data.site_names)
+        site_names = list(robot.site_names)
         r_idx = next((i for i, n in enumerate(site_names) if n == "foot_right"), None)
         l_idx = next((i for i, n in enumerate(site_names) if n == "foot_left"), None)
         state["site_r"] = r_idx
