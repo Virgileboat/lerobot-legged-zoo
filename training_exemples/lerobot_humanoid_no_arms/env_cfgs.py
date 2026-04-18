@@ -283,11 +283,9 @@ class _BilateralSymmetryReward:
       root_pos_w = robot.data.root_pos_w  # [N, 3]
 
       if state["site_r"] is None:
-        site_names = list(robot.site_names)
-        r_idx = next((i for i, n in enumerate(site_names) if n == "foot_right"), None)
-        l_idx = next((i for i, n in enumerate(site_names) if n == "foot_left"), None)
-        state["site_r"] = r_idx
-        state["site_l"] = l_idx
+        # foot_right=1, foot_left=2 per MJCF site order (torso=0, foot_right=1, foot_left=2)
+        state["site_r"] = 1
+        state["site_l"] = 2
 
       r_idx, l_idx = state["site_r"], state["site_l"]
 
@@ -332,8 +330,8 @@ class _BilateralSymmetryReward:
         mean_swing = (mean_x_r - mean_x_l).square() * 3.0
         penalty += torch.where(ready, mean_swing, torch.zeros_like(mean_swing))
 
-    except Exception:
-      pass
+    except Exception as e:
+      import traceback; traceback.print_exc()
 
     return -penalty
 
