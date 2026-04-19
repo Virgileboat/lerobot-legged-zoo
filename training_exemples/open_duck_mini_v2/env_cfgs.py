@@ -295,7 +295,9 @@ def open_duck_mini_v2_velocity_env_cfg(
         time_out=False,
     )
 
-    cfg.events["reset_base"].params["pose_range"]["z"] = (0.20, 0.21)
+    # reset_root_state_uniform() adds pose_range on top of the init-state pos
+    # (KNEES_BENT_KEYFRAME at z=0.22), so use a tiny jitter, not an absolute.
+    cfg.events["reset_base"].params["pose_range"]["z"] = (-0.005, 0.005)
 
     if ENABLE_VELOCITY_PUSHES:
         interval = (0.5, 1.0) if play else VELOCITY_PUSH_INTERVAL_S
