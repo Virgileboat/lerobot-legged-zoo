@@ -200,7 +200,7 @@ def _load_feedback_tags() -> dict[str, str]:
 
 CLAUDE_BIN = "/home/vbatto/.local/bin/claude"
 CLAUDE_MODEL = "claude-haiku-4-5-20251001"
-ITERATE_CLAUDE_MODEL = "claude-sonnet-4-6"
+ITERATE_CLAUDE_MODEL = "claude-haiku-4-5-20251001"
 
 _QUESTION_STARTERS = (
     "what ", "why ", "how ", "when ", "where ", "who ", "which ",
@@ -592,7 +592,7 @@ async def on_message(message: discord.Message):
             if result.startswith("Training killed."):
                 spawned = spawn_iterate_agent(branch_sanitized)
                 if spawned:
-                    await message.channel.send("ITERATE agent started — implementing changes in background (Sonnet). Monitoring resumes automatically once training relaunches.")
+                    await message.channel.send("ITERATE agent started — implementing changes in background (Haiku). Monitoring resumes automatically once training relaunches.")
                 else:
                     await message.channel.send("Phase is now **ITERATE** — monitoring cron will handle it on next tick (~33 min). Send `!apply` again once iterate_agent file exists.")
 
