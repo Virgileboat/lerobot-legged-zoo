@@ -592,9 +592,9 @@ async def on_message(message: discord.Message):
             if result.startswith("Training killed."):
                 spawned = spawn_iterate_agent(branch_sanitized)
                 if spawned:
-                    await message.channel.send("ITERATE agent started — implementing changes in background with Sonnet. Monitoring will resume automatically once training relaunches.")
+                    await message.channel.send("ITERATE agent started — implementing changes in background (Sonnet). Monitoring resumes automatically once training relaunches.")
                 else:
-                    await message.channel.send("Phase is now **ITERATE** — keepalive agent will auto-implement changes and relaunch training within 13 minutes.")
+                    await message.channel.send("Phase is now **ITERATE** — monitoring cron will handle it on next tick (~33 min). Send `!apply` again once iterate_agent file exists.")
 
         elif cmd == "!status":
             await message.channel.send(format_status())
