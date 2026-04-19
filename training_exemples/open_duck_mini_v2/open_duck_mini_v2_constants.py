@@ -4,10 +4,12 @@ from pathlib import Path
 
 import mujoco
 
-from mjlab.actuator import XmlPositionActuatorCfg
+from mjlab.actuator import DelayedActuatorCfg, XmlPositionActuatorCfg
 from mjlab.entity import EntityArticulationInfoCfg, EntityCfg
 from mjlab.utils.os import update_assets
 from mjlab.utils.spec_config import CollisionCfg
+
+from .actuator import make_bam_m6_actuator_cfg
 
 ##
 # MJCF and assets.
@@ -98,38 +100,58 @@ FULL_COLLISION = CollisionCfg(
 # Actuators (XML-defined, exclude backlash joints).
 ##
 
-OPEN_DUCK_MINI_V2_ACTUATORS = XmlPositionActuatorCfg(
-  target_names_expr=(
-    "left_hip_yaw",
-    "left_hip_roll",
-    "left_hip_pitch",
-    "left_knee",
-    "left_ankle",
-    "neck_pitch",
-    "head_pitch",
-    "head_yaw",
-    "head_roll",
-    "right_hip_yaw",
-    "right_hip_roll",
-    "right_hip_pitch",
-    "right_knee",
-    "right_ankle",
-  ),
+ACTUATED_JOINTS = (
+  "left_hip_yaw",
+  "left_hip_roll",
+  "left_hip_pitch",
+  "left_knee",
+  "left_ankle",
+  "neck_pitch",
+  "head_pitch",
+  "head_yaw",
+  "head_roll",
+  "right_hip_yaw",
+  "right_hip_roll",
+  "right_hip_pitch",
+  "right_knee",
+  "right_ankle",
 )
 
-OPEN_DUCK_MINI_V2_ARTICULATION = EntityArticulationInfoCfg(
-  actuators=(OPEN_DUCK_MINI_V2_ACTUATORS,),
-  soft_joint_pos_limit_factor=0.9,
+# XML position actuator (MuJoCo built-in PD + frictionloss) — original path.
+OPEN_DUCK_MINI_V2_ACTUATORS = DelayedActuatorCfg(
+  delay_min_lag=0,
+  delay_max_lag=3,
+  base_cfg=XmlPositionActuatorCfg(joint_names_expr=ACTUATED_JOINTS),
+)
+
+# BAM M6 actuator (full voltage control + load-dependent friction).
+# NOTE: we don't yet have M6 identification data for the STS3215 actuators
+# used on the Open Duck Mini v2 — the default params are XL330 placeholders.
+# Swap in a real STS3215 JSON via `json_path=` once measurements are done.
+OPEN_DUCK_MINI_V2_M6_ACTUATORS = DelayedActuatorCfg(
+  delay_min_lag=0,
+  delay_max_lag=3,
+  base_cfg=make_bam_m6_actuator_cfg(joint_names_expr=ACTUATED_JOINTS),
 )
 
 
-def get_open_duck_mini_v2_robot_cfg() -> EntityCfg:
-  """Get a fresh Open Duck Mini v2 (backlash) robot configuration instance."""
+def get_open_duck_mini_v2_robot_cfg(use_m6: bool = False) -> EntityCfg:
+  """Get a fresh Open Duck Mini v2 (backlash) robot configuration instance.
+
+  Args:
+    use_m6: If True, use the BAM M6 actuator (placeholder XL330 params until
+      STS3215 identification is available). Otherwise use the XML position
+      actuator wrapped in a DelayedActuator.
+  """
+  actuators = OPEN_DUCK_MINI_V2_M6_ACTUATORS if use_m6 else OPEN_DUCK_MINI_V2_ACTUATORS
   return EntityCfg(
     spec_fn=get_spec,
     init_state=KNEES_BENT_KEYFRAME,
     collisions=(FULL_COLLISION,),
-    articulation=OPEN_DUCK_MINI_V2_ARTICULATION,
+    articulation=EntityArticulationInfoCfg(
+      actuators=(actuators,),
+      soft_joint_pos_limit_factor=0.9,
+    ),
   )
 
 

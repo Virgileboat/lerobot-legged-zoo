@@ -104,7 +104,7 @@ FULL_COLLISION = CollisionCfg(
 ##
 
 LEGGY_ACTUATORS = XmlPositionActuatorCfg(
-  target_names_expr=("LhipY", "LhipX", "Lknee", "RhipY", "RhipX", "Rknee"),
+  joint_names_expr=("LhipY", "LhipX", "Lknee", "RhipY", "RhipX", "Rknee"),
 )
 
 LEGGY_ARTICULATION = EntityArticulationInfoCfg(

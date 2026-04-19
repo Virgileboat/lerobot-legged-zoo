@@ -78,7 +78,7 @@ for a in G1_29DOF_ARTICULATION.actuators:
   assert isinstance(a, BuiltinPositionActuatorCfg)
   e = a.effort_limit
   s = a.stiffness
-  names = a.target_names_expr
+  names = a.joint_names_expr
   assert e is not None
   for n in names:
     G1_29DOF_ACTION_SCALE[n] = 0.25 * e / s

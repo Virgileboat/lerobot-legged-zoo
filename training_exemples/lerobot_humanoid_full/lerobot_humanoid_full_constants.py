@@ -72,7 +72,7 @@ KNEE_EFFORT_LIMIT = 88.0
 ANKLE_EFFORT_LIMIT = 40.0
 
 LEROBOT_ACTUATOR_HIP = BuiltinPositionActuatorCfg(
-  target_names_expr=(
+  joint_names_expr=(
     "hipz_.*",
     "hipx_.*",
     "hipy_.*",
@@ -84,7 +84,7 @@ LEROBOT_ACTUATOR_HIP = BuiltinPositionActuatorCfg(
 )
 
 LEROBOT_ACTUATOR_KNEE = BuiltinPositionActuatorCfg(
-  target_names_expr=("knee_.*",),
+  joint_names_expr=("knee_.*",),
   stiffness=KNEE_STIFFNESS,
   damping=KNEE_DAMPING,
   effort_limit=KNEE_EFFORT_LIMIT,
@@ -92,7 +92,7 @@ LEROBOT_ACTUATOR_KNEE = BuiltinPositionActuatorCfg(
 )
 
 LEROBOT_ACTUATOR_ANKLE = BuiltinPositionActuatorCfg(
-  target_names_expr=(
+  joint_names_expr=(
     "ankley_.*",
     "anklex_.*",
   ),
@@ -103,7 +103,7 @@ LEROBOT_ACTUATOR_ANKLE = BuiltinPositionActuatorCfg(
 )
 
 LEROBOT_ACTUATOR_ARMS = BuiltinPositionActuatorCfg(
-  target_names_expr=(
+  joint_names_expr=(
     "shoulder.*",
     "elbow.*",
   ),
@@ -249,7 +249,7 @@ for a in LEROBOT_HUMANOID_FULL_ARTICULATION.actuators:
   assert isinstance(a, BuiltinPositionActuatorCfg)
   e = a.effort_limit
   s = a.stiffness
-  names = a.target_names_expr
+  names = a.joint_names_expr
   assert e is not None
   for n in names:
     LEROBOT_HUMANOID_FULL_ACTION_SCALE[n] = 0.25 * e / s

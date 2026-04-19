@@ -9,7 +9,7 @@ description = "LeRobot/Pollen legged robot models + MJLab training examples (no 
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-  "mjlab @ git+https://github.com/mujocolab/mjlab.git",
+  "mjlab",
 ]
 
 [project.optional-dependencies]
@@ -47,3 +47,6 @@ line-length = 100
 
 [tool.uv]
 override-dependencies = ["mujoco"]
+
+[tool.uv.sources]
+mjlab = { git = "https://github.com/mujocolab/mjlab.git", rev = "d1d32d8b86e68fe317356de2561f4efc63ffcc29" }

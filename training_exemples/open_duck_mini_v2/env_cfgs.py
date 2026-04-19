@@ -8,42 +8,99 @@ ENABLE_COM_RANDOMIZATION = True
 ENABLE_KP_RANDOMIZATION = True
 ENABLE_KD_RANDOMIZATION = True
 ENABLE_MASS_INERTIA_RANDOMIZATION = True
+ENABLE_JOINT_FRICTION_RANDOMIZATION = False
+ENABLE_JOINT_DAMPING_RANDOMIZATION = False
 ENABLE_VELOCITY_PUSHES = True
 ENABLE_IMU_ORIENTATION_RANDOMIZATION = True
 ENABLE_BASE_ORIENTATION_RANDOMIZATION = False
+ENABLE_NECK_OFFSET_RANDOMIZATION = True
+
+# Neck offset randomization parameters
+NECK_OFFSET_MAX_ANGLE = 0.3
+NECK_OFFSET_INTERVAL_S = (2.0, 5.0)
 
 # Observation configuration
 USE_PROJECTED_GRAVITY = True  # If True, use projected gravity instead of raw accelerometer
 
 # Domain randomization ranges
-COM_RANDOMIZATION_RANGE = 0.005  # ±5mm
+COM_RANDOMIZATION_RANGE = 0.003  # ±3mm initial, ramped via curriculum
 MASS_INERTIA_RANDOMIZATION_RANGE = (0.95, 1.05)  # ±5%
 KP_RANDOMIZATION_RANGE = (0.85, 1.15)  # ±15%
 KD_RANDOMIZATION_RANGE = (0.9, 1.1)  # ±10%
+JOINT_FRICTION_RANDOMIZATION_RANGE = (0.98, 1.02)
+JOINT_DAMPING_RANDOMIZATION_RANGE = (0.98, 1.02)
 VELOCITY_PUSH_INTERVAL_S = (3.0, 6.0)
 VELOCITY_PUSH_RANGE = (-0.3, 0.3)
 IMU_ORIENTATION_RANDOMIZATION_ANGLE = 1.0  # ±1° IMU mounting error
 BASE_ORIENTATION_MAX_PITCH_DEG = 10.0
 BASE_ORIENTATION_MAX_ROLL_DEG = 5.0
 
+import mujoco as _mujoco
+import mjlab.terrains as terrain_gen
 from mjlab.envs import ManagerBasedRlEnvCfg
 from mjlab.envs.mdp.actions import JointPositionActionCfg
-from mjlab.managers.curriculum_manager import CurriculumTermCfg
-from mjlab.managers.event_manager import EventTermCfg
-from mjlab.managers.observation_manager import ObservationTermCfg
-from mjlab.managers.reward_manager import RewardTermCfg
+from mjlab.managers.manager_term_config import (
+    CurriculumTermCfg,
+    EventTermCfg,
+    ObservationTermCfg,
+    RewardTermCfg,
+    TerminationTermCfg,
+)
 from mjlab.managers.scene_entity_config import SceneEntityCfg
 from mjlab.sensor import ContactMatch, ContactSensorCfg
 from mjlab.tasks.velocity import mdp
 from mjlab.tasks.velocity.mdp import UniformVelocityCommandCfg
 from mjlab.tasks.velocity.velocity_env_cfg import make_velocity_env_cfg
+from mjlab.terrains.terrain_generator import TerrainGeneratorCfg
 from mjlab.utils.noise import UniformNoiseCfg as Unoise
 
-from .open_duck_mini_v2_constants import get_open_duck_mini_v2_robot_cfg
 from . import mdp as open_duck_mdp
+from .open_duck_mini_v2_constants import get_open_duck_mini_v2_robot_cfg
 
 
-def open_duck_mini_v2_velocity_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
+# Open Duck Mini v2 rough terrain: matched to microduck, the robot can only
+# lift its feet a couple of cm so step heights are capped.
+OPEN_DUCK_MINI_V2_ROUGH_TERRAINS_CFG = TerrainGeneratorCfg(
+    size=(8.0, 8.0),
+    border_width=20.0,
+    num_rows=10,
+    num_cols=20,
+    sub_terrains={
+        "flat": terrain_gen.BoxFlatTerrainCfg(proportion=0.3),
+        "pyramid_stairs": terrain_gen.BoxPyramidStairsTerrainCfg(
+            proportion=0.3,
+            step_height_range=(0.0, 0.015),
+            step_width=0.15,
+            platform_width=2.0,
+            border_width=1.0,
+        ),
+        "random_grid": terrain_gen.BoxRandomGridTerrainCfg(
+            proportion=0.4,
+            grid_width=0.45,
+            grid_height_range=(0.0, 0.010),
+            platform_width=1.5,
+        ),
+    },
+    add_lights=False,
+)
+
+
+def _soften_terrain_contacts(spec: _mujoco.MjSpec) -> None:
+    """Soften terrain box geom contacts to reduce edge-contact NaN instability."""
+    body = spec.body("terrain")
+    count = 0
+    for geom in body.geoms:
+        geom.solref = [0.04, 1.0]
+        geom.solimp = [0.85, 0.95, 0.001, 0.5, 2.0]
+        count += 1
+    print(f"[rough terrain] spec_fn: softened {count} terrain geoms (solref=0.04)")
+
+
+def open_duck_mini_v2_velocity_env_cfg(
+    play: bool = False,
+    rough: bool = False,
+    use_m6: bool = False,
+) -> ManagerBasedRlEnvCfg:
     """Create Open Duck Mini v2 velocity tracking environment configuration."""
 
     std_standing = {
@@ -113,7 +170,7 @@ def open_duck_mini_v2_velocity_env_cfg(play: bool = False) -> ManagerBasedRlEnvC
     ].site_names = site_names
 
     # Robot setup
-    cfg.scene.entities = {"robot": get_open_duck_mini_v2_robot_cfg()}
+    cfg.scene.entities = {"robot": get_open_duck_mini_v2_robot_cfg(use_m6=use_m6)}
     cfg.scene.sensors = (feet_ground_cfg, self_collision_cfg)
     cfg.viewer.body_name = "trunk_assembly"
 
@@ -121,6 +178,10 @@ def open_duck_mini_v2_velocity_env_cfg(play: bool = False) -> ManagerBasedRlEnvC
     joint_pos_action = cfg.actions["joint_pos"]
     assert isinstance(joint_pos_action, JointPositionActionCfg)
     joint_pos_action.scale = 1.0
+    if ENABLE_NECK_OFFSET_RANDOMIZATION:
+        cfg.actions["joint_pos"] = open_duck_mdp.NeckOffsetJointPositionActionCfg(
+            **vars(joint_pos_action)
+        )
 
     # === REWARDS ===
     cfg.rewards["pose"].params["std_standing"] = std_standing
@@ -213,7 +274,27 @@ def open_duck_mini_v2_velocity_env_cfg(play: bool = False) -> ManagerBasedRlEnvC
         mode="reset",
     )
 
+    if ENABLE_NECK_OFFSET_RANDOMIZATION:
+        cfg.events["reset_neck_offset"] = EventTermCfg(
+            func=open_duck_mdp.reset_neck_offset,
+            mode="reset",
+        )
+        cfg.events["randomize_neck_offset_target"] = EventTermCfg(
+            func=open_duck_mdp.randomize_neck_offset_target,
+            mode="interval",
+            interval_range_s=NECK_OFFSET_INTERVAL_S,
+            params={"max_offset": NECK_OFFSET_MAX_ANGLE},
+        )
+
     cfg.events["foot_friction"].params["asset_cfg"].geom_names = foot_frictions_geom_names
+    cfg.events["foot_friction"].params["ranges"] = (0.7, 1.3)
+
+    # Terminate environments that have gone numerically unstable.
+    cfg.terminations["nan_state"] = TerminationTermCfg(
+        func=open_duck_mdp.robot_state_is_nan,
+        time_out=False,
+    )
+
     cfg.events["reset_base"].params["pose_range"]["z"] = (0.20, 0.21)
 
     if ENABLE_VELOCITY_PUSHES:
@@ -268,6 +349,32 @@ def open_duck_mini_v2_velocity_env_cfg(play: bool = False) -> ManagerBasedRlEnvC
             },
         )
 
+    if ENABLE_JOINT_FRICTION_RANDOMIZATION:
+        cfg.events["randomize_joint_friction"] = EventTermCfg(
+            func=mdp.randomize_field,
+            mode="reset",
+            domain_randomization=True,
+            params={
+                "asset_cfg": SceneEntityCfg("robot", joint_names=(r".*",)),
+                "operation": "scale",
+                "field": "dof_frictionloss",
+                "ranges": JOINT_FRICTION_RANDOMIZATION_RANGE,
+            },
+        )
+
+    if ENABLE_JOINT_DAMPING_RANDOMIZATION:
+        cfg.events["randomize_joint_damping"] = EventTermCfg(
+            func=mdp.randomize_field,
+            mode="reset",
+            domain_randomization=True,
+            params={
+                "asset_cfg": SceneEntityCfg("robot", joint_names=(r".*",)),
+                "operation": "scale",
+                "field": "dof_damping",
+                "ranges": JOINT_DAMPING_RANDOMIZATION_RANGE,
+            },
+        )
+
     if ENABLE_IMU_ORIENTATION_RANDOMIZATION:
         cfg.events["randomize_imu_orientation"] = EventTermCfg(
             func=open_duck_mdp.randomize_imu_orientation,
@@ -291,6 +398,12 @@ def open_duck_mini_v2_velocity_env_cfg(play: bool = False) -> ManagerBasedRlEnvC
 
     # === OBSERVATIONS ===
     del cfg.observations["policy"].terms["base_lin_vel"]
+
+    # Add base_lin_vel to the critic (privileged information).
+    cfg.observations["critic"].terms["base_lin_vel"] = ObservationTermCfg(
+        func=mdp.base_lin_vel,
+        scale=1.0,
+    )
 
     gravity_term_name = "projected_gravity" if USE_PROJECTED_GRAVITY else "raw_accelerometer"
 
@@ -319,21 +432,37 @@ def open_duck_mini_v2_velocity_env_cfg(play: bool = False) -> ManagerBasedRlEnvC
     cfg.observations["policy"].terms["base_ang_vel"].noise = Unoise(n_min=-0.024, n_max=0.024)
     cfg.observations["policy"].terms[gravity_term_name].noise = Unoise(n_min=-0.007, n_max=0.007)
     cfg.observations["policy"].terms["joint_pos"].noise = Unoise(n_min=-0.0006, n_max=0.0006)
-    # cfg.observations["policy"].terms["joint_vel"].noise = Unoise(n_min=-0.024, n_max=0.024)
     cfg.observations["policy"].terms["joint_vel"].noise = Unoise(n_min=-0.1, n_max=0.1)
 
     # === COMMANDS ===
-    command: UniformVelocityCommandCfg = cfg.commands["twist"]
+    # deepcopy to avoid shared-state corruption from other env cfgs built off
+    # the same make_velocity_env_cfg() call.
+    command: UniformVelocityCommandCfg = deepcopy(cfg.commands["twist"])
+    cfg.commands["twist"] = command
     command.rel_standing_envs = 0.02
     command.rel_heading_envs = 0.0
     command.ranges.lin_vel_x = (-0.3, 0.3)
     command.ranges.lin_vel_y = (-0.3, 0.3)
     command.ranges.ang_vel_z = (-1.5, 1.5)
     command.viz.z_offset = 0.8
+    cfg.commands["twist"] = open_duck_mdp.VelocityCommandCommandOnlyCfg(**vars(command))
 
     # === TERRAIN ===
-    cfg.scene.terrain.terrain_type = "plane"
-    cfg.scene.terrain.terrain_generator = None
+    if not rough:
+        cfg.scene.terrain.terrain_type = "plane"
+        cfg.scene.terrain.terrain_generator = None
+    else:
+        cfg.scene.terrain.terrain_type = "generator"
+        cfg.scene.terrain.terrain_generator = OPEN_DUCK_MINI_V2_ROUGH_TERRAINS_CFG
+        cfg.scene.spec_fn = _soften_terrain_contacts
+        cfg.sim.nconmax = 200
+        cfg.sim.mujoco.iterations = 30
+        cfg.sim.mujoco.ls_iterations = 50
+
+        if play:
+            cfg.scene.terrain.terrain_generator.curriculum = False
+            cfg.scene.terrain.terrain_generator.num_cols = 5
+            cfg.scene.terrain.terrain_generator.num_rows = 5
 
     # === CURRICULUM ===
     cfg.curriculum["action_rate_weight"] = CurriculumTermCfg(
@@ -371,11 +500,42 @@ def open_duck_mini_v2_velocity_env_cfg(play: bool = False) -> ManagerBasedRlEnvC
                 {"step": 0,          "lin_vel_range": 0.3,  "ang_vel_range": 1.5},
                 {"step": 500 * 24,   "lin_vel_range": 0.35, "ang_vel_range": 1.6},
                 {"step": 1000 * 24,  "lin_vel_range": 0.4,  "ang_vel_range": 1.7},
+                {"step": 1500 * 24,  "lin_vel_range": 0.5,  "ang_vel_range": 2.0},
+                {"step": 1750 * 24,  "lin_vel_range": 0.6,  "ang_vel_range": 2.0},
+                {"step": 2000 * 24,  "lin_vel_range": 0.7,  "ang_vel_range": 2.0},
             ],
         },
     )
 
-    del cfg.curriculum["terrain_levels"]
+    if ENABLE_NECK_OFFSET_RANDOMIZATION:
+        cfg.curriculum["neck_offset_magnitude"] = CurriculumTermCfg(
+            func=open_duck_mdp.neck_offset_curriculum,
+            params={
+                "event_name": "randomize_neck_offset_target",
+                "offset_stages": [
+                    {"step": 0,          "max_offset": 0.0},
+                    {"step": 500 * 24,   "max_offset": 0.1},
+                    {"step": 750 * 24,   "max_offset": 0.2},
+                    {"step": 1000 * 24,  "max_offset": NECK_OFFSET_MAX_ANGLE},
+                ],
+            },
+        )
+
+    if ENABLE_COM_RANDOMIZATION:
+        cfg.curriculum["com_range"] = CurriculumTermCfg(
+            func=open_duck_mdp.com_range_curriculum,
+            params={
+                "event_name": "randomize_com",
+                "range_stages": [
+                    {"step": 0,          "range": 0.003},
+                    {"step": 1000 * 24,  "range": 0.005},
+                    {"step": 2000 * 24,  "range": 0.008},
+                ],
+            },
+        )
+
+    if not rough:
+        del cfg.curriculum["terrain_levels"]
     del cfg.curriculum["command_vel"]
 
     return cfg
