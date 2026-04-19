@@ -139,10 +139,16 @@ Exit (cron continues — will monitor on next tick now that phase=MONITOR).
 
 4. Send pre-decision notification (monitor_update event):
    Compose message from quality metrics (step 2b) and eval summary (from eval_report.md Summary section).
+   Append to the message: "Waiting 10 min for feedback before deciding — reply now to influence the decision."
    If VIDEO_PATH is non-empty and file exists:
      bash .claude/rl-training/scripts/notify.sh "$MSG" --branch "claude/symmetric-walk" --file "$VIDEO_PATH"
    Else:
      bash .claude/rl-training/scripts/notify.sh "$MSG" --branch "claude/symmetric-walk"
+
+4b. Wait 10 minutes for human feedback via Discord:
+    bash sleep 600   (use timeout: 660000ms)
+    After sleeping, re-read logs/sessions/claude--symmetric-walk/session_state.json to pick up
+    any feedback stored by the Discord bot during the wait window.
 
 5. DECIDE:
    uv run .claude/rl-training/scripts/decide.py run_NNN/ --monitor M --config .claude/rl-training/config.md --session-dir <session_dir> --task-config .claude/rl-training/tasks/locomotion/monitor_config.md
