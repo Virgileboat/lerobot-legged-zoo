@@ -199,7 +199,8 @@ def _load_feedback_tags() -> dict[str, str]:
 
 
 CLAUDE_BIN = "/home/vbatto/.local/bin/claude"
-CLAUDE_MODEL = "claude-haiku-4-5"
+CLAUDE_MODEL = "claude-haiku-4-5-20251001"
+ITERATE_CLAUDE_MODEL = "claude-sonnet-4-6"
 
 _QUESTION_STARTERS = (
     "what ", "why ", "how ", "when ", "where ", "who ", "which ",
@@ -215,6 +216,13 @@ _MODIFICATION_VERBS = (
     "kill and", "stop and", "restart with",
 )
 
+# Keywords anywhere in the message that signal a code/config change request
+_MODIFICATION_KEYWORDS = (
+    "debug", "fix", "rewrite", "refactor", "implement", "rework",
+    "reward", "curriculum", "weight", "penalty", "observation", "action",
+    "symmetr", "metric", "trajectory", "foot", "joint", "hip", "knee", "ankle",
+)
+
 
 def is_question(text: str) -> bool:
     """Return True if the message looks like a question rather than feedback."""
@@ -225,7 +233,13 @@ def is_question(text: str) -> bool:
 def is_modification_request(text: str) -> bool:
     """Return True if the message looks like a training modification request."""
     t = text.lower().strip()
-    return any(t.startswith(v) for v in _MODIFICATION_VERBS)
+    # Starts with an action verb
+    if any(t.startswith(v) for v in _MODIFICATION_VERBS):
+        return True
+    # Contains actionable keywords AND looks instructional (has a verb somewhere)
+    has_keyword = any(k in t for k in _MODIFICATION_KEYWORDS)
+    has_action = any(v.strip() in t for v in _MODIFICATION_VERBS)
+    return has_keyword and has_action
 
 
 def _load_training_context(branch_sanitized: str) -> str:
@@ -364,7 +378,29 @@ def apply_modification_now(branch_sanitized: str) -> str:
     queue_file = session_dir / "pending_modification.json"
 
     if not queue_file.exists():
-        return "No pending modification found. Queue one first with a free-text message."
+        # Fall back to latest human_feedback for current run stored in session_state
+        state_file = session_dir / "session_state.json"
+        if state_file.exists():
+            try:
+                state = json.loads(state_file.read_text())
+                current_run = state.get("current_run", 1)
+                for entry in reversed(state.get("iterations", [])):
+                    if entry.get("run") == current_run and entry.get("human_feedback"):
+                        notes = entry["human_feedback"].get("notes", "").strip()
+                        if notes:
+                            fallback_mod = [{
+                                "run": current_run,
+                                "summary": notes[:100],
+                                "parameters": [],
+                                "urgency": "immediate",
+                                "notes": notes,
+                            }]
+                            queue_file.write_text(json.dumps(fallback_mod, indent=2))
+                            break
+            except Exception:
+                pass
+        if not queue_file.exists():
+            return "No pending modification found. Queue one first with a free-text message."
 
     queue = json.loads(queue_file.read_text())
     if not queue:
@@ -410,6 +446,28 @@ def apply_modification_now(branch_sanitized: str) -> str:
         f"Modification: {mod.get('summary', '(unknown)')}\n"
         f"Kill output: {kill_out or 'ok'}"
     )
+
+
+def spawn_iterate_agent(branch_sanitized: str) -> bool:
+    """Spawn the iterate agent as a background claude process after !apply.
+
+    Returns True if the prompt file existed and the process was started.
+    The keepalive cron (every 13 min) recreates the monitoring cron once
+    phase flips back to MONITOR — no cron management needed here.
+    """
+    prompt_file = REPO_ROOT / ".claude" / "rl-training" / "sessions" / f"iterate_agent_{branch_sanitized}.md"
+    if not prompt_file.exists():
+        return False
+    log_file = SESSION_DIR / branch_sanitized / "iterate_agent.log"
+    log_file.parent.mkdir(parents=True, exist_ok=True)
+    subprocess.Popen(
+        [CLAUDE_BIN, "--print", "--dangerously-skip-permissions",
+         "--model", ITERATE_CLAUDE_MODEL, prompt_file.read_text()],
+        stdout=open(log_file, "w"),
+        stderr=subprocess.STDOUT,
+        cwd=str(REPO_ROOT),
+    )
+    return True
 
 
 def persist_feedback(branch_sanitized: str, run_num: int, tags: list[str], notes: str) -> str:
@@ -531,7 +589,12 @@ async def on_message(message: discord.Message):
                 None, apply_modification_now, branch_sanitized
             )
             await message.channel.send(f"```\n{result}\n```")
-            await message.channel.send("Phase is now **ITERATE** — keepalive agent will auto-implement changes and relaunch training within 17 minutes. No action needed.")
+            if result.startswith("Training killed."):
+                spawned = spawn_iterate_agent(branch_sanitized)
+                if spawned:
+                    await message.channel.send("ITERATE agent started — implementing changes in background with Sonnet. Monitoring will resume automatically once training relaunches.")
+                else:
+                    await message.channel.send("Phase is now **ITERATE** — keepalive agent will auto-implement changes and relaunch training within 13 minutes.")
 
         elif cmd == "!status":
             await message.channel.send(format_status())
@@ -678,19 +741,44 @@ async def on_message(message: discord.Message):
 # Main
 # ---------------------------------------------------------------------------
 
+LOCKFILE = REPO_ROOT / ".discord_bot.pid"
+
+
+def acquire_lock() -> None:
+    if LOCKFILE.exists():
+        old_pid = LOCKFILE.read_text().strip()
+        try:
+            os.kill(int(old_pid), 0)
+            raise SystemExit(f"Another instance is already running (PID {old_pid}). Kill it first or delete {LOCKFILE}.")
+        except (ProcessLookupError, ValueError):
+            pass  # stale lockfile — safe to overwrite
+    LOCKFILE.write_text(str(os.getpid()))
+
+
+def release_lock() -> None:
+    try:
+        LOCKFILE.unlink()
+    except FileNotFoundError:
+        pass
+
+
 def main():
-    secrets = load_secrets()
-    token = secrets.get("BOT_TOKEN", "")
-    channel_id = secrets.get("CHANNEL_ID", "")
+    acquire_lock()
+    try:
+        secrets = load_secrets()
+        token = secrets.get("BOT_TOKEN", "")
+        channel_id = secrets.get("CHANNEL_ID", "")
 
-    if not token or token == "PASTE_YOUR_BOT_TOKEN_HERE":
-        raise ValueError("BOT_TOKEN not set in .discord_secrets")
-    if not channel_id or channel_id == "PASTE_YOUR_CHANNEL_ID_HERE":
-        raise ValueError("CHANNEL_ID not set in .discord_secrets")
+        if not token or token == "PASTE_YOUR_BOT_TOKEN_HERE":
+            raise ValueError("BOT_TOKEN not set in .discord_secrets")
+        if not channel_id or channel_id == "PASTE_YOUR_CHANNEL_ID_HERE":
+            raise ValueError("CHANNEL_ID not set in .discord_secrets")
 
-    client._secrets = secrets
-    print(f"Starting bot... channel={channel_id}")
-    client.run(token)
+        client._secrets = secrets
+        print(f"Starting bot... channel={channel_id}")
+        client.run(token)
+    finally:
+        release_lock()
 
 
 if __name__ == "__main__":
