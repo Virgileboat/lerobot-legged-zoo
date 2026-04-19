@@ -10,6 +10,10 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
   "mjlab",
+  # Pin to match mjlab_microduck: rsl-rl 5.x removed the `policy` runner-cfg
+  # key (split into actor/critic) so mjlab d1d32d8's config no longer works
+  # with it. 3.3.0 is what microduck's lock uses.
+  "rsl-rl-lib==3.3.0",
 ]
 
 [project.optional-dependencies]

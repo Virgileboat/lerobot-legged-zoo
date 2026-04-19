@@ -56,24 +56,43 @@ except Exception as _e:
     print(f"[mdp] PPO.compute_returns patch skipped: {_e}")
 
 
+_STD_PATCH_OK = False
 try:
-    from rsl_rl.modules.distribution import GaussianDistribution as _GaussianDistribution
+    # rsl-rl-lib 3.x: patch ActorCritic._update_distribution
+    from rsl_rl.modules.actor_critic import ActorCritic as _ActorCritic
 
-    _orig_update = _GaussianDistribution.update
+    _orig_update_dist = _ActorCritic._update_distribution
 
-    def _safe_update(self, mlp_output: torch.Tensor) -> None:
-        with torch.no_grad():
-            if self.std_type == "scalar" and hasattr(self, "std_param"):
-                self.std_param.data.clamp_(min=1e-3).nan_to_num_(nan=1e-3)
-            elif self.std_type == "log" and hasattr(self, "log_std_param"):
-                self.log_std_param.data.nan_to_num_(nan=math.log(1e-3))
-        _orig_update(self, mlp_output)
+    def _safe_update_distribution(self, obs: torch.Tensor) -> None:
+        if not self.state_dependent_std:
+            with torch.no_grad():
+                if self.noise_std_type == "scalar" and hasattr(self, "std"):
+                    self.std.data.clamp_(min=1e-3).nan_to_num_(nan=1e-3)
+                elif self.noise_std_type == "log" and hasattr(self, "log_std"):
+                    self.log_std.data.nan_to_num_(nan=math.log(1e-3))
+        _orig_update_dist(self, obs)
 
-    _GaussianDistribution.update = _safe_update
+    _ActorCritic._update_distribution = _safe_update_distribution
     _STD_PATCH_OK = True
-except Exception as _e:
-    _STD_PATCH_OK = False
-    print(f"[mdp] Gaussian std patch skipped: {_e}")
+except Exception:
+    # rsl-rl-lib 5.x: patch GaussianDistribution.update
+    try:
+        from rsl_rl.modules.distribution import GaussianDistribution as _GaussianDistribution
+
+        _orig_update = _GaussianDistribution.update
+
+        def _safe_update(self, mlp_output: torch.Tensor) -> None:
+            with torch.no_grad():
+                if self.std_type == "scalar" and hasattr(self, "std_param"):
+                    self.std_param.data.clamp_(min=1e-3).nan_to_num_(nan=1e-3)
+                elif self.std_type == "log" and hasattr(self, "log_std_param"):
+                    self.log_std_param.data.nan_to_num_(nan=math.log(1e-3))
+            _orig_update(self, mlp_output)
+
+        _GaussianDistribution.update = _safe_update
+        _STD_PATCH_OK = True
+    except Exception as _e:
+        print(f"[mdp] Gaussian std patch skipped: {_e}")
 
 print(
     "[mdp] NaN-safe patches active: reward=yes, "

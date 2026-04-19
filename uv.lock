@@ -1175,6 +1175,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "mjlab" },
+    { name = "rsl-rl-lib" },
 ]
 
 [package.optional-dependencies]
@@ -1193,6 +1194,7 @@ requires-dist = [
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0.0" },
     { name = "rerun-sdk", marker = "extra == 'dev'", specifier = ">=0.20.0" },
     { name = "rerun-sdk", marker = "extra == 'visualization'", specifier = ">=0.20.0" },
+    { name = "rsl-rl-lib", specifier = "==3.3.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.7.0" },
 ]
 provides-extras = ["visualization", "dev"]
@@ -2610,7 +2612,7 @@ wheels = [
 
 [[package]]
 name = "rsl-rl-lib"
-version = "5.0.1"
+version = "3.3.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "gitpython" },
@@ -2622,9 +2624,9 @@ dependencies = [
     { name = "torch" },
     { name = "torchvision" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d5/23/dae404688e571e73662b7754ab2a8bddcc48f625c338b7f55576ad528653/rsl_rl_lib-5.0.1.tar.gz", hash = "sha256:b6e1fce8f4481c6118d53c7b03b80c8070d0a1edd3df3efbec5e5e6ff7c92132", size = 58623, upload-time = "2026-03-04T08:19:49.671Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/de/81/ee38b2ef2fb12a6459f459ab2de84bef688b5c2e9ee7e097667d98b4c7b5/rsl_rl_lib-3.3.0.tar.gz", hash = "sha256:49baeb397b2e3f28eb5b527a811ab7b3506321c5eee3db3ceaba652bbeeb24bf", size = 39539, upload-time = "2026-01-12T11:26:41.637Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ad/25/293a8ffd929d40accab30057b962084601133bd8a6779c156c2f58eb93bc/rsl_rl_lib-5.0.1-py3-none-any.whl", hash = "sha256:2f71a4f753537faf7826d0b74815160e37c409b39ab80a4581524b7ef7bd8539", size = 84202, upload-time = "2026-03-04T08:19:48.044Z" },
+    { url = "https://files.pythonhosted.org/packages/9c/54/21743b5c1cfdb6b4a43daf98f31cd2d05ae1351997b390b50ec2ef0ce335/rsl_rl_lib-3.3.0-py3-none-any.whl", hash = "sha256:87552931e420a637c5adc4fd878b4cf6689232e84022bbb80a74115309853f3e", size = 55926, upload-time = "2026-01-12T11:26:40.198Z" },
 ]
 
 [[package]]
