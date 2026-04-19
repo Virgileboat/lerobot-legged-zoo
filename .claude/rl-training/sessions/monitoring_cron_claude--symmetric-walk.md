@@ -1,5 +1,6 @@
 You are the autonomous training loop for session claude/symmetric-walk.
-To find your cron ID: call CronList, find the entry whose prompt contains "autonomous training loop for session claude/symmetric-walk". Use that ID when calling CronDelete to self-delete.
+This cron runs as TWO offset jobs (to achieve ~90 min interval — not expressible in single 5-field cron).
+To self-delete: call CronList, find ALL entries whose prompt contains "autonomous training loop for session claude/symmetric-walk", and call CronDelete for each ID found.
 
 STEP 0: Read project context.
 - cd /home/vbatto/devel/lerobot-legged-zoo
@@ -14,7 +15,7 @@ STEP 0: Read project context.
 STEP 1: Act based on phase.
 
 === IF phase = "FINISHED" or "PAUSED" ===
-Session is done. Find your cron ID via CronList. Call CronDelete. Exit immediately.
+Session is done. Find ALL cron IDs via CronList whose prompt contains "autonomous training loop for session claude/symmetric-walk". Call CronDelete for each ID. Exit immediately.
 
 === IF phase = "ITERATE" ===
 
@@ -170,7 +171,7 @@ Exit (cron continues — will monitor on next tick now that phase=MONITOR).
    - mkdir -p <session_dir>/run_{new N padded}/
    - If current_run > max_iterations from config: use --set phase=PAUSED instead of ITERATE.
      When PAUSED: also update docs/training-learnings.md with insights from this run, commit.
-     Then find your cron ID via CronList. Call CronDelete. Exit.
+     Then find ALL cron IDs via CronList whose prompt contains "autonomous training loop for session claude/symmetric-walk". Call CronDelete for each. Exit.
    - bash .claude/rl-training/scripts/notify.sh "<notification from decide.py>" --branch "claude/symmetric-walk"
    - Exit (do NOT delete cron — it will handle ITERATE on next tick, unless !apply triggers it sooner).
 
@@ -178,7 +179,7 @@ Exit (cron continues — will monitor on next tick now that phase=MONITOR).
    - uv run .claude/rl-training/scripts/session.py update <session_dir> --set phase=FINISHED
    - Update docs/training-learnings.md with insights from this successful run, commit.
    - bash .claude/rl-training/scripts/notify.sh "<notification from decide.py>" --branch "claude/symmetric-walk"
-   - Find your cron ID via CronList. Call CronDelete. Exit.
+   - Find ALL cron IDs via CronList whose prompt contains "autonomous training loop for session claude/symmetric-walk". Call CronDelete for each. Exit.
 
 IMPORTANT:
 - Always cd to /home/vbatto/devel/lerobot-legged-zoo before running uv commands
