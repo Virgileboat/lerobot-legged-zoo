@@ -235,11 +235,11 @@ class _ActionFftBandRatioReward:
 
 
 class _BilateralSymmetryReward:
-  """Penalize lateral bilateral asymmetry via joint position antisymmetry constraint.
+  """Penalize lateral bilateral asymmetry via sum-of-abs on hipx and hipz joints.
 
-  Lateral joints (hipx, anklex) satisfy right + left ≈ 0 in a symmetric gait.
-  Uses joint_pos (always available) instead of site positions, which are unreliable
-  with EntityArticulationInfoCfg and cause silent AttributeError → reward stuck at 0.
+  Each lateral joint should have small magnitude in a symmetric gait. Penalty =
+  |hipx_r| + |hipx_l| + |hipz_r| + |hipz_l|. Anklex excluded (structural asymmetry).
+  Uses joint_pos (always available) instead of site positions.
   """
 
   def __init__(self) -> None:
@@ -251,7 +251,7 @@ class _BilateralSymmetryReward:
     if not names:
       return None
     result: dict[str, int] = {}
-    for target in ("hipx_right", "hipx_left", "anklex_right", "anklex_left"):
+    for target in ("hipx_right", "hipx_left", "hipz_right", "hipz_left"):
       for i, n in enumerate(names):
         if target in n:
           result[target] = i
@@ -275,12 +275,12 @@ class _BilateralSymmetryReward:
       penalty = torch.zeros(N, device=joint_pos.device, dtype=joint_pos.dtype)
 
       if "hipx_right" in idx and "hipx_left" in idx:
-        # Antisymmetric: right + left ≈ 0 (opposite lateral tilt in symmetric gait)
-        penalty += (joint_pos[:, idx["hipx_right"]] + joint_pos[:, idx["hipx_left"]]).square() * 4.0
+        # Sum of abs: each lateral hip should be near zero in symmetric gait
+        penalty += joint_pos[:, idx["hipx_right"]].abs() + joint_pos[:, idx["hipx_left"]].abs()
 
-      if "anklex_right" in idx and "anklex_left" in idx:
-        # Antisymmetric: right + left ≈ 0
-        penalty += (joint_pos[:, idx["anklex_right"]] + joint_pos[:, idx["anklex_left"]]).square() * 4.0
+      if "hipz_right" in idx and "hipz_left" in idx:
+        # Sum of abs: yaw joints should also stay near zero
+        penalty += joint_pos[:, idx["hipz_right"]].abs() + joint_pos[:, idx["hipz_left"]].abs()
 
       return -penalty
 
