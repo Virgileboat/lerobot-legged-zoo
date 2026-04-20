@@ -4,6 +4,7 @@ import csv
 import json
 import math
 import re
+import traceback
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -234,126 +235,62 @@ class _ActionFftBandRatioReward:
 
 
 class _BilateralSymmetryReward:
-  """Penalize bilateral asymmetry using foot position metrics exclusively.
+  """Penalize lateral bilateral asymmetry via joint position antisymmetry constraint.
 
-  No joint-space metrics. All penalties based on foot site positions:
-  - Lateral lean (y): feet should mirror about sagittal plane
-  - Max height: both feet should reach the same peak height
-  - Mean height: both feet should maintain the same average height
-  - Max swing distance (x-range): both feet should have equal forward/backward reach
-  - Mean swing distance: both feet should have equal average forward position
+  Lateral joints (hipx, anklex) satisfy right + left ≈ 0 in a symmetric gait.
+  Uses joint_pos (always available) instead of site positions, which are unreliable
+  with EntityArticulationInfoCfg and cause silent AttributeError → reward stuck at 0.
   """
 
   def __init__(self) -> None:
-    self._state_by_env: dict[int, dict] = {}
-    self._last_env_key: int | None = None
+    self._idx_by_env: dict[int, dict[str, int] | None] = {}
+
+  def _find_indices(self, env) -> dict[str, int] | None:
+    asset = env.scene["robot"]
+    names = getattr(asset, "joint_names", None) or getattr(asset, "dof_names", None)
+    if not names:
+      return None
+    result: dict[str, int] = {}
+    for target in ("hipx_right", "hipx_left", "anklex_right", "anklex_left"):
+      for i, n in enumerate(names):
+        if target in n:
+          result[target] = i
+          break
+    return result if result else None
 
   def __call__(self, env, history_len: int = 60) -> torch.Tensor:
-    actions = env.action_manager.action  # [N, 12]
-    N = actions.shape[0]
-    env_key = id(env)
-    self._last_env_key = env_key
-
-    state = self._state_by_env.get(env_key)
-    if (
-      state is None
-      or state["foot_z_r"].shape[0] != N
-      or state["foot_z_r"].shape[1] != history_len
-    ):
-      state = {
-        "foot_z_r": torch.zeros((N, history_len), device=actions.device, dtype=actions.dtype),
-        "foot_z_l": torch.zeros((N, history_len), device=actions.device, dtype=actions.dtype),
-        "foot_x_r": torch.zeros((N, history_len), device=actions.device, dtype=actions.dtype),
-        "foot_x_l": torch.zeros((N, history_len), device=actions.device, dtype=actions.dtype),
-        "count": torch.zeros(N, device=actions.device, dtype=torch.long),
-        "pos": 0,
-        "site_r": None,
-        "site_l": None,
-      }
-      self._state_by_env[env_key] = state
-
-    penalty = torch.zeros(N, device=actions.device, dtype=actions.dtype)
-
-    pos = int(state["pos"])
-    state["pos"] = (pos + 1) % history_len
-
     try:
-      robot = env.scene["robot"]
-      site_pos_w = robot.data.site_pos_w  # [N, num_sites, 3]
-      root_pos_w = robot.data.root_pos_w  # [N, 3]
+      asset = env.scene["robot"]
+      joint_pos = asset.data.joint_pos  # [N, num_dof]
+      N = joint_pos.shape[0]
+      env_key = id(env)
 
-      if state["site_r"] is None:
-        # foot_right=1, foot_left=2 per MJCF site order (torso=0, foot_right=1, foot_left=2)
-        state["site_r"] = 1
-        state["site_l"] = 2
+      if env_key not in self._idx_by_env:
+        self._idx_by_env[env_key] = self._find_indices(env)
 
-      r_idx, l_idx = state["site_r"], state["site_l"]
+      idx = self._idx_by_env.get(env_key)
+      if idx is None:
+        return torch.zeros(N, device=joint_pos.device, dtype=joint_pos.dtype)
 
-      if r_idx is not None and l_idx is not None:
-        foot_r = site_pos_w[:, r_idx, :]  # [N, 3]
-        foot_l = site_pos_w[:, l_idx, :]  # [N, 3]
+      penalty = torch.zeros(N, device=joint_pos.device, dtype=joint_pos.dtype)
 
-        # Lateral (y) symmetry: feet should mirror about sagittal plane
-        y_asym = (foot_r[:, 1] + foot_l[:, 1] - 2.0 * root_pos_w[:, 1]).square()
-        penalty += y_asym * 4.0
+      if "hipx_right" in idx and "hipx_left" in idx:
+        # Antisymmetric: right + left ≈ 0 (opposite lateral tilt in symmetric gait)
+        penalty += (joint_pos[:, idx["hipx_right"]] + joint_pos[:, idx["hipx_left"]]).square() * 4.0
 
-        # Update foot position history
-        state["foot_z_r"][:, pos] = foot_r[:, 2]
-        state["foot_z_l"][:, pos] = foot_l[:, 2]
-        state["foot_x_r"][:, pos] = foot_r[:, 0] - root_pos_w[:, 0]
-        state["foot_x_l"][:, pos] = foot_l[:, 0] - root_pos_w[:, 0]
-        state["count"].add_(1).clamp_(max=history_len)
-        count = state["count"].float().clamp(min=1)
-        ready = state["count"] >= (history_len // 2)
+      if "anklex_right" in idx and "anklex_left" in idx:
+        # Antisymmetric: right + left ≈ 0
+        penalty += (joint_pos[:, idx["anklex_right"]] + joint_pos[:, idx["anklex_left"]]).square() * 4.0
 
-        # Max height symmetry: both feet should reach the same peak height
-        max_z_r = state["foot_z_r"].max(dim=1).values
-        max_z_l = state["foot_z_l"].max(dim=1).values
-        max_h = (max_z_r - max_z_l).square() * 6.0
-        penalty += torch.where(ready, max_h, torch.zeros_like(max_h))
+      return -penalty
 
-        # Mean height symmetry: both feet should have the same average height
-        mean_z_r = state["foot_z_r"].sum(dim=1) / count
-        mean_z_l = state["foot_z_l"].sum(dim=1) / count
-        mean_h = (mean_z_r - mean_z_l).square() * 4.0
-        penalty += torch.where(ready, mean_h, torch.zeros_like(mean_h))
-
-        # Max swing distance: forward/backward reach (x-range) should be equal
-        range_x_r = state["foot_x_r"].max(dim=1).values - state["foot_x_r"].min(dim=1).values
-        range_x_l = state["foot_x_l"].max(dim=1).values - state["foot_x_l"].min(dim=1).values
-        swing_dist = (range_x_r - range_x_l).square() * 3.0
-        penalty += torch.where(ready, swing_dist, torch.zeros_like(swing_dist))
-
-        # Mean swing distance: average forward position should be equal
-        mean_x_r = state["foot_x_r"].sum(dim=1) / count
-        mean_x_l = state["foot_x_l"].sum(dim=1) / count
-        mean_swing = (mean_x_r - mean_x_l).square() * 3.0
-        penalty += torch.where(ready, mean_swing, torch.zeros_like(mean_swing))
-
-    except Exception as e:
-      import traceback; traceback.print_exc()
-
-    return -penalty
+    except Exception:
+      traceback.print_exc()
+      N = env.num_envs if hasattr(env, "num_envs") else env.action_manager.action.shape[0]
+      return torch.zeros(N, device=env.action_manager.action.device)
 
   def reset(self, env_ids: torch.Tensor | slice | None = None) -> None:
-    if self._last_env_key is None:
-      return
-    state = self._state_by_env.get(self._last_env_key)
-    if state is None:
-      return
-    if env_ids is None or isinstance(env_ids, slice):
-      state["foot_z_r"].zero_()
-      state["foot_z_l"].zero_()
-      state["foot_x_r"].zero_()
-      state["foot_x_l"].zero_()
-      state["count"].zero_()
-      state["pos"] = 0
-      return
-    state["foot_z_r"][env_ids] = 0.0
-    state["foot_z_l"][env_ids] = 0.0
-    state["foot_x_r"][env_ids] = 0.0
-    state["foot_x_l"][env_ids] = 0.0
-    state["count"][env_ids] = 0
+    pass  # No persistent per-env state
 
 
 _ACTION_FFT_BAND_RATIO_REWARD = _ActionFftBandRatioReward()
@@ -539,7 +476,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
   projected_gravity_term.noise.n_max = 0.015
   joint_pos_term = policy_obs.terms.get("joint_pos")
   if joint_pos_term is not None and getattr(joint_pos_term, "noise", None) is not None:
-    joint_pos_noise_rad = math.radians(1.5)
+    joint_pos_noise_rad = math.radians(4.0)
     joint_pos_term.noise.n_min = -joint_pos_noise_rad
     joint_pos_term.noise.n_max = joint_pos_noise_rad
   joint_vel_term = policy_obs.terms.get("joint_vel")

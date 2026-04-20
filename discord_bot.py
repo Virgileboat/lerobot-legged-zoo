@@ -649,7 +649,7 @@ async def on_message(message: discord.Message):
     # Free-text → question (Haiku Q&A) or human feedback                  #
     # ------------------------------------------------------------------ #
     sessions = get_sessions()
-    active = [s for s in sessions if s.get("phase") in ("MONITOR", "ITERATE", "LAUNCH")]
+    active = [s for s in sessions if s.get("phase") in ("MONITOR", "ITERATE", "LAUNCH", "WAITING", "PAUSED", "FINISHED")]
     if not active:
         return  # nothing to work with
 
