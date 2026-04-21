@@ -407,14 +407,22 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
   cfg.sim.contact_sensor_maxmatch = 500
   cfg.sim.nconmax = 100
 
-  # Wrap all actuators with randomized delay centred on the measured 1 control-tick
-  # latency (20 ms on the real robot, physics dt = 5 ms → 1 tick = 4 physics steps).
-  # Randomise from 0 to 2 control ticks (0–8 physics steps) for robustness.
+  # Wrap all actuators with delay around the measured 1 control-tick latency
+  # (20 ms on the real robot, physics dt = 5 ms -> 1 tick = 4 physics steps).
+  # Keep delay mostly stable: previous 0-8 lag with per-step resampling behaved like
+  # high-frequency jitter, which is less realistic than a near-constant transport delay.
+  # Use a narrow 15-25 ms range (3-5 physics steps) and update infrequently.
   robot_cfg = get_lerobot_humanoid_no_arms_robot_cfg()
   orig_artic = robot_cfg.articulation
   robot_cfg.articulation = EntityArticulationInfoCfg(
     actuators=tuple(
-      DelayedActuatorCfg(base_cfg=a, delay_min_lag=0, delay_max_lag=8)
+      DelayedActuatorCfg(
+        base_cfg=a,
+        delay_min_lag=3,
+        delay_max_lag=5,
+        delay_update_period=4,
+        delay_hold_prob=0.95,
+      )
       for a in orig_artic.actuators
     ),
     soft_joint_pos_limit_factor=orig_artic.soft_joint_pos_limit_factor,
@@ -584,6 +592,9 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
         "ranges": joint_armature_scales[group_name],
         "operation": "scale",
         "asset_cfg": asset_cfg,
+        # Keep left/right joints in each group synchronized to avoid injecting
+        # artificial bilateral asymmetry through randomization.
+        "shared_random": True,
       },
     )
     cfg.events[f"joint_damping_{group_name}"] = EventTermCfg(
@@ -595,6 +606,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
         "ranges": joint_damping_scales[group_name],
         "operation": "scale",
         "asset_cfg": asset_cfg,
+        "shared_random": True,
       },
     )
     cfg.events[f"joint_frictionloss_{group_name}"] = EventTermCfg(
@@ -606,6 +618,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
         "ranges": joint_frictionloss_scales[group_name],
         "operation": "scale",
         "asset_cfg": asset_cfg,
+        "shared_random": True,
       },
     )
 
@@ -732,7 +745,9 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
   )
   cfg.rewards["bilateral_symmetry"] = RewardTermCfg(
     func=_BILATERAL_SYMMETRY_REWARD,
-    weight=2.0,
+    # Keep this low at the beginning: too-strong symmetry early in training tends
+    # to collapse exploration into one-leg standing instead of learning to walk.
+    weight=0.2,
     params={"history_len": 60},
   )
   cfg.rewards["action_rate_l2"].weight = -0.1
@@ -754,6 +769,20 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
         {"step": 5_000 * 24, "weight": -0.5},
         {"step": 10_000 * 24, "weight": -1.5},
         {"step": 15_000 * 24, "weight": -3.0},
+      ],
+    },
+  )
+  cfg.curriculum["bilateral_symmetry_weight"] = CurriculumTermCfg(
+    func=mdp.reward_weight,
+    params={
+      "reward_name": "bilateral_symmetry",
+      "weight_stages": [
+        {"step": 0, "weight": 0.2},
+        # Ramp symmetry only after gait emerges; this avoids over-constraining
+        # early exploration while still enforcing cleaner, more symmetric walking later.
+        {"step": 7_500 * 24, "weight": 0.35},
+        {"step": 12_500 * 24, "weight": 0.5},
+        {"step": 17_500 * 24, "weight": 0.7},
       ],
     },
   )
