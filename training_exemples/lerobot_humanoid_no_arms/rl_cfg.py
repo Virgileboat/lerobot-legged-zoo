@@ -23,6 +23,8 @@ def lerobot_humanoid_no_arms_ppo_runner_cfg() -> RslRlOnPolicyRunnerCfg:
       value_loss_coef=1.0,
       use_clipped_value_loss=True,
       clip_param=0.2,
+      # Start high for exploration; the no-arms runner applies exponential
+      # annealing toward 0 during training.
       entropy_coef=0.01,
       num_learning_epochs=5,
       num_mini_batches=4,

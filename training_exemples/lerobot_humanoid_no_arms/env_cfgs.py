@@ -235,58 +235,128 @@ class _ActionFftBandRatioReward:
 
 
 class _BilateralSymmetryReward:
-  """Penalize lateral bilateral asymmetry via sum-of-abs on hipx and hipz joints.
+  """Penalize bilateral asymmetry from world-space foot trajectories.
 
-  Penalty = |hipx_r| + |hipx_l| + |hipz_r| + |hipz_l|, scaled to zero when the
-  lateral velocity command (vy) is non-zero. Asymmetry is expected and allowed during
-  lateral motion — only penalize during forward/turning motion.
+  Uses foot-space metrics from docs/training-learnings.md:
+  - y-lean (lateral midpoint bias),
+  - max foot-height mismatch,
+  - mean foot-height mismatch,
+  - swing-range mismatch.
   """
 
   def __init__(self) -> None:
-    self._idx_by_env: dict[int, dict[str, int] | None] = {}
+    self._state_by_env: dict[int, dict[str, Any]] = {}
+    self._last_env_key: int | None = None
 
-  def _find_indices(self, env) -> dict[str, int] | None:
+  def _find_site_indices(self, env) -> tuple[int, int] | None:
     asset = env.scene["robot"]
-    names = getattr(asset, "joint_names", None) or getattr(asset, "dof_names", None)
-    if not names:
-      return None
-    result: dict[str, int] = {}
-    for target in ("hipx_right", "hipx_left", "hipz_right", "hipz_left"):
-      for i, n in enumerate(names):
-        if target in n:
-          result[target] = i
-          break
-    return result if result else None
+    site_names = getattr(asset, "site_names", None)
+    if site_names:
+      right_idx = None
+      left_idx = None
+      for i, site_name in enumerate(site_names):
+        lower_name = site_name.lower()
+        if right_idx is None and ("foot_right" in lower_name or "right_foot" in lower_name):
+          right_idx = i
+        if left_idx is None and ("foot_left" in lower_name or "left_foot" in lower_name):
+          left_idx = i
+      if right_idx is not None and left_idx is not None:
+        return right_idx, left_idx
+    # Fallback for legacy MJCF ordering (torso=0, foot_right=1, foot_left=2).
+    # Keeping this fallback avoids silently zeroing the reward if site names change.
+    if asset.data.site_pos_w.shape[1] >= 3:
+      return 1, 2
+    return None
 
-  def __call__(self, env, history_len: int = 60) -> torch.Tensor:
+  def __call__(
+    self,
+    env,
+    history_len: int = 60,
+    min_history: int = 30,
+    lateral_cmd_scale: float = 1.0,
+  ) -> torch.Tensor:
     try:
       asset = env.scene["robot"]
-      joint_pos = asset.data.joint_pos  # [N, num_dof]
-      N = joint_pos.shape[0]
+      site_pos_w = asset.data.site_pos_w  # [N, num_sites, 3]
+      N = site_pos_w.shape[0]
       env_key = id(env)
+      self._last_env_key = env_key
 
-      if env_key not in self._idx_by_env:
-        self._idx_by_env[env_key] = self._find_indices(env)
+      state = self._state_by_env.get(env_key)
+      needs_init = (
+        state is None
+        or state["buf"].shape[0] != N
+        or state["buf"].shape[1] != history_len
+        or state["buf"].device != site_pos_w.device
+        or state["buf"].dtype != site_pos_w.dtype
+      )
+      if needs_init:
+        state = {
+          "site_ids": self._find_site_indices(env),
+          "buf": torch.zeros(
+            (N, history_len, 2, 3),
+            device=site_pos_w.device,
+            dtype=site_pos_w.dtype,
+          ),
+          "pos": 0,
+          "count": torch.zeros(N, device=site_pos_w.device, dtype=torch.long),
+        }
+        self._state_by_env[env_key] = state
 
-      idx = self._idx_by_env.get(env_key)
-      if idx is None:
-        return torch.zeros(N, device=joint_pos.device, dtype=joint_pos.dtype)
+      site_ids = state["site_ids"]
+      if site_ids is None:
+        return torch.zeros(N, device=site_pos_w.device, dtype=site_pos_w.dtype)
+      right_idx, left_idx = site_ids
+      if max(right_idx, left_idx) >= site_pos_w.shape[1]:
+        return torch.zeros(N, device=site_pos_w.device, dtype=site_pos_w.dtype)
 
-      penalty = torch.zeros(N, device=joint_pos.device, dtype=joint_pos.dtype)
+      right = site_pos_w[:, right_idx, :]
+      left = site_pos_w[:, left_idx, :]
 
-      if "hipx_right" in idx and "hipx_left" in idx:
-        # Sum of abs: each lateral hip should be near zero in symmetric gait
-        penalty += joint_pos[:, idx["hipx_right"]].abs() + joint_pos[:, idx["hipx_left"]].abs()
+      buf = state["buf"]
+      pos = int(state["pos"])
+      count = state["count"]
+      buf[:, pos, 0, :] = right
+      buf[:, pos, 1, :] = left
+      state["pos"] = (pos + 1) % history_len
+      count.add_(1).clamp_(max=history_len)
 
-      if "hipz_right" in idx and "hipz_left" in idx:
-        # Sum of abs: yaw joints should also stay near zero
-        penalty += joint_pos[:, idx["hipz_right"]].abs() + joint_pos[:, idx["hipz_left"]].abs()
+      idx = torch.tensor(
+        [((state["pos"] - history_len + i) % history_len) for i in range(history_len)],
+        device=site_pos_w.device,
+        dtype=torch.long,
+      )
+      hist = buf.index_select(1, idx)
 
-      # Scale penalty to zero during lateral commands — asymmetry is expected when vy != 0.
-      # Soft mask: 1.0 at vy=0, 0.0 at |vy|>=0.4 (max lateral command range).
+      right_y = hist[:, :, 0, 1]
+      left_y = hist[:, :, 1, 1]
+      right_z = hist[:, :, 0, 2]
+      left_z = hist[:, :, 1, 2]
+
+      root_y = asset.data.root_link_pos_w[:, 1].unsqueeze(1)
+      # y-lean: lateral midpoint of both feet should stay centered under the torso.
+      y_lean = (0.5 * (right_y + left_y) - root_y).abs().mean(dim=1)
+
+      # Foot-height symmetry metrics recommended in training learnings.
+      max_height_diff = (right_z.max(dim=1).values - left_z.max(dim=1).values).abs()
+      mean_height_diff = (right_z.mean(dim=1) - left_z.mean(dim=1)).abs()
+      swing_right = right_z.max(dim=1).values - right_z.min(dim=1).values
+      swing_left = left_z.max(dim=1).values - left_z.min(dim=1).values
+      swing_range_diff = (swing_right - swing_left).abs()
+
+      penalty = y_lean + max_height_diff + mean_height_diff + swing_range_diff
+
+      if min_history > 0:
+        ready = count >= min(min_history, history_len)
+        penalty = torch.where(ready, penalty, torch.zeros_like(penalty))
+
+      # During strong lateral commands, perfect left/right symmetry is not expected.
+      # Keep the penalty active near vy=0 and fade it out toward |vy|=1.0 (G1 command range).
       cmd = env.command_manager.get_command("twist")
       if cmd is not None:
-        forward_weight = (1.0 - cmd[:, 1].abs() / 0.4).clamp(min=0.0)
+        forward_weight = (1.0 - cmd[:, 1].abs() / max(lateral_cmd_scale, 1e-6)).clamp(
+          min=0.0
+        )
         penalty = penalty * forward_weight
 
       return -penalty
@@ -297,7 +367,20 @@ class _BilateralSymmetryReward:
       return torch.zeros(N, device=env.action_manager.action.device)
 
   def reset(self, env_ids: torch.Tensor | slice | None = None) -> None:
-    pass  # No persistent per-env state
+    if self._last_env_key is None:
+      return
+    state = self._state_by_env.get(self._last_env_key)
+    if state is None:
+      return
+    buf = state["buf"]
+    count = state["count"]
+    if env_ids is None or isinstance(env_ids, slice):
+      buf.zero_()
+      count.zero_()
+      state["pos"] = 0
+      return
+    buf[env_ids] = 0.0
+    count[env_ids] = 0
 
 
 _ACTION_FFT_BAND_RATIO_REWARD = _ActionFftBandRatioReward()
@@ -380,6 +463,43 @@ def _joint_torques_obs(env) -> torch.Tensor:
   return env.scene["robot"].data.actuator_force
 
 
+def _contact_dr_ranges_curriculum(
+  env,
+  env_ids,
+  ranges_stages: list[dict[str, Any]],
+) -> dict[str, torch.Tensor]:
+  """Progressively widen contact DR ranges as training improves.
+
+  This keeps early training easier (narrow DR around baseline), then broadens
+  ranges for robustness once a gait is established.
+  """
+
+  del env_ids  # Global schedule based on common training step.
+  step = int(env.common_step_counter)
+  stage = ranges_stages[0]
+  for candidate in ranges_stages:
+    if step >= int(candidate["step"]):
+      stage = candidate
+
+  foot_friction = env.event_manager.get_term_cfg("foot_friction")
+  foot_friction.params["ranges"] = tuple(stage["mu"])
+
+  foot_torsional = env.event_manager.get_term_cfg("foot_friction_torsional")
+  foot_torsional.params["ranges"] = {1: tuple(stage["torsional"])}
+
+  foot_rolling = env.event_manager.get_term_cfg("foot_friction_rolling")
+  foot_rolling.params["ranges"] = {2: tuple(stage["rolling"])}
+
+  return {
+    "mu_min": torch.tensor(stage["mu"][0], dtype=torch.float),
+    "mu_max": torch.tensor(stage["mu"][1], dtype=torch.float),
+    "torsional_min": torch.tensor(stage["torsional"][0], dtype=torch.float),
+    "torsional_max": torch.tensor(stage["torsional"][1], dtype=torch.float),
+    "rolling_min": torch.tensor(stage["rolling"][0], dtype=torch.float),
+    "rolling_max": torch.tensor(stage["rolling"][1], dtype=torch.float),
+  }
+
+
 def _print_actuator_torques(env, env_ids=None) -> None:
   """Print mean/max actuator torque (absolute) for quick debugging during play."""
   asset = env.scene["robot"]
@@ -399,7 +519,7 @@ def _print_actuator_torques(env, env_ids=None) -> None:
   sys.stdout.flush()
 
 
-def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool = True) -> ManagerBasedRlEnvCfg:
+def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool = False) -> ManagerBasedRlEnvCfg:
   """Create LeRobot Humanoid rough terrain velocity configuration."""
   cfg = make_velocity_env_cfg()
 
@@ -461,9 +581,6 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
     if hasattr(cfg.scene.terrain, "max_init_terrain_level"):
       cfg.scene.terrain.max_init_terrain_level = 2
 
-  # Disable default velocity-command curriculum, keep terrain curriculum.
-  cfg.curriculum.pop("command_vel", None)
-
   joint_pos_action = cfg.actions["joint_pos"]
   assert isinstance(joint_pos_action, JointPositionActionCfg)
   joint_pos_action.scale = LEROBOT_HUMANOID_NO_ARMS_ACTION_SCALE
@@ -473,10 +590,24 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
   twist_cmd = cfg.commands["twist"]
   assert isinstance(twist_cmd, UniformVelocityCommandCfg)
   twist_cmd.viz.z_offset = 0.9  # Adjust based on robot height.
-  # Lower velocity command ranges for training stability.
-  twist_cmd.ranges.lin_vel_x = (-0.8, 0.8)
-  twist_cmd.ranges.lin_vel_y = (-0.4, 0.4)
+  # Start with an easier command envelope and ramp to the full G1 range.
+  # This follows the curriculum recommendation: learn core gait first, then
+  # increase command difficulty.
+  twist_cmd.ranges.lin_vel_x = (-0.4, 0.4)
+  twist_cmd.ranges.lin_vel_y = (-0.2, 0.2)
   twist_cmd.ranges.ang_vel_z = (-0.2, 0.2)
+  cfg.curriculum["command_vel"] = CurriculumTermCfg(
+    func=mdp.commands_vel,
+    params={
+      "command_name": "twist",
+      "velocity_stages": [
+        {"step": 0, "lin_vel_x": (-0.4, 0.4), "lin_vel_y": (-0.2, 0.2), "ang_vel_z": (-0.2, 0.2)},
+        {"step": 5_000 * 24, "lin_vel_x": (-0.7, 0.7), "lin_vel_y": (-0.5, 0.5), "ang_vel_z": (-0.35, 0.35)},
+        # Final stage matches G1 command envelope.
+        {"step": 10_000 * 24, "lin_vel_x": (-1.0, 1.0), "lin_vel_y": (-1.0, 1.0), "ang_vel_z": (-0.5, 0.5)},
+      ],
+    },
+  )
 
   # Stronger observation randomization for sim-to-real robustness.
   policy_obs = cfg.observations["policy"]
@@ -517,31 +648,61 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
   # Domain Randomization: Contact Parameters
   # ---------------------------------------------------------------------------
   cfg.events["foot_friction"].params["asset_cfg"].geom_names = geom_names
-  cfg.events["foot_friction"].params["ranges"] = (0.35, 1.20)  # geom_friction[0]
-  cfg.events["foot_friction"].params["shared_random"] = True
+  # Randomize around the identified baseline (mu ~= 0.6) with a narrower band.
+  # This follows the training doc guidance: start from a validated baseline and
+  # avoid overly broad contact DR that can block learning.
+  cfg.events["foot_friction"].params["ranges"] = (0.52, 0.75)  # geom_friction[0]
+  # Keep feet independent to model real left/right contact asymmetries.
+  cfg.events["foot_friction"].params["shared_random"] = False
+  cfg.events["foot_friction"].mode = "reset"
   cfg.events["foot_friction"].domain_randomization = True
   cfg.events["foot_friction_torsional"] = EventTermCfg(
     func=envs_mdp.randomize_field,
-    mode="startup",
+    mode="reset",
     domain_randomization=True,
     params={
       "field": "geom_friction",
-      "ranges": {1: (0.002, 0.020)},  # geom_friction[1]
+      "ranges": {1: (0.004, 0.009)},  # geom_friction[1]
       "operation": "abs",
       "asset_cfg": SceneEntityCfg("robot", geom_names=geom_names),
-      "shared_random": True,
+      "shared_random": False,
     },
   )
   cfg.events["foot_friction_rolling"] = EventTermCfg(
     func=envs_mdp.randomize_field,
-    mode="startup",
+    mode="reset",
     domain_randomization=True,
     params={
       "field": "geom_friction",
-      "ranges": {2: (0.00005, 0.00100)},  # geom_friction[2]
+      "ranges": {2: (0.00008, 0.00025)},  # geom_friction[2]
       "operation": "abs",
       "asset_cfg": SceneEntityCfg("robot", geom_names=geom_names),
-      "shared_random": True,
+      "shared_random": False,
+    },
+  )
+  cfg.curriculum["contact_dr_ranges"] = CurriculumTermCfg(
+    func=_contact_dr_ranges_curriculum,
+    params={
+      "ranges_stages": [
+        {
+          "step": 0,
+          "mu": (0.52, 0.75),
+          "torsional": (0.004, 0.009),
+          "rolling": (0.00008, 0.00025),
+        },
+        {
+          "step": 7_500 * 24,
+          "mu": (0.48, 0.84),
+          "torsional": (0.0035, 0.0105),
+          "rolling": (0.00006, 0.00033),
+        },
+        {
+          "step": 15_000 * 24,
+          "mu": (0.45, 0.90),
+          "torsional": (0.003, 0.012),
+          "rolling": (0.00005, 0.00040),
+        },
+      ]
     },
   )
 
@@ -592,9 +753,6 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
         "ranges": joint_armature_scales[group_name],
         "operation": "scale",
         "asset_cfg": asset_cfg,
-        # Keep left/right joints in each group synchronized to avoid injecting
-        # artificial bilateral asymmetry through randomization.
-        "shared_random": True,
       },
     )
     cfg.events[f"joint_damping_{group_name}"] = EventTermCfg(
@@ -606,7 +764,6 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
         "ranges": joint_damping_scales[group_name],
         "operation": "scale",
         "asset_cfg": asset_cfg,
-        "shared_random": True,
       },
     )
     cfg.events[f"joint_frictionloss_{group_name}"] = EventTermCfg(
@@ -618,7 +775,6 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
         "ranges": joint_frictionloss_scales[group_name],
         "operation": "scale",
         "asset_cfg": asset_cfg,
-        "shared_random": True,
       },
     )
 
@@ -717,8 +873,8 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
     r".*ankley.*": 0.2,
     r".*anklex.*": 0.1,
   }
-  # Match G1 reward parametrization while keeping robot-specific pose std maps.
-  cfg.rewards["pose"].weight = 1.0
+  # Keep pose regularization meaningful for no-arms while allowing stepping.
+  cfg.rewards["pose"].weight = 1.5
 
   cfg.rewards["upright"].params["asset_cfg"].body_names = ("torso_subassembly",)
   cfg.rewards["body_ang_vel"].params["asset_cfg"].body_names = ("torso_subassembly",)
@@ -748,7 +904,12 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
     # Keep this low at the beginning: too-strong symmetry early in training tends
     # to collapse exploration into one-leg standing instead of learning to walk.
     weight=0.2,
-    params={"history_len": 60},
+    params={
+      "history_len": 60,
+      "min_history": 30,
+      # Must match twist_cmd.ranges.lin_vel_y magnitude above.
+      "lateral_cmd_scale": 1.0,
+    },
   )
   cfg.rewards["action_rate_l2"].weight = -0.1
   cfg.rewards["action_rate_hipz_hipx_l2"] = RewardTermCfg(
@@ -756,7 +917,6 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
     weight=-0.5,
     params={"joint_name_patterns": (r".*hipz.*", r".*hipx.*")},
   )
-  cfg.rewards["pose"].weight = 1.5
   cfg.curriculum.pop("pose_weight", None)
   cfg.curriculum["action_rate_weight"] = CurriculumTermCfg(
     func=mdp.reward_weight,
@@ -832,7 +992,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
   return cfg
 
 
-def lerobot_humanoid_no_arms_flat_env_cfg(play: bool = False, torque_obs: bool = True) -> ManagerBasedRlEnvCfg:
+def lerobot_humanoid_no_arms_flat_env_cfg(play: bool = False, torque_obs: bool = False) -> ManagerBasedRlEnvCfg:
   """Create LeRobot Humanoid flat terrain velocity configuration."""
   cfg = lerobot_humanoid_no_arms_rough_env_cfg(play=play, torque_obs=torque_obs)
 
