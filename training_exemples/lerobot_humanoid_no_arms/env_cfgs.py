@@ -237,9 +237,9 @@ class _ActionFftBandRatioReward:
 class _BilateralSymmetryReward:
   """Penalize lateral bilateral asymmetry via sum-of-abs on hipx and hipz joints.
 
-  Each lateral joint should have small magnitude in a symmetric gait. Penalty =
-  |hipx_r| + |hipx_l| + |hipz_r| + |hipz_l|. Anklex excluded (structural asymmetry).
-  Uses joint_pos (always available) instead of site positions.
+  Penalty = |hipx_r| + |hipx_l| + |hipz_r| + |hipz_l|, scaled to zero when the
+  lateral velocity command (vy) is non-zero. Asymmetry is expected and allowed during
+  lateral motion — only penalize during forward/turning motion.
   """
 
   def __init__(self) -> None:
@@ -281,6 +281,13 @@ class _BilateralSymmetryReward:
       if "hipz_right" in idx and "hipz_left" in idx:
         # Sum of abs: yaw joints should also stay near zero
         penalty += joint_pos[:, idx["hipz_right"]].abs() + joint_pos[:, idx["hipz_left"]].abs()
+
+      # Scale penalty to zero during lateral commands — asymmetry is expected when vy != 0.
+      # Soft mask: 1.0 at vy=0, 0.0 at |vy|>=0.4 (max lateral command range).
+      cmd = env.command_manager.get_command("twist")
+      if cmd is not None:
+        forward_weight = (1.0 - cmd[:, 1].abs() / 0.4).clamp(min=0.0)
+        penalty = penalty * forward_weight
 
       return -penalty
 
