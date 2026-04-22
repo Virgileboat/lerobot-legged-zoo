@@ -118,6 +118,87 @@ class _SelectiveActionRateL2Penalty:
     del env_ids
 
 
+class _SelectiveJointLimitMarginPenalty:
+  """Penalize selected joints when operating near hard joint limits."""
+
+  def __init__(self) -> None:
+    self._state_by_env: dict[int, dict[str, Any]] = {}
+
+  def _resolve_joint_indices(
+    self,
+    env,
+    joint_name_patterns: tuple[str, ...],
+    device: torch.device,
+  ) -> torch.Tensor:
+    asset = env.scene["robot"]
+    joint_names = getattr(asset, "joint_names", None)
+    if joint_names is None:
+      raise ValueError("Robot joint names are unavailable for limit-margin penalty.")
+    compiled_patterns = [re.compile(p) for p in joint_name_patterns]
+    ids = [
+      i
+      for i, name in enumerate(joint_names)
+      if any(pattern.fullmatch(name) for pattern in compiled_patterns)
+    ]
+    if not ids:
+      raise ValueError(
+        f"No joints matched joint_name_patterns={joint_name_patterns} "
+        f"in available joints={tuple(joint_names)}."
+      )
+    return torch.tensor(ids, dtype=torch.long, device=device)
+
+  def __call__(
+    self,
+    env,
+    joint_name_patterns: tuple[str, ...] = (r".*ankley.*", r".*anklex.*"),
+    margin_ratio: float = 0.2,
+  ) -> torch.Tensor:
+    asset = env.scene["robot"]
+    joint_pos = asset.data.joint_pos
+    joint_pos_limits = asset.data.joint_pos_limits
+    env_key = id(env)
+
+    state = self._state_by_env.get(env_key)
+    needs_init = (
+      state is None
+      or state["joint_ids"].device != joint_pos.device
+      or state["num_joints"] != joint_pos.shape[1]
+      or state["joint_name_patterns"] != joint_name_patterns
+    )
+    if needs_init:
+      state = {
+        "joint_ids": self._resolve_joint_indices(
+          env=env,
+          joint_name_patterns=joint_name_patterns,
+          device=joint_pos.device,
+        ),
+        "num_joints": joint_pos.shape[1],
+        "joint_name_patterns": joint_name_patterns,
+      }
+      self._state_by_env[env_key] = state
+
+    joint_ids = state["joint_ids"]
+    if joint_ids.numel() == 0:
+      return torch.zeros(joint_pos.shape[0], device=joint_pos.device, dtype=joint_pos.dtype)
+
+    pos = joint_pos[:, joint_ids]
+    lower = joint_pos_limits[:, joint_ids, 0]
+    upper = joint_pos_limits[:, joint_ids, 1]
+    span = (upper - lower).clamp(min=1e-6)
+    margin_ratio = float(max(0.0, min(margin_ratio, 0.49)))
+
+    # Start penalizing inside a margin band near each hard bound.
+    margin = margin_ratio * span
+    lower_band = lower + margin
+    upper_band = upper - margin
+    near_lower = (lower_band - pos).clamp(min=0.0) / span
+    near_upper = (pos - upper_band).clamp(min=0.0) / span
+    return torch.sum(near_lower.square() + near_upper.square(), dim=1)
+
+  def reset(self, env_ids: torch.Tensor | slice | None = None) -> None:
+    del env_ids
+
+
 class _ActionFftBandRatioReward:
   """Reward the fraction of action spectral energy inside a low-frequency band."""
 
@@ -385,6 +466,7 @@ class _BilateralSymmetryReward:
 
 _ACTION_FFT_BAND_RATIO_REWARD = _ActionFftBandRatioReward()
 _SELECTIVE_ACTION_RATE_L2_PENALTY = _SelectiveActionRateL2Penalty()
+_SELECTIVE_JOINT_LIMIT_MARGIN_PENALTY = _SelectiveJointLimitMarginPenalty()
 _BILATERAL_SYMMETRY_REWARD = _BilateralSymmetryReward()
 
 
@@ -583,31 +665,26 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
 
   joint_pos_action = cfg.actions["joint_pos"]
   assert isinstance(joint_pos_action, JointPositionActionCfg)
-  joint_pos_action.scale = LEROBOT_HUMANOID_NO_ARMS_ACTION_SCALE
+  joint_pos_action.scale = dict(LEROBOT_HUMANOID_NO_ARMS_ACTION_SCALE)
+  # Keep ankle command authority narrower than hips/knees.
+  # The identified ankle mechanical ranges are only ~10-20 deg, while the default
+  # scale built from 0.25*effort/kp gives 0.55 rad (~31 deg), which encourages
+  # limit-hitting commands in transfer. Tighten only ankle scales here.
+  for joint_name in ("ankley_right", "ankley_left"):
+    joint_pos_action.scale[joint_name] = 0.22  # ~12.6 deg
+  for joint_name in ("anklex_right", "anklex_left"):
+    joint_pos_action.scale[joint_name] = 0.18  # ~10.3 deg
 
   cfg.viewer.body_name = "torso_subassembly"
 
   twist_cmd = cfg.commands["twist"]
   assert isinstance(twist_cmd, UniformVelocityCommandCfg)
   twist_cmd.viz.z_offset = 0.9  # Adjust based on robot height.
-  # Start with an easier command envelope and ramp to the full G1 range.
-  # This follows the curriculum recommendation: learn core gait first, then
-  # increase command difficulty.
-  twist_cmd.ranges.lin_vel_x = (-0.4, 0.4)
-  twist_cmd.ranges.lin_vel_y = (-0.2, 0.2)
-  twist_cmd.ranges.ang_vel_z = (-0.2, 0.2)
-  cfg.curriculum["command_vel"] = CurriculumTermCfg(
-    func=mdp.commands_vel,
-    params={
-      "command_name": "twist",
-      "velocity_stages": [
-        {"step": 0, "lin_vel_x": (-0.4, 0.4), "lin_vel_y": (-0.2, 0.2), "ang_vel_z": (-0.2, 0.2)},
-        {"step": 5_000 * 24, "lin_vel_x": (-0.7, 0.7), "lin_vel_y": (-0.5, 0.5), "ang_vel_z": (-0.35, 0.35)},
-        # Final stage matches G1 command envelope.
-        {"step": 10_000 * 24, "lin_vel_x": (-1.0, 1.0), "lin_vel_y": (-1.0, 1.0), "ang_vel_z": (-0.5, 0.5)},
-      ],
-    },
-  )
+  # Use the full command envelope from the beginning (no velocity curriculum).
+  twist_cmd.ranges.lin_vel_x = (-1.0, 1.0)
+  twist_cmd.ranges.lin_vel_y = (-1.0, 1.0)
+  twist_cmd.ranges.ang_vel_z = (-0.5, 0.5)
+  cfg.curriculum.pop("command_vel", None)
 
   # Stronger observation randomization for sim-to-real robustness.
   policy_obs = cfg.observations["policy"]
@@ -883,11 +960,22 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
   for reward_name in ["foot_clearance", "foot_swing_height", "foot_slip"]:
     cfg.rewards[reward_name].params["asset_cfg"].site_names = site_names
 
-  cfg.rewards["track_linear_velocity"].weight = 2.0
-  cfg.rewards["track_angular_velocity"].weight = 2.0
+  # Slightly increase task-tracking priority.
+  cfg.rewards["track_linear_velocity"].weight = 2.2
+  cfg.rewards["track_angular_velocity"].weight = 2.2
 
   cfg.rewards["body_ang_vel"].weight = -0.05
-  cfg.rewards["dof_pos_limits"].weight = -1.0
+  # Replace default soft-limit crossing cost with an explicit near-limit cost.
+  # This starts penalizing in a margin band before hard bounds (not only after
+  # crossing a soft-limit threshold), which better discourages boundary-seeking.
+  cfg.rewards["dof_pos_limits"] = RewardTermCfg(
+    func=_SELECTIVE_JOINT_LIMIT_MARGIN_PENALTY,
+    weight=-1.5,
+    params={
+      "joint_name_patterns": (r".*",),
+      "margin_ratio": 0.2,
+    },
+  )
   cfg.rewards["angular_momentum"].weight = -0.02
   cfg.rewards["air_time"].weight = 1.5
   cfg.rewards["foot_slip"].weight = -0.1
@@ -912,6 +1000,14 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
     },
   )
   cfg.rewards["action_rate_l2"].weight = -0.1
+  # Additional smoothness/effort regularizers (kept conservative and ramped via
+  # curriculum below so they do not block early task learning).
+  cfg.rewards["action_acc_l2"] = RewardTermCfg(func=mdp.action_acc_l2, weight=-0.03)
+  cfg.rewards["joint_vel_l2"] = RewardTermCfg(func=mdp.joint_vel_l2, weight=-1e-3)
+  cfg.rewards["joint_acc_l2"] = RewardTermCfg(func=mdp.joint_acc_l2, weight=-2e-7)
+  cfg.rewards["joint_torques_l2"] = RewardTermCfg(
+    func=mdp.joint_torques_l2, weight=-2e-5
+  )
   cfg.rewards["action_rate_hipz_hipx_l2"] = RewardTermCfg(
     func=_SELECTIVE_ACTION_RATE_L2_PENALTY,
     weight=-0.5,
@@ -929,6 +1025,54 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
         {"step": 5_000 * 24, "weight": -0.5},
         {"step": 10_000 * 24, "weight": -1.5},
         {"step": 15_000 * 24, "weight": -3.0},
+      ],
+    },
+  )
+  cfg.curriculum["action_acc_weight"] = CurriculumTermCfg(
+    func=mdp.reward_weight,
+    params={
+      "reward_name": "action_acc_l2",
+      "weight_stages": [
+        {"step": 0, "weight": 0.0},
+        {"step": 5_000 * 24, "weight": -0.01},
+        {"step": 10_000 * 24, "weight": -0.02},
+        {"step": 15_000 * 24, "weight": -0.03},
+      ],
+    },
+  )
+  cfg.curriculum["joint_vel_l2_weight"] = CurriculumTermCfg(
+    func=mdp.reward_weight,
+    params={
+      "reward_name": "joint_vel_l2",
+      "weight_stages": [
+        {"step": 0, "weight": 0.0},
+        {"step": 5_000 * 24, "weight": -3e-4},
+        {"step": 10_000 * 24, "weight": -6e-4},
+        {"step": 15_000 * 24, "weight": -1e-3},
+      ],
+    },
+  )
+  cfg.curriculum["joint_acc_l2_weight"] = CurriculumTermCfg(
+    func=mdp.reward_weight,
+    params={
+      "reward_name": "joint_acc_l2",
+      "weight_stages": [
+        {"step": 0, "weight": 0.0},
+        {"step": 5_000 * 24, "weight": -5e-8},
+        {"step": 10_000 * 24, "weight": -1e-7},
+        {"step": 15_000 * 24, "weight": -2e-7},
+      ],
+    },
+  )
+  cfg.curriculum["joint_torques_l2_weight"] = CurriculumTermCfg(
+    func=mdp.reward_weight,
+    params={
+      "reward_name": "joint_torques_l2",
+      "weight_stages": [
+        {"step": 0, "weight": 0.0},
+        {"step": 5_000 * 24, "weight": -5e-6},
+        {"step": 10_000 * 24, "weight": -1e-5},
+        {"step": 15_000 * 24, "weight": -2e-5},
       ],
     },
   )
