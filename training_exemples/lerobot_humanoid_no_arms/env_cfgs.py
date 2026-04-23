@@ -580,7 +580,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
   joint_vel_term = policy_obs.terms.get("joint_vel")
   # Real hardware finite-difference velocity is noisy; use a slightly wider
   # envelope to cover estimator spikes seen in logs.
-  joint_vel_noise_rad_s = 12.0 * math.pi / 180.0
+  joint_vel_noise_rad_s = 20.0 * math.pi / 180.0
   joint_vel_term.noise.n_min = -joint_vel_noise_rad_s
   joint_vel_term.noise.n_max = joint_vel_noise_rad_s
   # Joint torques with noise (sim2real: real actuators have torque measurement noise).
@@ -763,14 +763,14 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
   }
   cfg.events["base_com"].domain_randomization = True
 
-  # Mass: +/- 20% per body.
+  # Mass: +/- 15% per body.
   cfg.events["body_mass"] = EventTermCfg(
     func=envs_mdp.randomize_field,
     mode="startup",
     domain_randomization=True,
     params={
       "field": "body_mass",
-      "ranges": (0.80, 1.20),
+      "ranges": (0.85, 1.15),
       "operation": "scale",
       "asset_cfg": SceneEntityCfg("robot", body_names=dr_body_names),
     },
@@ -781,7 +781,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
     domain_randomization=True,
     params={
       "field": "body_inertia",
-      "ranges": (0.80, 1.20),
+      "ranges": (0.85, 1.15),
       "operation": "scale",
       "asset_cfg": SceneEntityCfg("robot", body_names=dr_body_names),
     },
