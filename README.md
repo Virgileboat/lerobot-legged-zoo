@@ -84,7 +84,7 @@ Each robot has a model under `models/` and a matching training example under
 ![Open Duck v2](media/open_duck_v2.svg)
 
 ### LeRobot Humanoid Full (20-DOF)
-- Model: `models/lerobot_humanoide/mjcf/robot.xml`
+- Model: `models/lerobot-humanoid-model/models/lerobot_humanoide/mjcf/robot.xml`
 - Training: `training_exemples/lerobot_humanoid_full/env_cfgs.py`
 - Constants: `training_exemples/lerobot_humanoid_full/lerobot_humanoid_full_constants.py`
 - Tasks: `Mjlab-Velocity-Flat-LeRobot-Humanoid-full`, `Mjlab-Velocity-Rough-LeRobot-Humanoid-full`
@@ -92,7 +92,7 @@ Each robot has a model under `models/` and a matching training example under
 ![LeRobot Humanoid Full](media/lerobot_humanoid_full.png)
 
 ### LeRobot Humanoid (12-DOF)
-- Model: `models/bipedal_plateform/mjcf/robot.xml`
+- Model: `models/lerobot-humanoid-model/models/bipedal_plateform/mjcf/robot.xml`
 - Training: `training_exemples/lerobot_humanoid/env_cfgs.py`
 - Constants: `training_exemples/lerobot_humanoid/lerobot_humanoid_constants.py`
 - Tasks: `Mjlab-Velocity-Flat-LeRobot-Humanoid`, `Mjlab-Velocity-Rough-LeRobot-Humanoid`
@@ -100,7 +100,7 @@ Each robot has a model under `models/` and a matching training example under
 [![LeRobot Humanoid (rough terrain policy)](media/lerobot_humanoid.png)](media/lerobot_humanoide.mp4)
 
 ### LeRobot Humanoid No-Arms
-- Model: `models/bipedal_plateform_no_arms/mjcf/robot.xml`
+- Model: `models/lerobot-humanoid-model/models/bipedal_plateform_no_arms/mjcf/robot.xml`
 - Training: `training_exemples/lerobot_humanoid_no_arms/env_cfgs.py`
 - Constants: `training_exemples/lerobot_humanoid_no_arms/lerobot_humanoid_no_arms_constants.py`
 - Tasks: `Mjlab-Velocity-Flat-LeRobot-Humanoid-no-arms`, `Mjlab-Velocity-Rough-LeRobot-Humanoid-no-arms`

@@ -21,7 +21,22 @@ def _find_repo_root() -> Path:
   raise FileNotFoundError("Could not locate repo root containing 'models' directory.")
 
 
-LEROBOT_HUMANOID_MESH_DIR: Path = _find_repo_root() / "models" / "bipedal_plateform" / "mjcf"
+def _find_model_mjcf_dir(model_name: str) -> Path:
+  repo_root = _find_repo_root()
+  candidates = (
+    # New layout (assets moved under the dedicated model package repo).
+    repo_root / "models" / "lerobot-humanoid-model" / "models" / model_name / "mjcf",
+    # Backward compatibility with the old top-level layout.
+    repo_root / "models" / model_name / "mjcf",
+  )
+  for candidate in candidates:
+    if candidate.is_dir():
+      return candidate
+  tried = ", ".join(str(p) for p in candidates)
+  raise FileNotFoundError(f"Could not locate MJCF directory for '{model_name}'. Tried: {tried}")
+
+
+LEROBOT_HUMANOID_MESH_DIR: Path = _find_model_mjcf_dir("bipedal_plateform")
 LEROBOT_HUMANOID_XML: Path = LEROBOT_HUMANOID_MESH_DIR / "robot.xml"
 
 assert LEROBOT_HUMANOID_XML.exists(), f"MJCF file not found: {LEROBOT_HUMANOID_XML}"

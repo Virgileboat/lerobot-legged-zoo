@@ -199,6 +199,122 @@ class _SelectiveJointLimitMarginPenalty:
     del env_ids
 
 
+class _ActionFftBandRatioReward:
+  """Reward the fraction of action spectral energy inside a low-frequency band."""
+
+  def __init__(self) -> None:
+    self._state_by_env: dict[int, dict[str, Any]] = {}
+    self._last_env_key: int | None = None
+    self._freq_masks_cache: dict[
+      tuple[int, float, float, str], tuple[torch.Tensor, torch.Tensor]
+    ] = {}
+
+  def _get_freq_masks(
+    self,
+    history_len: int,
+    step_dt: float,
+    cutoff_hz: float,
+    device: torch.device,
+  ) -> tuple[torch.Tensor, torch.Tensor]:
+    key = (history_len, round(step_dt, 8), cutoff_hz, str(device))
+    masks = self._freq_masks_cache.get(key)
+    if masks is not None:
+      return masks
+    freqs = torch.fft.rfftfreq(history_len, d=step_dt, device=device)
+    valid_mask = freqs > 0.0
+    inband_mask = (freqs <= cutoff_hz) & valid_mask
+    masks = (inband_mask, valid_mask)
+    self._freq_masks_cache[key] = masks
+    return masks
+
+  def __call__(
+    self,
+    env,
+    history_len: int = 50,
+    min_history: int = 50,
+    cutoff_hz: float = 3.0,
+  ) -> torch.Tensor:
+    actions = env.action_manager.action
+    if history_len < 4:
+      raise ValueError(f"history_len must be >= 4 for FFT reward, got {history_len}")
+    env_key = id(env)
+    self._last_env_key = env_key
+
+    state = self._state_by_env.get(env_key)
+    needs_init = (
+      state is None
+      or state["buf"].shape[0] != actions.shape[0]
+      or state["buf"].shape[2] != actions.shape[1]
+      or state["buf"].shape[1] != history_len
+    )
+    if needs_init:
+      state = {
+        "buf": torch.zeros(
+          (actions.shape[0], history_len, actions.shape[1]),
+          device=actions.device,
+          dtype=actions.dtype,
+        ),
+        "pos": 0,
+        "count": torch.zeros(
+          actions.shape[0], device=actions.device, dtype=torch.long
+        ),
+      }
+      self._state_by_env[env_key] = state
+
+    buf = state["buf"]
+    pos = int(state["pos"])
+    count = state["count"]
+
+    buf[:, pos, :] = actions
+    state["pos"] = (pos + 1) % history_len
+    count.add_(1).clamp_(max=history_len)
+
+    idx = torch.tensor(
+      [((state["pos"] - history_len + i) % history_len) for i in range(history_len)],
+      device=actions.device,
+      dtype=torch.long,
+    )
+    hist = buf.index_select(1, idx)
+    hist = hist - hist.mean(dim=1, keepdim=True)
+    spec = torch.fft.rfft(hist, dim=1)
+    power = spec.real.square() + spec.imag.square()
+    inband_mask, valid_mask = self._get_freq_masks(
+      history_len, float(env.step_dt), cutoff_hz, actions.device
+    )
+    if not bool(valid_mask.any()):
+      reward = torch.ones(actions.shape[0], device=actions.device, dtype=actions.dtype)
+    else:
+      total_power = power[:, valid_mask, :].sum(dim=(1, 2))
+      inband_power = power[:, inband_mask, :].sum(dim=(1, 2))
+      reward = torch.where(
+        total_power > 1e-12,
+        inband_power / total_power,
+        torch.ones_like(total_power),
+      )
+
+    if min_history > 0:
+      ready = count >= min(min_history, history_len)
+      reward = torch.where(ready, reward, torch.zeros_like(reward))
+
+    return reward
+
+  def reset(self, env_ids: torch.Tensor | slice | None = None) -> None:
+    if self._last_env_key is None:
+      return
+    state = self._state_by_env.get(self._last_env_key)
+    if state is None:
+      return
+    buf = state["buf"]
+    count = state["count"]
+    if env_ids is None or isinstance(env_ids, slice):
+      buf.zero_()
+      count.zero_()
+      state["pos"] = 0
+      return
+    buf[env_ids] = 0.0
+    count[env_ids] = 0
+
+
 class _BilateralSymmetryReward:
   """Penalize bilateral asymmetry from world-space foot trajectories.
 
@@ -348,6 +464,7 @@ class _BilateralSymmetryReward:
     count[env_ids] = 0
 
 
+_ACTION_FFT_BAND_RATIO_REWARD = _ActionFftBandRatioReward()
 _SELECTIVE_ACTION_RATE_L2_PENALTY = _SelectiveActionRateL2Penalty()
 _SELECTIVE_JOINT_LIMIT_MARGIN_PENALTY = _SelectiveJointLimitMarginPenalty()
 _BILATERAL_SYMMETRY_REWARD = _BilateralSymmetryReward()
@@ -860,6 +977,12 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
   cfg.rewards["air_time"].weight = 1.5
   cfg.rewards["foot_slip"].weight = -0.1
   cfg.rewards["soft_landing"].weight = -1e-5
+
+  cfg.rewards["action_fft_band_le_3hz_ratio"] = RewardTermCfg(
+    func=_ACTION_FFT_BAND_RATIO_REWARD,
+    weight=1.5,
+    params={"history_len": 50, "min_history": 50, "cutoff_hz": 2.5},
+  )
 
   cfg.rewards["bilateral_symmetry"] = RewardTermCfg(
     func=_BILATERAL_SYMMETRY_REWARD,
