@@ -666,6 +666,11 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
   joint_pos_action = cfg.actions["joint_pos"]
   assert isinstance(joint_pos_action, JointPositionActionCfg)
   joint_pos_action.scale = dict(LEROBOT_HUMANOID_NO_ARMS_ACTION_SCALE)
+  # Keep ankle command authority narrower than hips/knees (f86d8bc behavior).
+  for joint_name in ("ankley_right", "ankley_left"):
+    joint_pos_action.scale[joint_name] = 0.22
+  for joint_name in ("anklex_right", "anklex_left"):
+    joint_pos_action.scale[joint_name] = 0.18
 
   cfg.viewer.body_name = "torso_subassembly"
 
