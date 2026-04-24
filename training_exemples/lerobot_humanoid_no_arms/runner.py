@@ -10,8 +10,8 @@ class LerobotNoArmsOnPolicyRunner(VelocityOnPolicyRunner):
   schedule here so exploration starts high and decays toward exploitation.
   """
 
-  _ENTROPY_DECAY_RATE = 0.9995
-  _ENTROPY_MIN = 0.0
+  _ENTROPY_DECAY_RATE = 0.9998
+  _ENTROPY_MIN = 3e-4
 
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)

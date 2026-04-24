@@ -24,7 +24,7 @@ def lerobot_humanoid_no_arms_ppo_runner_cfg() -> RslRlOnPolicyRunnerCfg:
       use_clipped_value_loss=True,
       clip_param=0.2,
       # Start high for exploration; the no-arms runner applies exponential
-      # annealing toward 0 during training.
+      # annealing toward a small non-zero floor during training.
       entropy_coef=0.01,
       num_learning_epochs=5,
       num_mini_batches=4,
@@ -38,5 +38,5 @@ def lerobot_humanoid_no_arms_ppo_runner_cfg() -> RslRlOnPolicyRunnerCfg:
     experiment_name="lerobot_humanoid_no_arms_velocity",
     save_interval=50,
     num_steps_per_env=24,
-    max_iterations=20_000,
+    max_iterations=40_000,
   )

@@ -582,6 +582,40 @@ def _contact_dr_ranges_curriculum(
   }
 
 
+def _push_recovery_curriculum(
+  env,
+  env_ids,
+  ranges_stages: list[dict[str, Any]],
+) -> dict[str, torch.Tensor]:
+  """Ramp push disturbances after gait emergence."""
+
+  del env_ids  # Global schedule based on common training step.
+  step = int(env.common_step_counter)
+  stage = ranges_stages[0]
+  for candidate in ranges_stages:
+    if step >= int(candidate["step"]):
+      stage = candidate
+
+  push_event = env.event_manager.get_term_cfg("push_robot")
+  push_event.interval_range_s = tuple(stage["interval_s"])
+  push_event.params["velocity_range"] = {
+    axis: tuple(lims)
+    for axis, lims in stage["velocity_range"].items()
+  }
+
+  vel = stage["velocity_range"]
+  return {
+    "push_interval_min_s": torch.tensor(stage["interval_s"][0], dtype=torch.float),
+    "push_interval_max_s": torch.tensor(stage["interval_s"][1], dtype=torch.float),
+    "push_abs_x": torch.tensor(abs(vel["x"][1]), dtype=torch.float),
+    "push_abs_y": torch.tensor(abs(vel["y"][1]), dtype=torch.float),
+    "push_abs_z": torch.tensor(abs(vel["z"][1]), dtype=torch.float),
+    "push_abs_roll": torch.tensor(abs(vel["roll"][1]), dtype=torch.float),
+    "push_abs_pitch": torch.tensor(abs(vel["pitch"][1]), dtype=torch.float),
+    "push_abs_yaw": torch.tensor(abs(vel["yaw"][1]), dtype=torch.float),
+  }
+
+
 def _print_actuator_torques(env, env_ids=None) -> None:
   """Print mean/max actuator torque (absolute) for quick debugging during play."""
   asset = env.scene["robot"]
@@ -611,17 +645,17 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
 
   # Wrap all actuators with delay around the measured 1 control-tick latency
   # (20 ms on the real robot, physics dt = 5 ms -> 1 tick = 4 physics steps).
-  # Keep delay mostly stable: previous 0-8 lag with per-step resampling behaved like
-  # high-frequency jitter, which is less realistic than a near-constant transport delay.
-  # Use a narrow 15-25 ms range (3-5 physics steps) and update infrequently.
+  # Keep delay mostly stable: per-step resampling behaves like high-frequency jitter,
+  # which is less realistic than a slowly varying transport delay.
+  # Use a moderate 10-30 ms range (2-6 physics steps) and update infrequently.
   robot_cfg = get_lerobot_humanoid_no_arms_robot_cfg()
   orig_artic = robot_cfg.articulation
   robot_cfg.articulation = EntityArticulationInfoCfg(
     actuators=tuple(
       DelayedActuatorCfg(
         base_cfg=a,
-        delay_min_lag=3,
-        delay_max_lag=5,
+        delay_min_lag=2,
+        delay_max_lag=6,
         delay_update_period=4,
         delay_hold_prob=0.95,
       )
@@ -696,7 +730,8 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
   projected_gravity_term.noise.n_max = 0.015
   joint_pos_term = policy_obs.terms.get("joint_pos")
   if joint_pos_term is not None and getattr(joint_pos_term, "noise", None) is not None:
-    joint_pos_noise_rad = math.radians(4.0)
+    # Keep position corruption present but slightly tighter than before.
+    joint_pos_noise_rad = math.radians(3.0)
     joint_pos_term.noise.n_min = -joint_pos_noise_rad
     joint_pos_term.noise.n_max = joint_pos_noise_rad
   joint_vel_term = policy_obs.terms.get("joint_vel")
@@ -759,6 +794,62 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
       "shared_random": False,
     },
   )
+
+  # Push-recovery training: occasional base-velocity perturbations.
+  push_event = cfg.events.get("push_robot", None)
+  if push_event is not None:
+    push_event.interval_range_s = (10.0, 12.0)
+    push_event.params["velocity_range"] = {
+      "x": (0.0, 0.0),
+      "y": (0.0, 0.0),
+      "z": (0.0, 0.0),
+      "roll": (0.0, 0.0),
+      "pitch": (0.0, 0.0),
+      "yaw": (0.0, 0.0),
+    }
+    cfg.curriculum["push_recovery"] = CurriculumTermCfg(
+      func=_push_recovery_curriculum,
+      params={
+        "ranges_stages": [
+          {
+            "step": 0,
+            "interval_s": (10.0, 12.0),
+            "velocity_range": {
+              "x": (0.0, 0.0),
+              "y": (0.0, 0.0),
+              "z": (0.0, 0.0),
+              "roll": (0.0, 0.0),
+              "pitch": (0.0, 0.0),
+              "yaw": (0.0, 0.0),
+            },
+          },
+          {
+            "step": 8_000 * 24,
+            "interval_s": (6.0, 8.0),
+            "velocity_range": {
+              "x": (-0.10, 0.10),
+              "y": (-0.10, 0.10),
+              "z": (-0.05, 0.05),
+              "roll": (-0.05, 0.05),
+              "pitch": (-0.05, 0.05),
+              "yaw": (-0.10, 0.10),
+            },
+          },
+          {
+            "step": 14_000 * 24,
+            "interval_s": (3.0, 5.0),
+            "velocity_range": {
+              "x": (-0.15, 0.15),
+              "y": (-0.15, 0.15),
+              "z": (-0.08, 0.08),
+              "roll": (-0.08, 0.08),
+              "pitch": (-0.08, 0.08),
+              "yaw": (-0.15, 0.15),
+            },
+          },
+        ]
+      },
+    )
   cfg.curriculum["contact_dr_ranges"] = CurriculumTermCfg(
     func=_contact_dr_ranges_curriculum,
     params={
@@ -797,29 +888,29 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
     "anklex": ("anklex_right", "anklex_left"),
   }
   joint_armature_scales = {
-    "hipz": (0.85, 1.15),
-    "hipx": (0.85, 1.15),
-    "hipy": (0.90, 1.10),
-    "knee": (0.90, 1.10),
+    "hipz": (0.80, 1.20),
+    "hipx": (0.80, 1.20),
+    "hipy": (0.80, 1.20),
+    "knee": (0.80, 1.20),
     "ankley": (0.80, 1.20),
     "anklex": (0.80, 1.20),
   }
   joint_damping_scales = {
-    "hipz": (0.70, 1.40),
-    "hipx": (0.70, 1.40),
-    "hipy": (0.80, 1.30),
-    "knee": (0.80, 1.30),
-    "ankley": (0.60, 1.80),
-    "anklex": (0.60, 1.80),
+    "hipz": (0.80, 1.20),
+    "hipx": (0.80, 1.20),
+    "hipy": (0.80, 1.20),
+    "knee": (0.80, 1.20),
+    "ankley": (0.80, 1.20),
+    "anklex": (0.80, 1.20),
   }
   # "Static friction" approximation at the joint level (MuJoCo frictionloss).
   joint_frictionloss_scales = {
-    "hipz": (0.60, 1.60),
-    "hipx": (0.60, 1.60),
-    "hipy": (0.70, 1.50),
-    "knee": (0.70, 1.50),
-    "ankley": (0.50, 2.00),
-    "anklex": (0.50, 2.00),
+    "hipz": (0.80, 1.20),
+    "hipx": (0.80, 1.20),
+    "hipy": (0.80, 1.20),
+    "knee": (0.80, 1.20),
+    "ankley": (0.80, 1.20),
+    "anklex": (0.80, 1.20),
   }
   for group_name, joint_names in joint_groups.items():
     asset_cfg = SceneEntityCfg("robot", joint_names=list(joint_names))
@@ -885,14 +976,14 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
   }
   cfg.events["base_com"].domain_randomization = True
 
-  # Mass: +/- 15% per body.
+  # Mass: +/- 20% per body.
   cfg.events["body_mass"] = EventTermCfg(
     func=envs_mdp.randomize_field,
     mode="startup",
     domain_randomization=True,
     params={
       "field": "body_mass",
-      "ranges": (0.85, 1.15),
+      "ranges": (0.80, 1.20),
       "operation": "scale",
       "asset_cfg": SceneEntityCfg("robot", body_names=dr_body_names),
     },
@@ -903,7 +994,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
     domain_randomization=True,
     params={
       "field": "body_inertia",
-      "ranges": (0.85, 1.15),
+      "ranges": (0.80, 1.20),
       "operation": "scale",
       "asset_cfg": SceneEntityCfg("robot", body_names=dr_body_names),
     },
@@ -1114,6 +1205,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
 
     cfg.observations["policy"].enable_corruption = False
     cfg.events.pop("push_robot", None)
+    cfg.curriculum.pop("push_recovery", None)
     cfg.events["randomize_terrain"] = EventTermCfg(
       func=envs_mdp.randomize_terrain,
       mode="reset",
