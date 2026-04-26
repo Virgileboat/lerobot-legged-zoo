@@ -1,6 +1,7 @@
 """LeRobot Humanoid velocity environment configurations."""
 
 import csv
+from copy import deepcopy
 import json
 import math
 import re
@@ -719,6 +720,11 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
 
   # Stronger observation randomization for sim-to-real robustness.
   policy_obs = cfg.observations["policy"]
+  # Base velocity cfg builds critic terms from policy terms; clone policy terms that
+  # we customize so policy-only history settings do not leak into critic.
+  for term_name in ("projected_gravity", "joint_pos", "joint_vel", "actions"):
+    if term_name in policy_obs.terms:
+      policy_obs.terms[term_name] = deepcopy(policy_obs.terms[term_name])
   base_lin_vel_term = policy_obs.terms.get("base_lin_vel")
   if base_lin_vel_term is not None and getattr(base_lin_vel_term, "noise", None) is not None:
     base_lin_vel_term.noise.n_min = -0.075
@@ -726,8 +732,10 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
   policy_obs.terms.pop("base_lin_vel", None)
   policy_obs.terms.pop("base_ang_vel", None)
   projected_gravity_term = policy_obs.terms.get("projected_gravity")
-  projected_gravity_term.noise.n_min = -0.015
-  projected_gravity_term.noise.n_max = 0.015
+  projected_gravity_term.noise.n_min = -0.012
+  projected_gravity_term.noise.n_max = 0.012
+  projected_gravity_term.history_length = 3
+  projected_gravity_term.flatten_history_dim = True
   joint_pos_term = policy_obs.terms.get("joint_pos")
   if joint_pos_term is not None and getattr(joint_pos_term, "noise", None) is not None:
     # Keep position corruption present but slightly tighter than before.
@@ -740,6 +748,12 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
   joint_vel_noise_rad_s = 20.0 * math.pi / 180.0
   joint_vel_term.noise.n_min = -joint_vel_noise_rad_s
   joint_vel_term.noise.n_max = joint_vel_noise_rad_s
+  joint_vel_term.history_length = 3
+  joint_vel_term.flatten_history_dim = True
+  actions_term = policy_obs.terms.get("actions")
+  if actions_term is not None:
+    actions_term.history_length = 3
+    actions_term.flatten_history_dim = True
   # Joint torques with noise (sim2real: real actuators have torque measurement noise).
   if torque_obs:
     policy_obs.terms["joint_torques"] = ObservationTermCfg(
