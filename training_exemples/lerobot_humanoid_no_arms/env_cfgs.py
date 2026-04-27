@@ -583,40 +583,6 @@ def _contact_dr_ranges_curriculum(
   }
 
 
-def _push_recovery_curriculum(
-  env,
-  env_ids,
-  ranges_stages: list[dict[str, Any]],
-) -> dict[str, torch.Tensor]:
-  """Ramp push disturbances after gait emergence."""
-
-  del env_ids  # Global schedule based on common training step.
-  step = int(env.common_step_counter)
-  stage = ranges_stages[0]
-  for candidate in ranges_stages:
-    if step >= int(candidate["step"]):
-      stage = candidate
-
-  push_event = env.event_manager.get_term_cfg("push_robot")
-  push_event.interval_range_s = tuple(stage["interval_s"])
-  push_event.params["velocity_range"] = {
-    axis: tuple(lims)
-    for axis, lims in stage["velocity_range"].items()
-  }
-
-  vel = stage["velocity_range"]
-  return {
-    "push_interval_min_s": torch.tensor(stage["interval_s"][0], dtype=torch.float),
-    "push_interval_max_s": torch.tensor(stage["interval_s"][1], dtype=torch.float),
-    "push_abs_x": torch.tensor(abs(vel["x"][1]), dtype=torch.float),
-    "push_abs_y": torch.tensor(abs(vel["y"][1]), dtype=torch.float),
-    "push_abs_z": torch.tensor(abs(vel["z"][1]), dtype=torch.float),
-    "push_abs_roll": torch.tensor(abs(vel["roll"][1]), dtype=torch.float),
-    "push_abs_pitch": torch.tensor(abs(vel["pitch"][1]), dtype=torch.float),
-    "push_abs_yaw": torch.tensor(abs(vel["yaw"][1]), dtype=torch.float),
-  }
-
-
 def _print_actuator_torques(env, env_ids=None) -> None:
   """Print mean/max actuator torque (absolute) for quick debugging during play."""
   asset = env.scene["robot"]
@@ -734,7 +700,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
   projected_gravity_term = policy_obs.terms.get("projected_gravity")
   projected_gravity_term.noise.n_min = -0.012
   projected_gravity_term.noise.n_max = 0.012
-  projected_gravity_term.history_length = 3
+  projected_gravity_term.history_length = 0
   projected_gravity_term.flatten_history_dim = True
   joint_pos_term = policy_obs.terms.get("joint_pos")
   if joint_pos_term is not None and getattr(joint_pos_term, "noise", None) is not None:
@@ -748,11 +714,11 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
   joint_vel_noise_rad_s = 20.0 * math.pi / 180.0
   joint_vel_term.noise.n_min = -joint_vel_noise_rad_s
   joint_vel_term.noise.n_max = joint_vel_noise_rad_s
-  joint_vel_term.history_length = 3
+  joint_vel_term.history_length = 0
   joint_vel_term.flatten_history_dim = True
   actions_term = policy_obs.terms.get("actions")
   if actions_term is not None:
-    actions_term.history_length = 3
+    actions_term.history_length = 0
     actions_term.flatten_history_dim = True
   # Joint torques with noise (sim2real: real actuators have torque measurement noise).
   if torque_obs:
@@ -809,61 +775,6 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
     },
   )
 
-  # Push-recovery training: occasional base-velocity perturbations.
-  push_event = cfg.events.get("push_robot", None)
-  if push_event is not None:
-    push_event.interval_range_s = (10.0, 12.0)
-    push_event.params["velocity_range"] = {
-      "x": (0.0, 0.0),
-      "y": (0.0, 0.0),
-      "z": (0.0, 0.0),
-      "roll": (0.0, 0.0),
-      "pitch": (0.0, 0.0),
-      "yaw": (0.0, 0.0),
-    }
-    cfg.curriculum["push_recovery"] = CurriculumTermCfg(
-      func=_push_recovery_curriculum,
-      params={
-        "ranges_stages": [
-          {
-            "step": 0,
-            "interval_s": (10.0, 12.0),
-            "velocity_range": {
-              "x": (0.0, 0.0),
-              "y": (0.0, 0.0),
-              "z": (0.0, 0.0),
-              "roll": (0.0, 0.0),
-              "pitch": (0.0, 0.0),
-              "yaw": (0.0, 0.0),
-            },
-          },
-          {
-            "step": 8_000 * 24,
-            "interval_s": (6.0, 8.0),
-            "velocity_range": {
-              "x": (-0.10, 0.10),
-              "y": (-0.10, 0.10),
-              "z": (-0.05, 0.05),
-              "roll": (-0.05, 0.05),
-              "pitch": (-0.05, 0.05),
-              "yaw": (-0.10, 0.10),
-            },
-          },
-          {
-            "step": 14_000 * 24,
-            "interval_s": (3.0, 5.0),
-            "velocity_range": {
-              "x": (-0.15, 0.15),
-              "y": (-0.15, 0.15),
-              "z": (-0.08, 0.08),
-              "roll": (-0.08, 0.08),
-              "pitch": (-0.08, 0.08),
-              "yaw": (-0.15, 0.15),
-            },
-          },
-        ]
-      },
-    )
   cfg.curriculum["contact_dr_ranges"] = CurriculumTermCfg(
     func=_contact_dr_ranges_curriculum,
     params={
@@ -1220,11 +1131,17 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
     cfg.observations["policy"].enable_corruption = False
     cfg.events.pop("push_robot", None)
     cfg.curriculum.pop("push_recovery", None)
-    cfg.events["randomize_terrain"] = EventTermCfg(
-      func=envs_mdp.randomize_terrain,
-      mode="reset",
-      params={},
-    )
+    # Keep play mode diagnostic and repeatable: disable domain-randomized events.
+    for event_name in list(cfg.events.keys()):
+      if event_name in ("reset_base", "reset_robot_joints"):
+        continue
+      event_cfg = cfg.events[event_name]
+      if getattr(event_cfg, "domain_randomization", False):
+        cfg.events.pop(event_name, None)
+    # Encoder bias is a startup perturbation (not tagged as domain_randomization).
+    cfg.events.pop("encoder_bias", None)
+    # Remove DR curriculum terms tied to removed events.
+    cfg.curriculum.pop("contact_dr_ranges", None)
 
     if cfg.scene.terrain is not None:
       if cfg.scene.terrain.terrain_generator is not None:
