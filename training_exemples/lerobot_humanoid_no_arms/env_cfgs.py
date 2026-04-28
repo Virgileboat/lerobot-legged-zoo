@@ -316,6 +316,28 @@ class _ActionFftBandRatioReward:
     count[env_ids] = 0
 
 
+def _find_right_left_foot_site_indices(env) -> tuple[int, int] | None:
+  """Resolve world-space foot site indices as (right_idx, left_idx)."""
+  asset = env.scene["robot"]
+  site_names = getattr(asset, "site_names", None)
+  if site_names:
+    right_idx = None
+    left_idx = None
+    for i, site_name in enumerate(site_names):
+      lower_name = site_name.lower()
+      if right_idx is None and ("foot_right" in lower_name or "right_foot" in lower_name):
+        right_idx = i
+      if left_idx is None and ("foot_left" in lower_name or "left_foot" in lower_name):
+        left_idx = i
+    if right_idx is not None and left_idx is not None:
+      return right_idx, left_idx
+  # Fallback for legacy MJCF ordering (torso=0, foot_right=1, foot_left=2).
+  # Keeping this fallback avoids silently zeroing the reward if site names change.
+  if asset.data.site_pos_w.shape[1] >= 3:
+    return 1, 2
+  return None
+
+
 class _BilateralSymmetryReward:
   """Penalize bilateral asymmetry from world-space foot trajectories.
 
@@ -329,26 +351,6 @@ class _BilateralSymmetryReward:
   def __init__(self) -> None:
     self._state_by_env: dict[int, dict[str, Any]] = {}
     self._last_env_key: int | None = None
-
-  def _find_site_indices(self, env) -> tuple[int, int] | None:
-    asset = env.scene["robot"]
-    site_names = getattr(asset, "site_names", None)
-    if site_names:
-      right_idx = None
-      left_idx = None
-      for i, site_name in enumerate(site_names):
-        lower_name = site_name.lower()
-        if right_idx is None and ("foot_right" in lower_name or "right_foot" in lower_name):
-          right_idx = i
-        if left_idx is None and ("foot_left" in lower_name or "left_foot" in lower_name):
-          left_idx = i
-      if right_idx is not None and left_idx is not None:
-        return right_idx, left_idx
-    # Fallback for legacy MJCF ordering (torso=0, foot_right=1, foot_left=2).
-    # Keeping this fallback avoids silently zeroing the reward if site names change.
-    if asset.data.site_pos_w.shape[1] >= 3:
-      return 1, 2
-    return None
 
   def __call__(
     self,
@@ -374,7 +376,7 @@ class _BilateralSymmetryReward:
       )
       if needs_init:
         state = {
-          "site_ids": self._find_site_indices(env),
+          "site_ids": _find_right_left_foot_site_indices(env),
           "buf": torch.zeros(
             (N, history_len, 2, 3),
             device=site_pos_w.device,
@@ -465,10 +467,138 @@ class _BilateralSymmetryReward:
     count[env_ids] = 0
 
 
+class _FootLeadAlternationReward:
+  """Encourage lead-foot alternation during forward locomotion.
+
+  The reward combines:
+  - a discrete bonus when the lead foot swaps in +x/-x,
+  - a small dense bonus for maintaining non-zero fore-aft foot separation,
+  - a penalty if the same foot stays in front for too many steps.
+  """
+
+  def __init__(self) -> None:
+    self._state_by_env: dict[int, dict[str, Any]] = {}
+    self._last_env_key: int | None = None
+
+  def __call__(
+    self,
+    env,
+    lead_margin: float = 0.02,
+    target_separation: float = 0.08,
+    max_same_lead_steps: int = 20,
+    min_forward_cmd: float = 0.15,
+    forward_cmd_full: float = 0.60,
+    lateral_cmd_scale: float = 1.0,
+  ) -> torch.Tensor:
+    try:
+      asset = env.scene["robot"]
+      site_pos_w = asset.data.site_pos_w  # [N, num_sites, 3]
+      N = site_pos_w.shape[0]
+      env_key = id(env)
+      self._last_env_key = env_key
+
+      state = self._state_by_env.get(env_key)
+      needs_init = (
+        state is None
+        or state["prev_lead_sign"].shape[0] != N
+        or state["prev_lead_sign"].device != site_pos_w.device
+      )
+      if needs_init:
+        state = {
+          "site_ids": _find_right_left_foot_site_indices(env),
+          "prev_lead_sign": torch.zeros(N, device=site_pos_w.device, dtype=torch.int8),
+          "steps_same_lead": torch.zeros(N, device=site_pos_w.device, dtype=torch.long),
+          "initialized": torch.zeros(N, device=site_pos_w.device, dtype=torch.bool),
+        }
+        self._state_by_env[env_key] = state
+
+      site_ids = state["site_ids"]
+      if site_ids is None:
+        return torch.zeros(N, device=site_pos_w.device, dtype=site_pos_w.dtype)
+      right_idx, left_idx = site_ids
+      if max(right_idx, left_idx) >= site_pos_w.shape[1]:
+        return torch.zeros(N, device=site_pos_w.device, dtype=site_pos_w.dtype)
+
+      right_x = site_pos_w[:, right_idx, 0]
+      left_x = site_pos_w[:, left_idx, 0]
+      delta_x = right_x - left_x
+
+      lead_sign = torch.zeros(N, device=site_pos_w.device, dtype=torch.int8)
+      lead_sign = torch.where(delta_x > lead_margin, torch.ones_like(lead_sign), lead_sign)
+      lead_sign = torch.where(delta_x < -lead_margin, -torch.ones_like(lead_sign), lead_sign)
+
+      prev_lead_sign = state["prev_lead_sign"]
+      initialized = state["initialized"]
+      switched = initialized & (lead_sign != 0) & (prev_lead_sign != 0) & (lead_sign != prev_lead_sign)
+
+      cmd = env.command_manager.get_command("twist")
+      if cmd is not None:
+        forward_mag = cmd[:, 0].abs()
+        forward_ramp = max(float(forward_cmd_full) - float(min_forward_cmd), 1e-6)
+        forward_gate = ((forward_mag - float(min_forward_cmd)) / forward_ramp).clamp(
+          min=0.0, max=1.0
+        )
+        lateral_gate = (1.0 - cmd[:, 1].abs() / max(float(lateral_cmd_scale), 1e-6)).clamp(
+          min=0.0
+        )
+        active = forward_gate * lateral_gate
+      else:
+        active = torch.ones(N, device=site_pos_w.device, dtype=site_pos_w.dtype)
+
+      should_count = (lead_sign != 0) & (active > 0.0)
+      steps_same_lead = state["steps_same_lead"]
+      steps_same_lead = torch.where(
+        should_count, steps_same_lead + 1, torch.zeros_like(steps_same_lead)
+      )
+      steps_same_lead = torch.where(switched, torch.zeros_like(steps_same_lead), steps_same_lead)
+      state["steps_same_lead"] = steps_same_lead
+
+      # Update remembered lead sign only when outside dead-zone.
+      state["prev_lead_sign"] = torch.where(lead_sign != 0, lead_sign, prev_lead_sign)
+      state["initialized"] = initialized | (lead_sign != 0)
+
+      switch_bonus = switched.to(site_pos_w.dtype)
+      sep_denom = max(float(target_separation) - float(lead_margin), 1e-6)
+      separation_bonus = ((delta_x.abs() - float(lead_margin)) / sep_denom).clamp(
+        min=0.0, max=1.0
+      )
+      stale_penalty = (
+        (steps_same_lead.to(site_pos_w.dtype) - float(max_same_lead_steps))
+        / max(float(max_same_lead_steps), 1.0)
+      ).clamp(min=0.0, max=1.0)
+
+      reward = (switch_bonus + 0.25 * separation_bonus - stale_penalty) * active
+      return reward
+
+    except Exception:
+      traceback.print_exc()
+      N = env.num_envs if hasattr(env, "num_envs") else env.action_manager.action.shape[0]
+      return torch.zeros(N, device=env.action_manager.action.device)
+
+  def reset(self, env_ids: torch.Tensor | slice | None = None) -> None:
+    if self._last_env_key is None:
+      return
+    state = self._state_by_env.get(self._last_env_key)
+    if state is None:
+      return
+    prev_lead_sign = state["prev_lead_sign"]
+    steps_same_lead = state["steps_same_lead"]
+    initialized = state["initialized"]
+    if env_ids is None or isinstance(env_ids, slice):
+      prev_lead_sign.zero_()
+      steps_same_lead.zero_()
+      initialized.zero_()
+      return
+    prev_lead_sign[env_ids] = 0
+    steps_same_lead[env_ids] = 0
+    initialized[env_ids] = False
+
+
 _ACTION_FFT_BAND_RATIO_REWARD = _ActionFftBandRatioReward()
 _SELECTIVE_ACTION_RATE_L2_PENALTY = _SelectiveActionRateL2Penalty()
 _SELECTIVE_JOINT_LIMIT_MARGIN_PENALTY = _SelectiveJointLimitMarginPenalty()
 _BILATERAL_SYMMETRY_REWARD = _BilateralSymmetryReward()
+_FOOT_LEAD_ALTERNATION_REWARD = _FootLeadAlternationReward()
 
 
 def _flatten_obs_policy(
@@ -614,15 +744,15 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
   # (20 ms on the real robot, physics dt = 5 ms -> 1 tick = 4 physics steps).
   # Keep delay mostly stable: per-step resampling behaves like high-frequency jitter,
   # which is less realistic than a slowly varying transport delay.
-  # Use a moderate 10-30 ms range (2-6 physics steps) and update infrequently.
+  # Use a moderate 5-35 ms range (1-7 physics steps) and update infrequently.
   robot_cfg = get_lerobot_humanoid_no_arms_robot_cfg()
   orig_artic = robot_cfg.articulation
   robot_cfg.articulation = EntityArticulationInfoCfg(
     actuators=tuple(
       DelayedActuatorCfg(
         base_cfg=a,
-        delay_min_lag=2,
-        delay_max_lag=6,
+        delay_min_lag=1,
+        delay_max_lag=7,
         delay_update_period=4,
         delay_hold_prob=0.95,
       )
@@ -742,10 +872,9 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
   # Domain Randomization: Contact Parameters
   # ---------------------------------------------------------------------------
   cfg.events["foot_friction"].params["asset_cfg"].geom_names = geom_names
-  # Randomize around the identified baseline (mu ~= 0.6) with a narrower band.
-  # This follows the training doc guidance: start from a validated baseline and
-  # avoid overly broad contact DR that can block learning.
-  cfg.events["foot_friction"].params["ranges"] = (0.52, 0.75)  # geom_friction[0]
+  # Randomize around measured hardware slip behavior while keeping a higher
+  # upper bound for robustness to grippier real terrains/materials.
+  cfg.events["foot_friction"].params["ranges"] = (0.24, 0.75)  # geom_friction[0]
   # Keep feet independent to model real left/right contact asymmetries.
   cfg.events["foot_friction"].params["shared_random"] = False
   cfg.events["foot_friction"].mode = "reset"
@@ -781,19 +910,19 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
       "ranges_stages": [
         {
           "step": 0,
-          "mu": (0.52, 0.75),
+          "mu": (0.24, 0.75),
           "torsional": (0.004, 0.009),
           "rolling": (0.00008, 0.00025),
         },
         {
           "step": 7_500 * 24,
-          "mu": (0.48, 0.84),
+          "mu": (0.22, 0.84),
           "torsional": (0.0035, 0.0105),
           "rolling": (0.00006, 0.00033),
         },
         {
           "step": 15_000 * 24,
-          "mu": (0.45, 0.90),
+          "mu": (0.20, 0.90),
           "torsional": (0.003, 0.012),
           "rolling": (0.00005, 0.00040),
         },
@@ -1017,6 +1146,24 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
       "lateral_cmd_scale": 1.0,
     },
   )
+  cfg.rewards["foot_lead_alternation"] = RewardTermCfg(
+    func=_FOOT_LEAD_ALTERNATION_REWARD,
+    # Keep initial weight low: this term shapes step ordering and cadence, but
+    # too much pressure early can suppress gait exploration.
+    weight=0.05,
+    params={
+      # Lead-change is counted only after one foot gets ahead by this margin.
+      "lead_margin": 0.02,
+      # Approximate desired front/back stance gap during forward walking.
+      "target_separation": 0.08,
+      # Avoid one-foot-leading "shuffle" by forcing periodic lead swaps.
+      "max_same_lead_steps": 20,
+      # Activate mainly during meaningful forward commands.
+      "min_forward_cmd": 0.15,
+      "forward_cmd_full": 0.60,
+      "lateral_cmd_scale": 1.0,
+    },
+  )
   cfg.rewards["action_rate_l2"].weight = -0.1
   # Additional smoothness/effort regularizers (kept conservative and ramped via
   # curriculum below so they do not block early task learning).
@@ -1105,6 +1252,18 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
         {"step": 7_500 * 24, "weight": 0.35},
         {"step": 12_500 * 24, "weight": 0.5},
         {"step": 17_500 * 24, "weight": 0.7},
+      ],
+    },
+  )
+  cfg.curriculum["foot_lead_alternation_weight"] = CurriculumTermCfg(
+    func=mdp.reward_weight,
+    params={
+      "reward_name": "foot_lead_alternation",
+      "weight_stages": [
+        {"step": 0, "weight": 0.05},
+        {"step": 7_500 * 24, "weight": 0.12},
+        {"step": 12_500 * 24, "weight": 0.20},
+        {"step": 17_500 * 24, "weight": 0.30},
       ],
     },
   )
