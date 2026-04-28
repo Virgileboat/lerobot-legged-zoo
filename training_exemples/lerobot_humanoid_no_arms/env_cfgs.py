@@ -700,7 +700,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
   projected_gravity_term = policy_obs.terms.get("projected_gravity")
   projected_gravity_term.noise.n_min = -0.012
   projected_gravity_term.noise.n_max = 0.012
-  projected_gravity_term.history_length = 0
+  projected_gravity_term.history_length = 3
   projected_gravity_term.flatten_history_dim = True
   joint_pos_term = policy_obs.terms.get("joint_pos")
   if joint_pos_term is not None and getattr(joint_pos_term, "noise", None) is not None:
@@ -714,11 +714,11 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
   joint_vel_noise_rad_s = 20.0 * math.pi / 180.0
   joint_vel_term.noise.n_min = -joint_vel_noise_rad_s
   joint_vel_term.noise.n_max = joint_vel_noise_rad_s
-  joint_vel_term.history_length = 0
+  joint_vel_term.history_length = 3
   joint_vel_term.flatten_history_dim = True
   actions_term = policy_obs.terms.get("actions")
   if actions_term is not None:
-    actions_term.history_length = 0
+    actions_term.history_length = 3
     actions_term.flatten_history_dim = True
   # Joint torques with noise (sim2real: real actuators have torque measurement noise).
   if torque_obs:
