@@ -594,11 +594,167 @@ class _FootLeadAlternationReward:
     initialized[env_ids] = False
 
 
+class _BilateralTorqueBalanceReward:
+  """Penalize sustained left/right torque-energy imbalance between legs.
+
+  Uses actuator torque squared (tau^2) as a proxy for effort and compares
+  right-vs-left rolling averages over a short history window.
+  """
+
+  def __init__(self) -> None:
+    self._state_by_env: dict[int, dict[str, Any]] = {}
+    self._last_env_key: int | None = None
+
+  def _resolve_leg_indices(
+    self,
+    env,
+    num_actuators: int,
+    device: torch.device,
+  ) -> tuple[torch.Tensor, torch.Tensor]:
+    asset = env.scene["robot"]
+    candidate_name_lists = [
+      ("actuator_names", getattr(asset, "actuator_names", None)),
+      ("joint_names", getattr(asset, "joint_names", None)),
+      ("dof_names", getattr(asset, "dof_names", None)),
+    ]
+
+    checked_sources: list[str] = []
+    for source_name, names in candidate_name_lists:
+      if names is None or len(names) != num_actuators:
+        size = "None" if names is None else str(len(names))
+        checked_sources.append(f"{source_name}={size}")
+        continue
+      checked_sources.append(f"{source_name}={len(names)}")
+      right_ids: list[int] = []
+      left_ids: list[int] = []
+      for i, name in enumerate(names):
+        lname = str(name).lower()
+        if "_right" in lname or lname.endswith("right"):
+          right_ids.append(i)
+        elif "_left" in lname or lname.endswith("left"):
+          left_ids.append(i)
+      if right_ids and left_ids:
+        return (
+          torch.tensor(right_ids, dtype=torch.long, device=device),
+          torch.tensor(left_ids, dtype=torch.long, device=device),
+        )
+
+    raise ValueError(
+      "Could not resolve left/right actuator indices for torque balance. "
+      f"num_actuators={num_actuators}, checked sources: {', '.join(checked_sources)}."
+    )
+
+  def __call__(
+    self,
+    env,
+    history_len: int = 40,
+    min_history: int = 20,
+    epsilon: float = 1e-6,
+  ) -> torch.Tensor:
+    try:
+      torques = env.scene["robot"].data.actuator_force
+      if history_len < 1:
+        raise ValueError(f"history_len must be >= 1, got {history_len}")
+      env_key = id(env)
+      self._last_env_key = env_key
+
+      state = self._state_by_env.get(env_key)
+      needs_init = (
+        state is None
+        or state["buf"].shape[0] != torques.shape[0]
+        or state["buf"].shape[1] != history_len
+        or state["buf"].device != torques.device
+        or state["buf"].dtype != torques.dtype
+        or state["num_actuators"] != torques.shape[1]
+      )
+      if needs_init:
+        right_ids, left_ids = self._resolve_leg_indices(
+          env=env,
+          num_actuators=torques.shape[1],
+          device=torques.device,
+        )
+        state = {
+          "right_ids": right_ids,
+          "left_ids": left_ids,
+          "num_actuators": torques.shape[1],
+          "buf": torch.zeros(
+            (torques.shape[0], history_len, 2),
+            device=torques.device,
+            dtype=torques.dtype,
+          ),
+          "pos": 0,
+          "count": torch.zeros(torques.shape[0], device=torques.device, dtype=torch.long),
+        }
+        self._state_by_env[env_key] = state
+
+      right_ids = state["right_ids"]
+      left_ids = state["left_ids"]
+      if right_ids.numel() == 0 or left_ids.numel() == 0:
+        return torch.zeros(torques.shape[0], device=torques.device, dtype=torques.dtype)
+      if (
+        int(right_ids.max().item()) >= torques.shape[1]
+        or int(left_ids.max().item()) >= torques.shape[1]
+      ):
+        return torch.zeros(torques.shape[0], device=torques.device, dtype=torques.dtype)
+
+      right_energy = torques[:, right_ids].square().sum(dim=1)
+      left_energy = torques[:, left_ids].square().sum(dim=1)
+
+      buf = state["buf"]
+      pos = int(state["pos"])
+      count = state["count"]
+      buf[:, pos, 0] = right_energy
+      buf[:, pos, 1] = left_energy
+      state["pos"] = (pos + 1) % history_len
+      count.add_(1).clamp_(max=history_len)
+
+      idx = torch.tensor(
+        [((state["pos"] - history_len + i) % history_len) for i in range(history_len)],
+        device=torques.device,
+        dtype=torch.long,
+      )
+      hist = buf.index_select(1, idx)
+      denom = count.clamp(min=1).to(torques.dtype)
+      right_avg = hist[:, :, 0].sum(dim=1) / denom
+      left_avg = hist[:, :, 1].sum(dim=1) / denom
+      eps = max(float(epsilon), 1e-12)
+      imbalance = (right_avg - left_avg).abs() / (right_avg + left_avg + eps)
+
+      if min_history > 0:
+        ready = count >= min(min_history, history_len)
+        imbalance = torch.where(ready, imbalance, torch.zeros_like(imbalance))
+
+      # This term is a penalty; reward manager multiplies by a positive weight.
+      return -imbalance
+
+    except Exception:
+      traceback.print_exc()
+      N = env.num_envs if hasattr(env, "num_envs") else env.action_manager.action.shape[0]
+      return torch.zeros(N, device=env.action_manager.action.device)
+
+  def reset(self, env_ids: torch.Tensor | slice | None = None) -> None:
+    if self._last_env_key is None:
+      return
+    state = self._state_by_env.get(self._last_env_key)
+    if state is None:
+      return
+    buf = state["buf"]
+    count = state["count"]
+    if env_ids is None or isinstance(env_ids, slice):
+      buf.zero_()
+      count.zero_()
+      state["pos"] = 0
+      return
+    buf[env_ids] = 0.0
+    count[env_ids] = 0
+
+
 _ACTION_FFT_BAND_RATIO_REWARD = _ActionFftBandRatioReward()
 _SELECTIVE_ACTION_RATE_L2_PENALTY = _SelectiveActionRateL2Penalty()
 _SELECTIVE_JOINT_LIMIT_MARGIN_PENALTY = _SelectiveJointLimitMarginPenalty()
 _BILATERAL_SYMMETRY_REWARD = _BilateralSymmetryReward()
 _FOOT_LEAD_ALTERNATION_REWARD = _FootLeadAlternationReward()
+_BILATERAL_TORQUE_BALANCE_REWARD = _BilateralTorqueBalanceReward()
 
 
 def _flatten_obs_policy(
@@ -830,12 +986,12 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
   projected_gravity_term = policy_obs.terms.get("projected_gravity")
   projected_gravity_term.noise.n_min = -0.012
   projected_gravity_term.noise.n_max = 0.012
-  projected_gravity_term.history_length = 3
+  projected_gravity_term.history_length = 0
   projected_gravity_term.flatten_history_dim = True
   joint_pos_term = policy_obs.terms.get("joint_pos")
   if joint_pos_term is not None and getattr(joint_pos_term, "noise", None) is not None:
-    # Keep position corruption present but slightly tighter than before.
-    joint_pos_noise_rad = math.radians(3.0)
+    # Keep position corruption present but tighter to match runtime behavior.
+    joint_pos_noise_rad = math.radians(1.0)
     joint_pos_term.noise.n_min = -joint_pos_noise_rad
     joint_pos_term.noise.n_max = joint_pos_noise_rad
   joint_vel_term = policy_obs.terms.get("joint_vel")
@@ -844,11 +1000,11 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
   joint_vel_noise_rad_s = 20.0 * math.pi / 180.0
   joint_vel_term.noise.n_min = -joint_vel_noise_rad_s
   joint_vel_term.noise.n_max = joint_vel_noise_rad_s
-  joint_vel_term.history_length = 3
+  joint_vel_term.history_length = 0
   joint_vel_term.flatten_history_dim = True
   actions_term = policy_obs.terms.get("actions")
   if actions_term is not None:
-    actions_term.history_length = 3
+    actions_term.history_length = 0
     actions_term.flatten_history_dim = True
   # Joint torques with noise (sim2real: real actuators have torque measurement noise).
   if torque_obs:
@@ -874,7 +1030,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
   cfg.events["foot_friction"].params["asset_cfg"].geom_names = geom_names
   # Randomize around measured hardware slip behavior while keeping a higher
   # upper bound for robustness to grippier real terrains/materials.
-  cfg.events["foot_friction"].params["ranges"] = (0.24, 0.75)  # geom_friction[0]
+  cfg.events["foot_friction"].params["ranges"] = (0.52, 0.75)  # geom_friction[0]
   # Keep feet independent to model real left/right contact asymmetries.
   cfg.events["foot_friction"].params["shared_random"] = False
   cfg.events["foot_friction"].mode = "reset"
@@ -910,19 +1066,19 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
       "ranges_stages": [
         {
           "step": 0,
-          "mu": (0.24, 0.75),
+          "mu": (0.52, 0.75),
           "torsional": (0.004, 0.009),
           "rolling": (0.00008, 0.00025),
         },
         {
           "step": 7_500 * 24,
-          "mu": (0.22, 0.84),
+          "mu": (0.48, 0.84),
           "torsional": (0.0035, 0.0105),
           "rolling": (0.00006, 0.00033),
         },
         {
           "step": 15_000 * 24,
-          "mu": (0.20, 0.90),
+          "mu": (0.45, 0.90),
           "torsional": (0.003, 0.012),
           "rolling": (0.00005, 0.00040),
         },
@@ -1146,22 +1302,15 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
       "lateral_cmd_scale": 1.0,
     },
   )
-  cfg.rewards["foot_lead_alternation"] = RewardTermCfg(
-    func=_FOOT_LEAD_ALTERNATION_REWARD,
-    # Keep initial weight low: this term shapes step ordering and cadence, but
-    # too much pressure early can suppress gait exploration.
-    weight=0.05,
+  cfg.rewards["bilateral_torque_balance"] = RewardTermCfg(
+    func=_BILATERAL_TORQUE_BALANCE_REWARD,
+    weight=0.0,
     params={
-      # Lead-change is counted only after one foot gets ahead by this margin.
-      "lead_margin": 0.02,
-      # Approximate desired front/back stance gap during forward walking.
-      "target_separation": 0.08,
-      # Avoid one-foot-leading "shuffle" by forcing periodic lead swaps.
-      "max_same_lead_steps": 20,
-      # Activate mainly during meaningful forward commands.
-      "min_forward_cmd": 0.15,
-      "forward_cmd_full": 0.60,
-      "lateral_cmd_scale": 1.0,
+      # Smooth over roughly one gait sub-phase to avoid penalizing normal
+      # stance/swing alternation at each single timestep.
+      "history_len": 40,
+      "min_history": 20,
+      "epsilon": 1e-6,
     },
   )
   cfg.rewards["action_rate_l2"].weight = -0.1
@@ -1255,19 +1404,18 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
       ],
     },
   )
-  cfg.curriculum["foot_lead_alternation_weight"] = CurriculumTermCfg(
+  cfg.curriculum["bilateral_torque_balance_weight"] = CurriculumTermCfg(
     func=mdp.reward_weight,
     params={
-      "reward_name": "foot_lead_alternation",
+      "reward_name": "bilateral_torque_balance",
       "weight_stages": [
-        {"step": 0, "weight": 0.05},
-        {"step": 7_500 * 24, "weight": 0.12},
-        {"step": 12_500 * 24, "weight": 0.20},
-        {"step": 17_500 * 24, "weight": 0.30},
+        {"step": 0, "weight": 0.0},
+        {"step": 7_500 * 24, "weight": 0.05},
+        {"step": 12_500 * 24, "weight": 0.10},
+        {"step": 17_500 * 24, "weight": 0.15},
       ],
     },
   )
-
   cfg.rewards["self_collisions"] = RewardTermCfg(
     func=mdp.self_collision_cost,
     weight=-1.0,
