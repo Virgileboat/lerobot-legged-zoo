@@ -1327,6 +1327,11 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
     weight=-0.5,
     params={"joint_name_patterns": (r".*hipz.*", r".*hipx.*")},
   )
+  cfg.rewards["action_rate_ankle_l2"] = RewardTermCfg(
+    func=_SELECTIVE_ACTION_RATE_L2_PENALTY,
+    weight=-0.1,
+    params={"joint_name_patterns": (r".*ankley.*", r".*anklex.*")},
+  )
   cfg.curriculum.pop("pose_weight", None)
   cfg.curriculum["action_rate_weight"] = CurriculumTermCfg(
     func=mdp.reward_weight,
@@ -1351,6 +1356,18 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
         {"step": 5_000 * 24, "weight": -0.01},
         {"step": 10_000 * 24, "weight": -0.02},
         {"step": 15_000 * 24, "weight": -0.03},
+      ],
+    },
+  )
+  cfg.curriculum["action_rate_ankle_weight"] = CurriculumTermCfg(
+    func=mdp.reward_weight,
+    params={
+      "reward_name": "action_rate_ankle_l2",
+      "weight_stages": [
+        {"step": 0, "weight": -0.02},
+        {"step": 5_000 * 24, "weight": -0.05},
+        {"step": 10_000 * 24, "weight": -0.08},
+        {"step": 15_000 * 24, "weight": -0.1},
       ],
     },
   )
