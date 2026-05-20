@@ -1184,6 +1184,7 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
     1: (-0.03, 0.03),
     2: (-0.03, 0.03),
   }
+  cfg.events["base_com"].mode = "reset"
   cfg.events["base_com"].domain_randomization = True
 
   # Mass: +/- 20% per body.
