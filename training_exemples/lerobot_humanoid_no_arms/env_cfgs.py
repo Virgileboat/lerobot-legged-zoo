@@ -1408,6 +1408,19 @@ def lerobot_humanoid_no_arms_rough_env_cfg(play: bool = False, torque_obs: bool 
       ],
     },
   )
+  cfg.curriculum["soft_landing_weight"] = CurriculumTermCfg(
+    func=mdp.reward_weight,
+    params={
+      "reward_name": "soft_landing",
+      # Ramp impact penalty after initial gait discovery.
+      "weight_stages": [
+        {"step": 0, "weight": -1e-5},
+        {"step": 5_000 * 24, "weight": -2e-5},
+        {"step": 10_000 * 24, "weight": -4e-5},
+        {"step": 15_000 * 24, "weight": -8e-5},
+      ],
+    },
+  )
   cfg.curriculum["bilateral_symmetry_weight"] = CurriculumTermCfg(
     func=mdp.reward_weight,
     params={
